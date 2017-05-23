@@ -1,7 +1,7 @@
 {
   "name": "moleculer-svc-fake",
   "version": "0.1.0",
-  "description": "Fake data generator service for Moleculer",
+  "description": "Fake data generator by Fakerator",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",
@@ -23,18 +23,18 @@
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.7.1"
-  },
+    "moleculer": "^0.7.3"
+  },  
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
     "eslint": "3.19.0",
-    "jest": "20.0.0",
-    "jest-cli": "20.0.0",
+    "jest": "20.0.3",
+    "jest-cli": "20.0.3",
     "lolex": "1.6.0",
-    "moleculer": "^0.7.1",
+    "moleculer": "^0.7.3",
     "nodemon": "1.11.0",
-    "npm-check": "5.4.0"
+    "npm-check": "5.4.4"
   },
   "jest": {
     "testEnvironment": "node",
