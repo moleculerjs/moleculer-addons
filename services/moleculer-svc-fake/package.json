@@ -13,11 +13,12 @@
   },
   "keywords": [
     "microservices",
-    "microservice"
+    "microservice",
+    "moleculer"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ice-services/moleculer-svc-fake.git"
+    "url": "https://github.com/ice-services/moleculer-addons.git"
   },
   "author": "Ice Services",
   "license": "MIT",

@@ -7,7 +7,9 @@
     "setup": "npm install && lerna bootstrap",
     "clean": "lerna clean",
     "release": "lerna publish",
-    "init:service": "cd services && moleculer init module"
+    "init:service": "cd services && moleculer init module",
+    "test": "jest --coverage",
+    "ci": "jest --watch"    
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   },
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
+    "jest": "20.0.3",
     "lerna": "^2.0.0-rc.5"
   },
   "dependencies": {
