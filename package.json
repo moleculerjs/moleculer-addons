@@ -9,6 +9,7 @@
     "release": "lerna publish",
     "test": "jest --coverage",
     "ci": "jest --watch",
+    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "init:service": "cd services && moleculer init addon"
   },
   "repository": {
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
+    "coveralls": "2.13.1",
     "jest": "20.0.3",
     "lerna": "2.0.0-rc.5"
   },
