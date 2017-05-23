@@ -16,8 +16,8 @@ broker.start().then(() => {
 
 	// Call action
 	broker
-		.call("fake.test", { name: "John Doe" })
-		.then(broker.logger.info)
-		.catch(broker.logger.error);
+		.call("fake.generate", { _type: "random.number", times: 1 })
+		.then(res => broker.logger.info("Result", res))
+		.catch(err => broker.logger.error("Error:", err));
 
 });

@@ -6,6 +6,9 @@
 
 "use strict";
 
+const Fakerator = require("fakerator");
+const _ = require("lodash");
+
 module.exports = {
 
 	name: "fake",
@@ -14,15 +17,29 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-
+		language: "hu-HU" // default
 	},
 
 	/**
 	 * Actions
 	 */
 	actions: {
-		test(ctx) {
-			return "Hello " + (ctx.params.name || "Anonymous");
+		/**
+		 * Generate fake data
+		 * 
+		 * @param {any} ctx 
+		 * @returns {Promise}
+		 */
+		generate(ctx) {
+			const type = ctx.params.type || "entity.user";
+			const fn = _.get(this.fakerator, type);
+			if (fn) {
+				if (ctx.params.times)
+					return this.fakerator.times(fn, ctx.params.times);
+				else
+					return fn();
+			} else
+				return this.Promise.reject(new Error("Invalid type: " + type));
 		}
 	},
 
@@ -37,7 +54,7 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-
+		this.fakerator = Fakerator(this.settings.language)
 	},
 
 	/**

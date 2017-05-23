@@ -24,7 +24,7 @@
   "license": "MIT",
   "peerDependencies": {
     "moleculer": "^0.7.3"
-  },  
+  },
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
@@ -45,5 +45,9 @@
   },
   "engines": {
     "node": ">= 6.x.x"
+  },
+  "dependencies": {
+    "fakerator": "0.3.0",
+    "lodash": "4.17.4"
   }
 }
