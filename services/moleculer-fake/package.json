@@ -1,5 +1,5 @@
 {
-  "name": "moleculer-svc-fake",
+  "name": "moleculer-fake",
   "version": "0.1.0",
   "description": "Fake data generator by Fakerator",
   "main": "index.js",

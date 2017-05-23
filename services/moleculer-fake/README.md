@@ -1,6 +1,6 @@
 ![Moleculer logo](http://moleculer.services/images/banner.png)
 
-# moleculer-svc-fake [![NPM version](https://img.shields.io/npm/v/moleculer-svc-fake.svg)](https://www.npmjs.com/package/moleculer-svc-fake)
+# moleculer-fake [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake)
 
 Fake data generator by Fakerator
 
@@ -8,7 +8,7 @@ Fake data generator by Fakerator
 
 ## Install
 ```
-npm install moleculer-svc-fake --save
+npm install moleculer-fake --save
 ```
 
 ## Usage
