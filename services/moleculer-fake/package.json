@@ -1,6 +1,6 @@
 {
   "name": "moleculer-fake",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Fake data generator by Fakerator",
   "main": "index.js",
   "scripts": {
@@ -38,10 +38,6 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "rootDir": "./src",
-    "roots": [
-      "../test"
-    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/test/services/"
