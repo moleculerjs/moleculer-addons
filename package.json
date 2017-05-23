@@ -2,7 +2,6 @@
   "name": "moleculer-addons",
   "description": ":gift: Official addons (services, transporters, cachers...etc) for Moleculer framework",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "setup": "npm install && lerna bootstrap",
     "clean": "lerna clean",
@@ -19,16 +18,21 @@
   "keywords": [],
   "author": "Ice Services",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ice-services/moleculer-addons/issues"
-  },
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
     "coveralls": "2.13.1",
+    "eslint": "3.19.0",
     "jest": "20.0.3",
     "lerna": "2.0.0-rc.5"
   },
   "dependencies": {
     "moleculer-cli": "0.3.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/services/"
+    ]
   }
 }
