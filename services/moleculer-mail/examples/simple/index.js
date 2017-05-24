@@ -31,8 +31,10 @@ broker.start().then(() => {
 
 	// Call action
 	broker.call("mail.send", { 
-		recipients: "hello@moleculer.services", 
+		from: "mereg.norbert@gmail.com",
+		to: "hello@moleculer.services", 
 		subject: "Hello Mailer", 
+		cc: "icebobcsi@gmail.com",
 		html: "This is a <b>moleculer-mail</b> demo!",
 		//text: "This is the text part"
 	})

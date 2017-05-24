@@ -14,10 +14,10 @@ module.exports = {
 	name: "mail",
 
 	settings: {
-		// Sender e-mail address
-		sender: "moleculer@company.net",
+		// Sender default e-mail address
+		from: "moleculer@company.net",
 
-		/* https://nodemailer.com/transports/sendmail/
+		// https://nodemailer.com/transports/sendmail/
 		transport: {
 			type: "sendmail",
 			options: {
@@ -25,9 +25,8 @@ module.exports = {
 				newline: 'unix',
 				path: '/usr/sbin/sendmail'
 			}
-		}
-		*/
-
+		},
+		
 		/* https://nodemailer.com/smtp/
 		transport: {
 			type: "smtp",
@@ -92,16 +91,19 @@ module.exports = {
 		 * Send an email to recipients
 		 */
 		send: {
+			/* Need add all fields from https://nodemailer.com/message/
 			params: {
-				sender: { type: "email", optional: true },
-				recipients: { type: "string" },
+				from: { type: "email", optional: true },
+				to: { type: "string" },
+				cc: { type: "string", optional: true },
+				bcc: { type: "string", optional: true },
 				subject: { type: "string" },
+				text: { type: "string", optional: true },
 				html: { type: "string", optional: true },
-				text: { type: "string", optional: true }
-			},
+				attachments: { type: "array", optional: true }
+			},*/
 			handler(ctx) {
-				let { sender, recipients, subject, html, text } = ctx.params;
-				return this.send(sender, recipients, subject, html, text);
+				return this.send(ctx.params);
 			}
 		}
 	},
@@ -130,30 +132,22 @@ module.exports = {
 		/**
 		 * Send an email to recipients
 		 * 
-		 * @param {String} recipients 
-		 * @param {String} subject 
-		 * @param {String} html 
-		 * @param {String} text 
+		 * @param {Object} msg 
 		 * @returns 
 		 */
-		send(sender, recipients, subject, html, text) {
+		send(msg) {
 			return new this.Promise((resolve, reject) => {
-				this.logger.debug(`Sending email to ${recipients} with subject ${subject}...`);
+				this.logger.debug(`Sending email to ${msg.to} with subject ${msg.subject}...`);
 
-				let mailOptions = {
-					from: sender || this.settings.sender,
-					to: recipients,
-					subject,
-					html,
-					text
-				};
+				if (!msg.from)
+					msg.from = this.settings.from;
 
 				let transporter = this.getTransporter();
 				if (transporter) {
-					if (this.settings.htmlToText && html && !text)
+					if (this.settings.htmlToText && msg.html && !msg.text)
 						transporter.use("compile", htmlToText());
 
-					transporter.sendMail(mailOptions, (err, info) => {
+					transporter.sendMail(msg, (err, info) => {
 						if (err) {
 							this.logger.warn("Unable to send email: ", err);
 							reject(err);

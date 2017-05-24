@@ -21,6 +21,7 @@ $ yarn add moleculer-mail
 
 ## Usage
 
+**Send an HTML e-mail with `sendmail`**
 ```js
 "use strict";
 
@@ -28,12 +29,41 @@ const { ServiceBroker } = require("moleculer");
 const broker = new ServiceBroker();
 
 // Load service
-broker.createService(require("moleculer-mail"));
+broker.createService(require("moleculer-mail"), {
+    from: "sender@moleculer.services"
+});
 
-// Call
-broker.call("mailer.xyz", {}).then(console.log);
-/* Result: ??? */
+// Send an e-mail
+broker.call("mail.send", { 
+    to: "john.doe@example.org", 
+    subject: "Hello Friends!", 
+    html: "This is the <b>content</b>!"
+}).then(console.log);
+```
 
+**Send an e-mail with mailgun**
+```js
+// Load service
+broker.createService(require("moleculer-mail"), {
+    transport: {
+        type: "mailgun",
+        options: {
+            auth: {
+                api_key: 'api12345',
+                domain: 'domain.com'
+            }
+        }
+    }
+});
+
+// Send an e-mail to some people
+broker.call("mail.send", { 
+    to: "john.doe@example.org", 
+    cc: "jane.doe@example.org",
+    bcc: "boss@example.org",
+    subject: "Hello Friends!", 
+    text: "This is a text only message!"
+}).then(console.log);
 ```
 
 ## Settings
@@ -45,10 +75,66 @@ broker.call("mailer.xyz", {}).then(console.log);
 | `transport.options` | `Object` | Transport settings. Pass to transport contructor |
 | `htmlToText` | `Boolean` | Enable html-to-text conversion |
 
+### Transport options
+
+#### Sendmail
+```js
+transport: {
+    type: "sendmail",
+    options: {
+        sendmail: true,
+        newline: 'unix',
+        path: '/usr/sbin/sendmail'
+    }
+}
+```
+
+#### SMTP
+```js
+transport: {
+    type: "smtp",
+    options: {
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: "",
+            pass: ""
+        }
+    }
+}
+```
+
+#### Mailgun
+```js
+transport: {
+    type: "mailgun",
+    options: {
+        auth: {
+            api_key: '',
+            domain: ''
+        }
+    }
+}
+```
+
+#### Sendgrid
+```js
+transport: {
+    type: "sendgrid",
+    options: {
+        auth: {
+            api_key: ""
+        }
+    }
+}
+```
+
+
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
-| `mail.send` | `recipients`, `subject`, `html`?, `text`?, `sender`? | `Object` | Send an email. |
+| `mail.send` | [Any field from here](https://nodemailer.com/message/) | [`Object`](https://nodemailer.com/usage/#sending-mail) | Send an email. |
 
 # Test
 ```
