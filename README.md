@@ -8,6 +8,7 @@
 [![Join the chat at https://gitter.im/ice-services/moleculer](https://badges.gitter.im/ice-services/moleculer.svg)](https://gitter.im/ice-services/moleculer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Official addons for Moleculer framework
+This is a monorepo, contains multiple npm packages.
 
 ## Services
 | Name | Version | Description |
@@ -19,6 +20,28 @@
 ## Serializers
 
 ## Cachers
+
+# Contribution
+
+## Install dependencies
+```bash
+$ npm run setup
+```
+
+## Publish new releases
+```bash
+$ npm run release
+```
+
+## Test
+```bash
+$ npm test
+```
+
+## Create a new service
+```bash
+$ npm run init:service
+```
 
 # License
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).

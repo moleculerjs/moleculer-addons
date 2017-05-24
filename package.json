@@ -5,11 +5,12 @@
   "scripts": {
     "setup": "npm install && lerna bootstrap",
     "clean": "lerna clean",
-    "release": "lerna publish",
+    "dev": "nodemon dev.js",
     "test": "jest --coverage",
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "init:service": "cd services && moleculer init addon"
+    "init:service": "cd services && moleculer init addon",
+    "release": "lerna publish"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,8 @@
     "eslint": "3.19.0",
     "jest": "20.0.3",
     "jest-cli": "20.0.3",
-    "lerna": "2.0.0-rc.5"
+    "lerna": "2.0.0-rc.5",
+    "nodemon": "1.11.0"
   },
   "dependencies": {
     "moleculer-cli": "0.3.0"
