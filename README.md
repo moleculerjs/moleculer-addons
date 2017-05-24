@@ -29,9 +29,9 @@ $ npm run setup
 ```
 
 ## Development
-**Run `simple` example in `moleculer-mailer` service**
+**Run `simple` example in `moleculer-mail` service**
 ```bash
-$ npm run dev services/moleculer-mailer
+$ npm run dev services/moleculer-mail
 ```
 
 **Run `full` example in `moleculer-fake` service**

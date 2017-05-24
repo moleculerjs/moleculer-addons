@@ -1,5 +1,5 @@
 {
-  "name": "moleculer-mailer",
+  "name": "moleculer-mail",
   "version": "0.0.0",
   "description": "Send emails",
   "main": "index.js",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "peerDependencies": {
     "moleculer": "^0.7.3"
-  },  
+  },
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
@@ -44,5 +44,11 @@
   },
   "engines": {
     "node": ">= 6.x.x"
+  },
+  "dependencies": {
+    "nodemailer": "4.0.1",
+    "nodemailer-html-to-text": "2.1.0",
+    "nodemailer-mailgun-transport": "1.3.5",
+    "nodemailer-sendgrid-transport": "0.2.0"
   }
 }
