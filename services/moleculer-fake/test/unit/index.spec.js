@@ -27,7 +27,7 @@ describe("Test FakeService", () => {
 		broker.createService(FakeService, {
 			settings: {
 				seed: 5555,
-				lang: "it-IT"
+				locale: "it-IT"
 			}
 		});
 
@@ -36,10 +36,10 @@ describe("Test FakeService", () => {
 
 	it("should create langs only once", () => {
 		expect(Object.keys(service.fakerators).length).toBe(1);
-		return broker.call("fake.name", { lang: "hu-HU" })
+		return broker.call("fake.name", { locale: "hu-HU" })
 			.then(res => {
 				expect(res).toBe("Sipos József");
-				return broker.call("fake.name", { lang: "hu-HU" });
+				return broker.call("fake.name", { locale: "hu-HU" });
 			})
 			.then(res => {
 				expect(res).toBe("Illés Márta");
@@ -49,9 +49,9 @@ describe("Test FakeService", () => {
 
 	describe("Test languages", () => {
 		it("Test default language", () => expect(broker.call("fake.name")).resolves.toBe("Ross Hansen"));
-		it("Test de-DE language", () => expect(broker.call("fake.name", { lang: "de-DE" })).resolves.toBe("Caitlin Balzer"));
-		it("Test ru-RU language", () => expect(broker.call("fake.name", { lang: "ru-RU" })).resolves.toBe("Хохлов Владислав"));
-		it("Test hu-HU language", () => expect(broker.call("fake.name", { lang: "hu-HU" })).resolves.toBe("Sipos József"));
+		it("Test de-DE language", () => expect(broker.call("fake.name", { locale: "de-DE" })).resolves.toBe("Caitlin Balzer"));
+		it("Test ru-RU language", () => expect(broker.call("fake.name", { locale: "ru-RU" })).resolves.toBe("Хохлов Владислав"));
+		it("Test hu-HU language", () => expect(broker.call("fake.name", { locale: "hu-HU" })).resolves.toBe("Sipos József"));
 	});
 
 	describe("Test times", () => {

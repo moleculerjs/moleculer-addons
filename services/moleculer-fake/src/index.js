@@ -17,7 +17,7 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-		language: null, // default
+		locale: null, // default is "en-US"
 		seed: null
 	},
 
@@ -109,8 +109,8 @@ module.exports = {
 		 */
 		generate(ctx, type, args = []) {
 			let fakerator = this.fakerator;
-			if (ctx.params.lang && ctx.params.lang != this.settings.lang)
-				fakerator = this.getFakerator(ctx.params.lang);
+			if (ctx.params.locale && ctx.params.locale != this.settings.locale)
+				fakerator = this.getFakerator(ctx.params.locale);
 
 			const fn = _.get(fakerator, type);
 			if (fn) {
@@ -125,16 +125,16 @@ module.exports = {
 				return this.Promise.reject(new Error("Invalid type: " + type));
 		},
 
-		getFakerator(lang) {
-			if (this.fakerators[lang])
-				return this.fakerators[lang];
+		getFakerator(locale) {
+			if (this.fakerators[locale])
+				return this.fakerators[locale];
 
-			// Create a new instance by language
-			const fakerator = Fakerator(lang);
+			// Create a new instance by localeuage
+			const fakerator = Fakerator(locale);
 			if (this.settings.seed)
 				fakerator.seed(this.settings.seed);
 			
-			this.fakerators[lang] = fakerator;
+			this.fakerators[locale] = fakerator;
 
 			return fakerator;
 		}
@@ -146,7 +146,7 @@ module.exports = {
 	created() {
 		this.fakerators = [];
 
-		this.fakerator = this.getFakerator(this.settings.lang);
+		this.fakerator = this.getFakerator(this.settings.locale);
 	},
 
 	/**
