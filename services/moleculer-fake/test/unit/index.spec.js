@@ -22,6 +22,18 @@ describe("Test FakeService", () => {
 		expect(service.fakerator).toBeDefined();
 	});
 
+	it("should be create with language from settings", () => {
+		const broker = new ServiceBroker();
+		broker.createService(FakeService, {
+			settings: {
+				seed: 5555,
+				lang: "it-IT"
+			}
+		});
+
+		return expect(broker.call("fake.name")).resolves.toBe("Lino Marini");
+	});
+
 	it("should create langs only once", () => {
 		expect(Object.keys(service.fakerators).length).toBe(1);
 		return broker.call("fake.name", { lang: "hu-HU" })

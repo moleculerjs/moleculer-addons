@@ -13,6 +13,9 @@ npm install moleculer-fake --save
 
 ## Usage
 
+```js
+```
+
 
 # Test
 ```

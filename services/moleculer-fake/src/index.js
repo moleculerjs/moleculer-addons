@@ -109,7 +109,7 @@ module.exports = {
 		 */
 		generate(ctx, type, args = []) {
 			let fakerator = this.fakerator;
-			if (ctx.params.lang && ctx.params.lang != this.settings.language)
+			if (ctx.params.lang && ctx.params.lang != this.settings.lang)
 				fakerator = this.getFakerator(ctx.params.lang);
 
 			const fn = _.get(fakerator, type);
@@ -146,7 +146,7 @@ module.exports = {
 	created() {
 		this.fakerators = [];
 
-		this.fakerator = this.getFakerator(this.settings.language);
+		this.fakerator = this.getFakerator(this.settings.lang);
 	},
 
 	/**
