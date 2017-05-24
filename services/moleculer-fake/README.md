@@ -35,28 +35,28 @@ broker.call("fake.name", { locale: "ru-RU"}).then(console.log);
 // Generate a complete user object
 broker.call("fake.user").then(console.log);
 /* Result:
-	{ 
-		firstName: 'Marsha',
-		lastName: 'Berge',
-		userName: 'marsha_berge35',
-		password: 'huhefehuje',
-		email: 'marsha.berge@yahoo.com',
-		phone: '319.071.6645 x2269',
-		dob: 2005-04-07T17:10:26.030Z,
-		website: 'http://laurence.biz',
-		ip: '236.82.114.84',
-		avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/guillemboti/128.jpg',
-		gravatar: 'https://www.gravatar.com/avatar/c89beff0132a6eaad9d03e9058b5378e',
-		address: 
-		{ country: 'Tristan da Cunha',
-			countryCode: 'TA',
-			state: 'Utah',
-			city: 'Carrollview',
-			street: '317 Veum Lakes Apt. 459',
-			zip: '10032',
-			geo: { latitude: -57.1798, longitude: -64.1921 } },
-		status: false
-	}
+    { 
+        firstName: 'Marsha',
+        lastName: 'Berge',
+        userName: 'marsha_berge35',
+        password: 'huhefehuje',
+        email: 'marsha.berge@yahoo.com',
+        phone: '319.071.6645 x2269',
+        dob: 2005-04-07T17:10:26.030Z,
+        website: 'http://laurence.biz',
+        ip: '236.82.114.84',
+        avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/guillemboti/128.jpg',
+        gravatar: 'https://www.gravatar.com/avatar/c89beff0132a6eaad9d03e9058b5378e',
+        address: 
+        { country: 'Tristan da Cunha',
+            countryCode: 'TA',
+            state: 'Utah',
+            city: 'Carrollview',
+            street: '317 Veum Lakes Apt. 459',
+            zip: '10032',
+            geo: { latitude: -57.1798, longitude: -64.1921 } },
+        status: false
+    }
 */
 
 ```
