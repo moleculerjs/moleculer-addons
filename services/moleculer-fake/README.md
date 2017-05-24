@@ -18,7 +18,7 @@ const { ServiceBroker } = require("moleculer");
 
 const broker = new ServiceBroker();
 
-broker.createService(require("moleculer-fake"), { settings: { lang: "hu-HU" }});
+broker.createService(require("moleculer-fake"), { settings: { locale: "hu-HU" }});
 
 // Generate 5 numbers between 0 and 20
 broker.call("fake.number", { max: 20, times: 5 }).then(console.log);
