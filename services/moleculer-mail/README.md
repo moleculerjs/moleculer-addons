@@ -147,6 +147,11 @@ In development with watching
 $ npm run ci
 ```
 
+# TODO
+- handle templates (settings.templateFolder: "") 
+    - read files (pug,ejs) and transform with consolidate.js
+    - mail.call params: `template: "welcome"` will use the `welcome.pug` file and run the render with `data` object.
+
 # License
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
