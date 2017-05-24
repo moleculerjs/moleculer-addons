@@ -11,6 +11,9 @@
 :gift: Official addons (services, transporters, cachers...etc) for Moleculer framework
 
 ## Services
+| Name | Version | Description |
+| ---- | ------- | ----------- |
+| [moleculer-fake](/services/moleculer-fake) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by [Fakerator](https://github.com/icebob/fakerator) |
 
 ## Transporters
 
