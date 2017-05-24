@@ -5,5 +5,7 @@ cache:
 node_js:
     - "7"
     - "6"
+script:
+  - npm run setup && npm test
 after_success:
   - npm run coverall
