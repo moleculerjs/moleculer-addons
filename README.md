@@ -28,9 +28,15 @@ This is a monorepo, contains multiple npm packages.
 $ npm run setup
 ```
 
-## Publish new releases
+## Development
+**Run `simple` example in `moleculer-mailer` service**
 ```bash
-$ npm run release
+$ npm run dev services/moleculer-mailer
+```
+
+**Run `full` example in `moleculer-fake` service**
+```bash
+$ npm run dev services/moleculer-fake full
 ```
 
 ## Test
@@ -41,6 +47,11 @@ $ npm test
 ## Create a new service
 ```bash
 $ npm run init:service
+```
+
+## Publish new releases
+```bash
+$ npm run release
 ```
 
 # License
