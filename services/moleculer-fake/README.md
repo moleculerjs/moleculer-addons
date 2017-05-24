@@ -18,7 +18,11 @@ const { ServiceBroker } = require("moleculer");
 
 const broker = new ServiceBroker();
 
-broker.createService(require("moleculer-fake"), { settings: { locale: "hu-HU" }});
+broker.createService(require("moleculer-fake"), { settings: { locale: "es-ES" }});
+
+// Generate a full name
+broker.call("fake.name").then(console.log);
+/* Result: "Soledad Lozada Tejada" */
 
 // Generate 5 numbers between 0 and 20
 broker.call("fake.number", { max: 20, times: 5 }).then(console.log);
@@ -60,6 +64,7 @@ broker.call("fake.user").then(console.log);
 */
 
 ```
+[Try it on Runkit](https://runkit.com/icebob/59257060145c9500128cf0dd)
 
 ## Settings
 | Property | Description |
