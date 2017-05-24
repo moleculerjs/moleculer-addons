@@ -17,16 +17,17 @@ module.exports = {
 		// Sender default e-mail address
 		from: "moleculer@company.net",
 
-		// https://nodemailer.com/transports/sendmail/
+		/* https://nodemailer.com/transports/sendmail/
 		transport: {
 			type: "sendmail",
 			options: {
 				sendmail: true,
-				newline: 'unix',
-				path: '/usr/sbin/sendmail'
+				newline: "unix",
+				path: "/usr/sbin/sendmail"
 			}
 		},
-		
+		*/
+
 		/* https://nodemailer.com/smtp/
 		transport: {
 			type: "smtp",
@@ -38,7 +39,7 @@ module.exports = {
 					pass: ""
 				}
 			}
-		}
+		},
 		*/
 
 		/*
@@ -53,7 +54,7 @@ module.exports = {
 					pass: ""
 				}
 			}
-		}
+		},
 		*/
 
 		/* https://github.com/orliesaurus/nodemailer-mailgun-transport
@@ -65,7 +66,7 @@ module.exports = {
 					domain: ''
 				}
 			}
-		}
+		},
 		*/
 
 		/* https://github.com/sendgrid/nodemailer-sendgrid-transport
@@ -76,7 +77,7 @@ module.exports = {
 					api_key: ""
 				}
 			}
-		}
+		},
 		*/		
 
 		// Convert HTML body to text
@@ -142,12 +143,8 @@ module.exports = {
 				if (!msg.from)
 					msg.from = this.settings.from;
 
-				let transporter = this.getTransporter();
-				if (transporter) {
-					if (this.settings.htmlToText && msg.html && !msg.text)
-						transporter.use("compile", htmlToText());
-
-					transporter.sendMail(msg, (err, info) => {
+				if (this.transporter) {
+					this.transporter.sendMail(msg, (err, info) => {
 						if (err) {
 							this.logger.warn("Unable to send email: ", err);
 							reject(err);
@@ -170,7 +167,15 @@ module.exports = {
 	created() {
 		if (!this.settings.transport || !this.settings.transport.type) {
 			this.logger.error("Missing mailer transport configuration!");
+			return;
 		}
+
+		this.transporter = this.getTransporter();
+		if (this.transporter) {
+			if (this.settings.htmlToText)
+				this.transporter.use("compile", htmlToText());
+		}
+		
 	},
 
 	/**
