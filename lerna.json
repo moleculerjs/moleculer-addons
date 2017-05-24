@@ -6,5 +6,12 @@
     "services/*",
     "transporters/*"
   ],
-  "version": "independent"
+  "version": "independent",
+  "commands": {
+    "publish": {
+      "ignore": [
+        "*.md"
+      ]
+    }
+  }
 }
