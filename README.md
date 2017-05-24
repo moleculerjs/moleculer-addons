@@ -7,8 +7,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/ice-services/moleculer-addons/badge.svg)](https://snyk.io/test/github/ice-services/moleculer-addons)
 [![Join the chat at https://gitter.im/ice-services/moleculer](https://badges.gitter.im/ice-services/moleculer.svg)](https://gitter.im/ice-services/moleculer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# moleculer-addons
-:gift: Official addons (services, transporters, cachers...etc) for Moleculer framework
+# Official addons for Moleculer framework
 
 ## Services
 | Name | Version | Description |
