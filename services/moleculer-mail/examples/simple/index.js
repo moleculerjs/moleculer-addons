@@ -13,14 +13,11 @@ let broker = new ServiceBroker({
 broker.createService(MailerService, {
 	settings: {
 		transport: {
-			type: "smtp",
-			options: {
-				host: "smtp.mailtrap.io",
-				port: 2525,
-				auth: {
-					user: "367335eaa82697636",
-					pass: "e5a76af9b056d0"
-				}
+			host: "smtp.mailtrap.io",
+			port: 2525,
+			auth: {
+				user: "367335eaa82697636",
+				pass: "e5a76af9b056d0"
 			}
 		}		
 	}

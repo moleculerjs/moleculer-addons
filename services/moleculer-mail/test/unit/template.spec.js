@@ -4,18 +4,18 @@ const { ServiceBroker } = require("moleculer");
 const MailService = require("../../src");
 const _ = require("lodash");
 
-describe.only("Test MailService template handling", () => {
+describe("Test MailService template handling", () => {
 
 	it("should create an empty templates prop", () => {
 		const broker = new ServiceBroker();
-		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" } } });
+		const service = broker.createService(MailService, { settings: { transport: {} } });
 		expect(service).toBeDefined();
 		expect(service.templates).toEqual({});
 	});
 
 	it("should create templates", () => {
 		const broker = new ServiceBroker();
-		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
+		const service = broker.createService(MailService, { settings: { transport: {}, templateFolder: __dirname + "/templates" } });
 
 		expect(Object.keys(service.templates).length).toBe(0);
 		let tmp = service.getTemplate("welcome");
@@ -25,7 +25,7 @@ describe.only("Test MailService template handling", () => {
 
 	it("should create templates", () => {
 		const broker = new ServiceBroker();
-		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
+		const service = broker.createService(MailService, { settings: { transport: {}, templateFolder: __dirname + "/templates" } });
 
 		// Mocking
 		service.send = jest.fn(() => Promise.resolve());

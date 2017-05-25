@@ -5,10 +5,11 @@
 Send emails with [nodemailer](https://nodemailer.com/about/). Support localized templates.
 
 ## Features
-- multiple transports (smtp, sendmail, mailgun, sendgrid)
-- HTML and Text messages
+- [30+ pre-configures services (Gmail, Hotmail, Mailgun Sendgrid...etc)](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json)
+- HTML and Text messages with attachments
 - html-to-text conversion
-- localized e-mail templates with [email-templates](https://github.com/crocodilejs/node-email-templates)
+- e-mail templates with localization
+- [30+ supported HTML template engines (handlebars, pug, haml, ejs, ...etc)](https://github.com/crocodilejs/node-email-templates#supported-template-engines)
 
 ## Install
 
@@ -22,7 +23,7 @@ $ yarn add moleculer-mail
 
 ## Usage
 
-**Send an HTML e-mail with `sendmail`**
+**Send an HTML e-mail with Gmail**
 ```js
 "use strict";
 
@@ -31,7 +32,14 @@ const broker = new ServiceBroker();
 
 // Load service
 broker.createService(require("moleculer-mail"), {
-    from: "sender@moleculer.services"
+    from: "sender@moleculer.services",
+    transport: {
+        service: 'gmail',
+        auth: {
+            user: 'gmail.user@gmail.com',
+            pass: 'yourpass'
+        }
+    }
 });
 
 // Send an e-mail
@@ -42,17 +50,15 @@ broker.call("mail.send", {
 }).then(console.log);
 ```
 
-**Send an e-mail with mailgun**
+**Send an e-mail with mailgun with Cc & Bcc**
 ```js
 // Load service
 broker.createService(require("moleculer-mail"), {
     transport: {
-        type: "mailgun",
-        options: {
-            auth: {
-                api_key: 'api12345',
-                domain: 'domain.com'
-            }
+        service: "mailgun",
+        auth: {
+            api_key: 'api12345',
+            domain: 'domain.com'
         }
     }
 });
@@ -95,66 +101,12 @@ broker.call("mail.send", {
 | Property | Type | Description |
 | -------- | -----| ----------- |
 | `sender` | `String` | Sender's email address |
-| `transport` | `Object` | Transport settings |
-| `transport.type` | `String` | Type of transport. `sendmail`, `smtp`, `mailgun`, `sendgrid` |
-| `transport.options` | `Object` | Transport settings. Pass to transport contructor |
+| `transport` | `Object` | Transport settings. Send to `nodemailer`  |
 | `htmlToText` | `Boolean` | Enable html-to-text conversion |
 | `templateFolder` | `String` | Path to template folder |
 
 ### Transport options
-
-#### Sendmail
-```js
-transport: {
-    type: "sendmail",
-    options: {
-        sendmail: true,
-        newline: 'unix',
-        path: '/usr/sbin/sendmail'
-    }
-}
-```
-
-#### SMTP
-```js
-transport: {
-    type: "smtp",
-    options: {
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-            user: "",
-            pass: ""
-        }
-    }
-}
-```
-
-#### Mailgun
-```js
-transport: {
-    type: "mailgun",
-    options: {
-        auth: {
-            api_key: '',
-            domain: ''
-        }
-    }
-}
-```
-
-#### Sendgrid
-```js
-transport: {
-    type: "sendgrid",
-    options: {
-        auth: {
-            api_key: ""
-        }
-    }
-}
-```
+[Read more from transport options](https://nodemailer.com/smtp/)
 
 ### Localized templates
 The service support templates. It uses [email-templates](https://github.com/crocodilejs/node-email-templates) library. The templates is rendered by [consolidate.js](https://www.npmjs.com/package/consolidate), so you can use many template engines.
@@ -178,11 +130,6 @@ In development with watching
 ```
 $ npm run ci
 ```
-
-# TODO
-- handle templates (settings.templateFolder: "") 
-    - read files (pug,ejs) and transform with consolidate.js
-    - mail.call params: `template: "welcome"` will use the `welcome.pug` file and run the render with `data` object.
 
 # License
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).

@@ -21,68 +21,26 @@ module.exports = {
 		// Sender default e-mail address
 		from: "moleculer@company.net",
 
-		/* https://nodemailer.com/transports/sendmail/
+		/* SMTP: https://nodemailer.com/smtp/
 		transport: {
-			type: "sendmail",
-			options: {
-				sendmail: true,
-				newline: "unix",
-				path: "/usr/sbin/sendmail"
+			host: "smtp.mailtrap.io",
+			port: 2525,
+			auth: {
+				user: "",
+				pass: ""
 			}
 		},
 		*/
 
-		/* https://nodemailer.com/smtp/
+		/* for Gmail service - https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json
 		transport: {
-			type: "smtp",
-			options: {
-				host: "smtp.mailtrap.io",
-				port: 2525,
-				auth: {
-					user: "",
-					pass: ""
-				}
+			service: "gmail",
+			auth: {
+				user: "",
+				pass: ""
 			}
 		},
 		*/
-
-		/*
-		transport: {
-			type: "smtp",
-			options: {
-				host: "smtp.gmail.com",
-				port: 465,
-				secure: true,
-				auth: {
-					user: "",
-					pass: ""
-				}
-			}
-		},
-		*/
-
-		/* https://github.com/orliesaurus/nodemailer-mailgun-transport
-		transport: {
-			type: "mailgun",
-			options: {
-				auth: {
-					api_key: '',
-					domain: ''
-				}
-			}
-		},
-		*/
-
-		/* https://github.com/sendgrid/nodemailer-sendgrid-transport
-		transport: {
-			type: "sendgrid",
-			options: {
-				auth: {
-					api_key: ""
-				}
-			}
-		},
-		*/		
 
 		// Convert HTML body to text
 		htmlToText: true,
@@ -132,27 +90,12 @@ module.exports = {
 	 * Methods
 	 */
 	methods: {
-		getTransporter() {
-			switch(this.settings.transport.type) {
-			case "sendmail":
-			case "smtp": {
-				return nodemailer.createTransport(this.settings.transport.options || {
-					sendmail: true,
-					newline: "unix",
-					path: "/usr/sbin/sendmail"
-				});
-			}
-			case "mailgun": {
-				let mg = require("nodemailer-mailgun-transport");
-				return nodemailer.createTransport(mg(this.settings.transport.options));
-			}
-			case "sendgrid": {
-				let sgTransport = require("nodemailer-sendgrid-transport");
-				return nodemailer.createTransport(sgTransport(this.settings.transport.options));
-			}
-			}
-		},
-
+		/**
+		 * Get template renderer by name
+		 * 
+		 * @param {any} templateName 
+		 * @returns 
+		 */
 		getTemplate(templateName) {
 			if (this.templates[templateName]) {
 				return this.templates[templateName];
@@ -168,7 +111,7 @@ module.exports = {
 		},
 
 		/**
-		 * Send an email to recipients
+		 * Send an email
 		 * 
 		 * @param {Object} msg 
 		 * @returns 
@@ -202,8 +145,8 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		if (!this.settings.transport || !this.settings.transport.type) {
-			this.logger.error("Missing mailer transport configuration!");
+		if (!this.settings.transport) {
+			this.logger.error("Missing transport configuration!");
 			return;
 		}
 
@@ -215,12 +158,11 @@ module.exports = {
 			}
 		}
 
-		this.transporter = this.getTransporter();
+		this.transporter = nodemailer.createTransport(this.settings.transport);
 		if (this.transporter) {
 			if (this.settings.htmlToText)
 				this.transporter.use("compile", htmlToText());
 		}
-
 	},
 
 	/**
