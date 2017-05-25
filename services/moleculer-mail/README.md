@@ -67,6 +67,30 @@ broker.call("mail.send", {
 }).then(console.log);
 ```
 
+
+**Send an e-mail from template**
+```js
+// Load service
+broker.createService(require("moleculer-mail"), {
+    transport: {
+        type: "sendmail"
+    },
+    templateFolder: "./email-templates"
+});
+
+// Send a welcome template
+broker.call("mail.send", { 
+    to: "john.doe@example.org", 
+    template: "welcome",
+    locale: "de-DE",
+    data: {
+        name: "John Doe",
+        username: "john_doe",
+        verifyToken: "123456"
+    }
+});
+```
+
 ## Settings
 | Property | Type | Description |
 | -------- | -----| ----------- |
