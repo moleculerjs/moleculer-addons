@@ -12,8 +12,8 @@
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"services\\moleculer-mail",
-				"template"
+				"services\\moleculer-mongoose",
+				"simple"
 			]
 		},
 		{
