@@ -2,12 +2,13 @@
 
 # moleculer-mail [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail)
 
-Send emails with [nodemailer](https://nodemailer.com/about/)
+Send emails with [nodemailer](https://nodemailer.com/about/). Support localized templates.
 
 ## Features
 - multiple transports (smtp, sendmail, mailgun, sendgrid)
 - HTML and Text messages
 - html-to-text conversion
+- localized e-mail templates with [email-templates](https://github.com/crocodilejs/node-email-templates)
 
 ## Install
 
@@ -74,6 +75,7 @@ broker.call("mail.send", {
 | `transport.type` | `String` | Type of transport. `sendmail`, `smtp`, `mailgun`, `sendgrid` |
 | `transport.options` | `Object` | Transport settings. Pass to transport contructor |
 | `htmlToText` | `Boolean` | Enable html-to-text conversion |
+| `templateFolder` | `String` | Path to template folder |
 
 ### Transport options
 
@@ -130,6 +132,12 @@ transport: {
 }
 ```
 
+### Localized templates
+The service support templates. It uses [email-templates](https://github.com/crocodilejs/node-email-templates) library. The templates is rendered by [consolidate.js](https://www.npmjs.com/package/consolidate), so you can use many template engines.
+
+Read more about [template files](https://github.com/crocodilejs/node-email-templates#quick-start).
+
+Read more about [localized templates](https://github.com/crocodilejs/node-email-templates#localized-template) or check the [examples](examples/template) folder.
 
 ## Actions
 | Name | Params | Result | Description |

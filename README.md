@@ -14,7 +14,7 @@ This is a monorepo, contains multiple npm packages.
 | Name | Version | Description |
 | ---- | ------- | ----------- |
 | [moleculer-fake](/services/moleculer-fake) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by [Fakerator](https://github.com/icebob/fakerator) |
-| [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails with [nodemailer](https://nodemailer.com/about/) |
+| [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails with [nodemailer](https://nodemailer.com/about/). Support localized templates. |
 
 ## Transporters
 
