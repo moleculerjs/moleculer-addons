@@ -19,7 +19,7 @@ module.exports = {
 
 	settings: {
 		// Sender default e-mail address
-		from: "moleculer@company.net",
+		from: null,
 
 		/* SMTP: https://nodemailer.com/smtp/
 		transport: {

@@ -32,12 +32,14 @@ const broker = new ServiceBroker();
 
 // Load service
 broker.createService(require("moleculer-mail"), {
-    from: "sender@moleculer.services",
-    transport: {
-        service: 'gmail',
-        auth: {
-            user: 'gmail.user@gmail.com',
-            pass: 'yourpass'
+    settings: {
+        from: "sender@moleculer.services",
+        transport: {
+            service: 'gmail',
+            auth: {
+                user: 'gmail.user@gmail.com',
+                pass: 'yourpass'
+            }
         }
     }
 });
@@ -54,11 +56,13 @@ broker.call("mail.send", {
 ```js
 // Load service
 broker.createService(require("moleculer-mail"), {
-    transport: {
-        service: "mailgun",
-        auth: {
-            api_key: 'api12345',
-            domain: 'domain.com'
+    settings: {
+        transport: {
+            service: "mailgun",
+            auth: {
+                api_key: 'api12345',
+                domain: 'domain.com'
+            }
         }
     }
 });
@@ -78,10 +82,12 @@ broker.call("mail.send", {
 ```js
 // Load service
 broker.createService(require("moleculer-mail"), {
-    transport: {
-        type: "sendmail"
-    },
-    templateFolder: "./email-templates"
+    settings: {
+        transport: {
+            type: "sendmail"
+        },
+        templateFolder: "./email-templates"
+    }
 });
 
 // Send a welcome template
@@ -100,9 +106,9 @@ broker.call("mail.send", {
 ## Settings
 | Property | Type | Description |
 | -------- | -----| ----------- |
-| `sender` | `String` | Sender's email address |
-| `transport` | `Object` | Transport settings. Send to `nodemailer`  |
-| `htmlToText` | `Boolean` | Enable html-to-text conversion |
+| `from` | `String` | Sender's default email address. Use it if missing from `ctx.params` |
+| `transport` | `Object` | Transport settings. Send to `nodemailer.createTransporter`  |
+| `htmlToText` | `Boolean` | Enable [html-to-text](https://github.com/andris9/nodemailer-html-to-text) conversion |
 | `templateFolder` | `String` | Path to template folder |
 
 ### Transport options
