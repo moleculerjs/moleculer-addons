@@ -25,6 +25,28 @@ broker.createService(MongooseService, {
 		}
 	},
 
+	actions: {
+		vote(ctx) {
+			return this.Promise.resolve(ctx)
+					.then(ctx => {
+						return this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: 1 } }, { "new": true });
+					})
+					.then(doc => this.toJSON(doc))
+					.then(json => this.popuplateModels(ctx, json))
+					.then(json => this.clearCache().then(() => json));			
+		},
+
+		unvote(ctx) {
+			return this.Promise.resolve(ctx)
+					.then(ctx => {
+						return this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: -1 } }, { "new": true });
+					})
+					.then(doc => this.toJSON(doc))
+					.then(json => this.popuplateModels(ctx, json))
+					.then(json => this.clearCache().then(() => json));			
+		}
+	},
+
 	afterConnected() {
 		console.log("afterConnected: Connected successfully");
 	}
@@ -45,6 +67,7 @@ broker.start().delay(500).then(() => {
 		// List posts
 		.then(() => console.log("\n--- LIST ---"))
 		.then(() => broker.call("posts.list").then(console.log))
+
 		// Create new Posts
 		.then(() => console.log("\n--- CREATE ---"))
 		.then(() => broker.call("posts.create", { entity: { title: "Hello", content: "Post content" } })
@@ -56,6 +79,13 @@ broker.start().delay(500).then(() => {
 		// Get a post
 		.then(() => console.log("\n--- GET ---"))
 		.then(() => broker.call("posts.get", { id }).then(console.log))
+
+		// Vote a post
+		.then(() => console.log("\n--- VOTE ---"))
+		.then(() => broker.call("posts.vote", { 
+			id
+		}).then(console.log))
+
 		// Update a posts
 		.then(() => console.log("\n--- UPDATE ---"))
 		.then(() => broker.call("posts.update", { 
@@ -66,6 +96,12 @@ broker.start().delay(500).then(() => {
 					content: "Post content 2" 
 				} 
 			} 
+		}).then(console.log))
+
+		// Unvote a post
+		.then(() => console.log("\n--- UNVOTE ---"))
+		.then(() => broker.call("posts.unvote", { 
+			id
 		}).then(console.log))
 		
 		// Count of posts
