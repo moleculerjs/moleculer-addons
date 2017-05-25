@@ -9,10 +9,11 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Launch demo",
-			"program": "${workspaceRoot}\\examples\\index.js",
+			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"simple"
+				"services\\moleculer-mail",
+				"template"
 			]
 		},
 		{

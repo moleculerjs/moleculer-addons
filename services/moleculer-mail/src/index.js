@@ -6,8 +6,12 @@
 
 "use strict";
 
-let nodemailer 	= require("nodemailer");
-let htmlToText 	= require("nodemailer-html-to-text").htmlToText;
+const fs 			= require("fs");
+const path 			= require("path");
+const _ 			= require("lodash");
+const nodemailer 	= require("nodemailer");
+const htmlToText 	= require("nodemailer-html-to-text").htmlToText;
+const EmailTemplate = require("email-templates").EmailTemplate;
 
 module.exports = {
 
@@ -81,7 +85,10 @@ module.exports = {
 		*/		
 
 		// Convert HTML body to text
-		htmlToText: true
+		htmlToText: true,
+
+		// Templates folder
+		templateFolder: null
 	},
 
 	/**
@@ -104,7 +111,29 @@ module.exports = {
 				attachments: { type: "array", optional: true }
 			},*/
 			handler(ctx) {
-				return this.send(ctx.params);
+				if (ctx.params.template) {
+					// Use templates
+					const template = this.getTemplate(ctx);
+					if (template) {
+						// Render template
+						return template.render(ctx.params.data, ctx.params.locale).then(rendered => {
+							const params = _.omit(ctx.params, ["template", "locale", "data"]);
+							params.html = rendered.html;
+							if (rendered.text)
+								params.text = rendered.text;
+							if (rendered.subject)
+								params.subject = rendered.subject;
+
+							// Send e-mail
+							return this.send(params);
+						});
+					}
+					return this.Promise.reject(new Error("Missing e-mail template:", ctx.params.template));
+
+				} else {
+					// Send e-mail
+					return this.send(ctx.params);
+				}
 			}
 		}
 	},
@@ -127,6 +156,21 @@ module.exports = {
 				let sgTransport = require("nodemailer-sendgrid-transport");
 				return nodemailer.createTransport(sgTransport(this.settings.transport.options));
 			}
+			}
+		},
+
+		getTemplate(ctx) {
+			const templateName = ctx.params.template;
+			if (this.templates[templateName]) {
+				return this.templates[templateName];
+			}
+
+			const templatePath = path.join(this.settings.templateFolder, templateName);
+			if (fs.existsSync(templatePath)) {
+				this.templates[templateName] = new EmailTemplate(templatePath);
+				this.Promise.promisifyAll(this.templates[templateName]);
+
+				return this.templates[templateName];
 			}
 		},
 
@@ -170,12 +214,19 @@ module.exports = {
 			return;
 		}
 
+		this.templates = {};
+		if (this.settings.templateFolder) {
+			if (!fs.existsSync(this.settings.templateFolder)) {
+				this.logger.warn("The templateFolder is not exists! Path:", this.settings.templateFolder);
+			}
+		}
+
 		this.transporter = this.getTransporter();
 		if (this.transporter) {
 			if (this.settings.htmlToText)
 				this.transporter.use("compile", htmlToText());
 		}
-		
+
 	},
 
 	/**
