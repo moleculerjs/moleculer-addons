@@ -1,0 +1,137 @@
+"use strict";
+
+const { ServiceBroker } = require("moleculer");
+const MailService = require("../../src");
+const _ = require("lodash");
+
+describe.only("Test MailService template handling", () => {
+
+	it("should create an empty templates prop", () => {
+		const broker = new ServiceBroker();
+		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" } } });
+		expect(service).toBeDefined();
+		expect(service.templates).toEqual({});
+	});
+
+	it("should create templates", () => {
+		const broker = new ServiceBroker();
+		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
+
+		expect(Object.keys(service.templates).length).toBe(0);
+		let tmp = service.getTemplate("welcome");
+		expect(tmp).toBeDefined();
+		expect(service.templates.welcome).toBe(tmp);
+	});
+
+	it("should create templates", () => {
+		const broker = new ServiceBroker();
+		const service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
+
+		// Mocking
+		service.send = jest.fn(() => Promise.resolve());
+		let tmp = service.getTemplate("welcome");
+		tmp.render = jest.fn(() => Promise.resolve({
+			html: "<h1>Hello</h1",
+			text: "Hello",
+			subject: "Hello Subject"
+		}));
+		
+		// Call
+		return broker.call("mail.send", {
+			template: "welcome",
+			to: "john.doe@johndoe.com",
+			data: {
+				name: "John"
+			}
+		}).then(() => {
+			expect(tmp.render).toHaveBeenCalledTimes(1);
+			expect(tmp.render).toHaveBeenCalledWith({ name: "John" }, undefined);
+
+			expect(service.send).toHaveBeenCalledTimes(1);
+			expect(service.send).toHaveBeenCalledWith({"to": "john.doe@johndoe.com", "html": "<h1>Hello</h1", "subject": "Hello Subject", "text": "Hello"});
+		});
+	});
+
+	
+	describe("should render templates", () => {
+		let broker, service;
+		let spySend = jest.fn(() => Promise.resolve());
+		beforeEach(() => {
+			broker = new ServiceBroker();
+			service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
+			service.send = spySend;
+		});
+
+		it("should render default template without localization", () => {
+			service.send.mockClear();
+
+			return broker.call("mail.send", {
+				template: "full",
+				subject: "Full",
+				to: "john.doe@johndoe.com",
+				data: {
+					name: "John"
+				}
+			}).then(() => {
+				expect(service.send).toHaveBeenCalledTimes(1);
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>", "subject": "Full", "to": "john.doe@johndoe.com"});
+			});
+		});
+
+		it("should render the 'hu-HU' localized template", () => {
+			service.send.mockClear();
+
+			return broker.call("mail.send", {
+				template: "full",
+				locale: "hu-HU",
+				subject: "Fallback subject",
+				to: "john.doe@johndoe.com",
+				data: {
+					name: "John"
+				}
+			}).then(() => {
+				expect(service.send).toHaveBeenCalledTimes(1);
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1 style=\"color: red;\">Szia John!</h1>", "subject": "Üdvözlünk, John!", "text": "Szia John!", "to": "john.doe@johndoe.com"});
+			});
+		});
+
+
+		it("should render default template if localization is not exist", () => {
+			service.send.mockClear();
+
+			return broker.call("mail.send", {
+				template: "full",
+				locale: "fr-FR",
+				subject: "Full",
+				to: "john.doe@johndoe.com",
+				data: {
+					name: "John"
+				}
+			}).then(() => {
+				expect(service.send).toHaveBeenCalledTimes(1);
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>", "subject": "Full", "to": "john.doe@johndoe.com"});
+			});
+		});		
+
+		it("should reject if template is not exist", () => {
+			service.send.mockClear();
+
+			return broker.call("mail.send", {
+				template: "nothing",
+				subject: "Full",
+				to: "john.doe@johndoe.com",
+				data: {
+					name: "John"
+				}
+			}).then(() => {
+				expect(true).toBe(false);
+			}).catch(err => {
+				expect(err.message).toBe("Missing e-mail template: nothing");
+				expect(service.send).toHaveBeenCalledTimes(0);
+			});
+		});		
+
+	});
+
+});
+

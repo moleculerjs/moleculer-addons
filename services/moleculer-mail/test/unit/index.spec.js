@@ -8,7 +8,7 @@ jest.mock("nodemailer");
 jest.mock("nodemailer-mailgun-transport");
 jest.mock("nodemailer-sendgrid-transport");
 
-describe.only("Test MailService", () => {
+describe("Test MailService", () => {
 
 	it("should be created", () => {
 		const broker = new ServiceBroker();

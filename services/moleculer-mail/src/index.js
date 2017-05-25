@@ -99,24 +99,14 @@ module.exports = {
 		 * Send an email to recipients
 		 */
 		send: {
-			/* Need add all fields from https://nodemailer.com/message/
-			params: {
-				from: { type: "email", optional: true },
-				to: { type: "string" },
-				cc: { type: "string", optional: true },
-				bcc: { type: "string", optional: true },
-				subject: { type: "string" },
-				text: { type: "string", optional: true },
-				html: { type: "string", optional: true },
-				attachments: { type: "array", optional: true }
-			},*/
 			handler(ctx) {
 				if (ctx.params.template) {
+					const templateName = ctx.params.template;
 					// Use templates
-					const template = this.getTemplate(ctx);
+					const template = this.getTemplate(templateName);
 					if (template) {
 						// Render template
-						return template.render(ctx.params.data, ctx.params.locale).then(rendered => {
+						return template.render(ctx.params.data || {}, ctx.params.locale).then(rendered => {
 							const params = _.omit(ctx.params, ["template", "locale", "data"]);
 							params.html = rendered.html;
 							if (rendered.text)
@@ -128,7 +118,7 @@ module.exports = {
 							return this.send(params);
 						});
 					}
-					return this.Promise.reject(new Error("Missing e-mail template:", ctx.params.template));
+					return this.Promise.reject(new Error("Missing e-mail template: " + templateName));
 
 				} else {
 					// Send e-mail
@@ -146,7 +136,11 @@ module.exports = {
 			switch(this.settings.transport.type) {
 			case "sendmail":
 			case "smtp": {
-				return nodemailer.createTransport(this.settings.transport.options);
+				return nodemailer.createTransport(this.settings.transport.options || {
+					sendmail: true,
+					newline: "unix",
+					path: "/usr/sbin/sendmail"
+				});
 			}
 			case "mailgun": {
 				let mg = require("nodemailer-mailgun-transport");
@@ -159,8 +153,7 @@ module.exports = {
 			}
 		},
 
-		getTemplate(ctx) {
-			const templateName = ctx.params.template;
+		getTemplate(templateName) {
 			if (this.templates[templateName]) {
 				return this.templates[templateName];
 			}
@@ -217,6 +210,7 @@ module.exports = {
 		this.templates = {};
 		if (this.settings.templateFolder) {
 			if (!fs.existsSync(this.settings.templateFolder)) {
+				/* istanbul ignore next */
 				this.logger.warn("The templateFolder is not exists! Path:", this.settings.templateFolder);
 			}
 		}
