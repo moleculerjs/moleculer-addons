@@ -22,7 +22,11 @@ describe("Test MailService", () => {
 		});
 
 		it("should call nodemailer.sendMail", () => {
-			const service = broker.createService(svc);
+			const service = broker.createService(svc, {
+				settings: {
+					from: "moleculer@company.net"
+				}
+			});
 			service.transporter = {
 				sendMail: spySendMail
 			};
