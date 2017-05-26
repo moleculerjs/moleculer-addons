@@ -55,7 +55,7 @@ module.exports = {
 				keys: ["search"]
 			},
 			handler(ctx) {
-				return this.count(ctx);
+				return this.count(ctx.params);
 			}
 		},
 
@@ -178,9 +178,7 @@ module.exports = {
 		 * @returns 
 		 */
 		find(ctx) {
-			const filter = {};
-
-			const query = this.collection.find(filter);
+			const query = this.collection.find(ctx.params.where);
 			return this.applyFilters(query, ctx.params).lean().exec()
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
@@ -188,13 +186,12 @@ module.exports = {
 		/**
 		 * 
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context?} ctx 
 		 * @returns 
 		 */
-		count(ctx) {
-			const filter = {};
-			// TODO: search
-			return this.collection.where(filter).count();
+		count(params = {}) {
+			const query = this.collection.find(params.where);
+			return this.applyFilters(query, params).count();
 		},
 
 		/**

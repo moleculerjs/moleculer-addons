@@ -110,6 +110,7 @@ broker.start().delay(500).then(() => {
 		// List posts
 		.then(() => console.log("\n--- FIND POSTS ---"))
 		.then(() => broker.call("posts.find", { limit: 0, offset: 0, search: "aspernatur", sort: "title", populate: false, fields: ["title", "votes", "author", "_score"] }).then(console.log))
+		//.then(() => broker.call("posts.count", { search: "aspernatur" }).then(console.log))
 
 		// Error handling
 		.catch(console.error)
