@@ -42,10 +42,7 @@ module.exports = {
 				keys: [ "limit", "offset", "sort", "search" ]
 			},
 			handler(ctx) {
-				const filter = {};
-
-				const query = this.collection.find(filter);
-				return this.applyFilters(query, ctx.params).lean().exec();
+				return this.list(ctx);
 			}
 		},
 
@@ -57,9 +54,7 @@ module.exports = {
 				keys: [ "search" ]
 			},
 			handler(ctx) {
-				const filter = {};
-				// TODO: search
-				return this.collection.where(filter).count();
+				return this.count(ctx);
 			}
 		},		
 
@@ -68,14 +63,7 @@ module.exports = {
 		 */
 		create: {
 			handler(ctx) {
-				return this.Promise.resolve(ctx)
-					.then(ctx => {
-						const item = new this.collection(ctx.params.entity);
-						return item.save();
-					})
-					.then(doc => this.toJSON(doc))
-					.then(json => this.popuplateModels(ctx, json))
-					.then(json => this.clearCache().then(() => json));
+				return this.create(ctx);
 			}
 		},
 
@@ -87,12 +75,19 @@ module.exports = {
 				keys: [ "id" ]
 			},
 			handler(ctx) {
-				return this.Promise.resolve(ctx)
-					.then(ctx => {
-						return this.collection.findById(ctx.params.id).lean().exec();
-					})
-					.then(doc => this.toJSON(doc))
-					.then(json => this.popuplateModels(ctx, json));
+				return this.get(ctx);
+			}
+		},
+
+		/**
+		 * 
+		 */
+		model: {
+			cache: {
+				keys: [ "id" ]
+			},
+			handler(ctx) {
+				return this.model(ctx);
 			}
 		},
 
@@ -101,13 +96,7 @@ module.exports = {
 		 */
 		update: {
 			handler(ctx) {
-				return this.Promise.resolve(ctx)
-					.then(ctx => {
-						return this.collection.findByIdAndUpdate(ctx.params.id, ctx.params.update, { "new": true });
-					})
-					.then(doc => this.toJSON(doc))
-					.then(json => this.popuplateModels(ctx, json))
-					.then(json => this.clearCache().then(() => json));
+				return this.update(ctx);
 			}
 		},
 
@@ -116,8 +105,7 @@ module.exports = {
 		 */
 		remove: {
 			handler(ctx) {
-				return this.collection.findByIdAndRemove(ctx.params.id)
-					.then(() => this.clearCache());
+				return this.remove(ctx);
 			}
 		},
 
@@ -125,9 +113,8 @@ module.exports = {
 		 * 
 		 */
 		drop: {
-			handler() {
-				return this.collection.remove({})
-					.then(() => this.clearCache());
+			handler(ctx) {
+				return this.drop(ctx);
 			}
 		}
 	},
@@ -154,6 +141,119 @@ module.exports = {
 			this.db = mongoose.connect(uri, opts).connection;
 
 			return this.db;
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		list(ctx) {
+			const filter = {};
+
+			const query = this.collection.find(filter);
+			return this.applyFilters(query, ctx.params).lean().exec()
+				.then(docs => this.transformDocuments(ctx, docs));
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		count(ctx) {
+			const filter = {};
+			// TODO: search
+			return this.collection.where(filter).count();
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		create(ctx) {
+			return this.Promise.resolve(ctx.params)
+				.then(({ entity }) => {
+					const item = new this.collection(entity);
+					return item.save();
+				})
+				.then(docs => this.transformDocuments(ctx, docs))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		get(ctx) {
+			return this.Promise.resolve(ctx.params)
+				.then(({ id }) => this.collection.findById(id).lean().exec())
+				.then(docs => this.transformDocuments(ctx, docs));
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		model(ctx) {
+			return this.Promise.resolve(ctx)
+				.then(ctx => {
+					return this.collection.findById(ctx.params.id).lean().exec();
+				})
+				.then(doc => {
+					if (ctx.params.propertyFilter != null)
+						return this.toJSON(doc, ctx.params.propertyFilter);
+					return doc;
+				})
+				.then(json => {
+					if (ctx.params.populate === true)
+						return this.popuplateModels(ctx, json);
+					return json;
+				});
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		update(ctx) {
+			return this.Promise.resolve(ctx.params)
+				.then(({id, update }) => this.collection.findByIdAndUpdate(id, update, { "new": true }))
+				.then(docs => this.transformDocuments(ctx, docs))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		remove(ctx) {
+			return this.Promise.resolve(ctx.params)
+				.then(({ id }) => this.collection.findByIdAndRemove(id))
+				.then(docs => this.transformDocuments(ctx, docs))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * 
+		 * 
+		 * @returns 
+		 */
+		drop() {
+			return this.collection.remove({})
+				.then(() => this.clearCache());
 		},
 
 		/**
@@ -189,6 +289,18 @@ module.exports = {
 		},
 
 		/**
+		 * 
+		 * 
+		 * @param {any} docs 
+		 * @returns 
+		 */
+		transformDocuments(ctx, docs) {
+			return this.Promise.resolve(docs)
+				.then(docs => this.toJSON(docs))
+				.then(json => this.popuplateModels(ctx, json));
+		},
+
+		/**
 		 * Convert the `docs` MongoDB model to JSON object.
 		 * With `propFilter` can be filter the properties
 		 * 
@@ -209,7 +321,7 @@ module.exports = {
 			};
 
 			if (propFilter == null) {
-				propFilter = this.settings.modelPropFilter;
+				propFilter = this.settings.propertyFilter;
 			}
 
 			if (_.isString(propFilter))

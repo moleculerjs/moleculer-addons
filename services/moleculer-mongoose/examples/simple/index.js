@@ -16,9 +16,9 @@ broker.createService(MongooseService, {
 	collection: Post,
 	settings: {
 		// Connection string
-		db: "mongodb://localhost",
+		db: "mongodb://localhost/moleculer-demo",
 
-		propertyFilter: "title content votes",
+		propertyFilter: "_id title content votes",
 
 		populates: {
 			"author": "persons.model"
@@ -64,10 +64,6 @@ broker.start().delay(500).then(() => {
 		.then(() => console.log("\n--- COUNT ---"))
 		.then(() => broker.call("posts.count").then(console.log))
 		
-		// List posts
-		.then(() => console.log("\n--- LIST ---"))
-		.then(() => broker.call("posts.list").then(console.log))
-
 		// Create new Posts
 		.then(() => console.log("\n--- CREATE ---"))
 		.then(() => broker.call("posts.create", { entity: { title: "Hello", content: "Post content" } })
@@ -76,6 +72,11 @@ broker.start().delay(500).then(() => {
 				console.log("Saved: ", doc);
 			})
 		)
+
+		// List posts
+		.then(() => console.log("\n--- LIST ---"))
+		.then(() => broker.call("posts.list").then(console.log))
+
 		// Get a post
 		.then(() => console.log("\n--- GET ---"))
 		.then(() => broker.call("posts.get", { id }).then(console.log))
