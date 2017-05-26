@@ -16,6 +16,14 @@
 				"simple"
 			]
 		},
+
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch readme",
+			"program": "${workspaceRoot}\\readme-generator",
+			"cwd": "${workspaceRoot}"
+		},
 		{
 			"type": "node",
 			"request": "launch",

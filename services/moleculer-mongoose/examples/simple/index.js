@@ -28,22 +28,16 @@ broker.createService(MongooseService, {
 	actions: {
 		vote(ctx) {
 			return this.Promise.resolve(ctx)
-					.then(ctx => {
-						return this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: 1 } }, { "new": true });
-					})
-					.then(doc => this.toJSON(doc))
-					.then(json => this.popuplateModels(ctx, json))
-					.then(json => this.clearCache().then(() => json));			
+					.then(ctx => this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: 1 } }, { "new": true }))
+					.then(docs => this.transformDocuments(ctx, docs))
+					.then(json => this.clearCache().then(() => json));		
 		},
 
 		unvote(ctx) {
 			return this.Promise.resolve(ctx)
-					.then(ctx => {
-						return this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: -1 } }, { "new": true });
-					})
-					.then(doc => this.toJSON(doc))
-					.then(json => this.popuplateModels(ctx, json))
-					.then(json => this.clearCache().then(() => json));			
+					.then(ctx => this.collection.findByIdAndUpdate(ctx.params.id, { $inc: { votes: -1 } }, { "new": true }))
+					.then(docs => this.transformDocuments(ctx, docs))
+					.then(json => this.clearCache().then(() => json));		
 		}
 	},
 

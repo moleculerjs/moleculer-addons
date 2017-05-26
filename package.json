@@ -10,7 +10,8 @@
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "init:service": "cd services && moleculer init addon",
-    "release": "lerna publish"
+    "release": "lerna publish",
+    "readme": "node readme-generator.js"
   },
   "repository": {
     "type": "git",
@@ -23,9 +24,12 @@
   "devDependencies": {
     "coveralls": "2.13.1",
     "eslint": "3.19.0",
+    "glob": "7.1.2",
     "jest": "20.0.3",
     "jest-cli": "20.0.3",
     "lerna": "2.0.0-rc.5",
+    "lodash": "4.17.4",
+    "markdown-magic": "0.1.15",
     "nodemon": "1.11.0"
   },
   "dependencies": {
