@@ -8,7 +8,6 @@
 
 const _ 			= require("lodash");
 const mongoose 		= require("mongoose");
-const { Schema } 	= require("mongoose");
 const ObjectId 		= require("mongoose").Types.ObjectId;
 
 module.exports = {
@@ -314,13 +313,13 @@ module.exports = {
 		applyFilters(q, params) {
 			if (params) {
 				if (_.isNumber(params.limit))
-					q.limit(params.limit);
+					q = q.limit(params.limit);
 
 				if (_.isNumber(params.offset))
-					q.skip(params.offset);
+					q = q.skip(params.offset);
 
 				if (_.isString(params.sort))
-					q.sort(params.sort.replace(/,/, " "));
+					q = q.sort(params.sort.replace(/,/, " "));
 
 				// TODO `search` with `searchField`
 			}
@@ -344,8 +343,12 @@ module.exports = {
 		 */
 		transformDocuments(ctx, docs) {
 			return this.Promise.resolve(docs)
-				.then(docs => this.toJSON(docs))
-				.then(json => this.populateDocs(ctx, json));
+				.then(json => {
+					if (ctx.params.populate !== false)
+						return this.populateDocs(ctx, json);
+					return json;
+				})
+				.then(docs => this.toJSON(docs, ctx.params.fields));
 		},
 
 		/**
@@ -376,8 +379,15 @@ module.exports = {
 			if (json._id instanceof ObjectId)
 				json._id = json._id.toString();
 
-			if (props != null)
-				return _.pick(json, props);
+			if (props != null) {
+				let res = {};
+				props.forEach(n => {
+					const v = _.get(json, n);
+					if (v !== undefined)
+						_.set(res, n, v);
+				});
+				return res;
+			}
 
 			return json;
 		},

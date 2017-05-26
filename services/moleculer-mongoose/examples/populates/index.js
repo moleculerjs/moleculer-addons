@@ -101,11 +101,10 @@ broker.createService(MongooseService, {
 
 // Start server
 broker.start().delay(500).then(() => {
-	let id;
 	Promise.resolve()
 		// List posts
 		.then(() => console.log("\n--- FIND POSTS ---"))
-		.then(() => broker.call("posts.find").then(console.log))
+		.then(() => broker.call("posts.find", { limit: 3, sort: "title", offset: 1, populate: true, fields: ["title", "votes", "author"] }).then(console.log))
 
 		// Error handling
 		.catch(console.error)
