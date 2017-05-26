@@ -25,11 +25,11 @@
     "coveralls": "2.13.1",
     "eslint": "3.19.0",
     "glob": "7.1.2",
-    "jest": "20.0.3",
-    "jest-cli": "20.0.3",
+    "jest": "20.0.4",
+    "jest-cli": "20.0.4",
     "lerna": "2.0.0-rc.5",
     "lodash": "4.17.4",
-    "markdown-magic": "0.1.15",
+    "markdown-magic": "0.1.16",
     "nodemon": "1.11.0"
   },
   "dependencies": {
