@@ -1,7 +1,7 @@
 "use strict";
 
-let mongoose 		= require("mongoose");
-let Schema 			= mongoose.Schema;
+let mongoose = require("mongoose");
+let Schema = mongoose.Schema;
 
 let PostSchema = new Schema({
 	title: {
@@ -18,10 +18,17 @@ let PostSchema = new Schema({
 	},
 	author: {
 		type: Schema.ObjectId
-	}	
+	}
 
 }, {
 	timestamps: true
 });
 
-module.exports =mongoose.model("Post", PostSchema);
+// Add full-text search index
+PostSchema.index({
+	//"$**": "text"
+	"title": "text",
+	"content": "text"
+});
+
+module.exports = mongoose.model("Post", PostSchema);

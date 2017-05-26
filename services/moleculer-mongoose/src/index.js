@@ -6,9 +6,9 @@
 
 "use strict";
 
-const _ 			= require("lodash");
-const mongoose 		= require("mongoose");
-const ObjectId 		= require("mongoose").Types.ObjectId;
+const _ = require("lodash");
+const mongoose = require("mongoose");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 module.exports = {
 	// Must overwrite it
@@ -40,7 +40,7 @@ module.exports = {
 		 */
 		find: {
 			cache: {
-				keys: [ "limit", "offset", "sort", "search" ]
+				keys: ["limit", "offset", "sort", "search"]
 			},
 			handler(ctx) {
 				return this.find(ctx);
@@ -52,12 +52,12 @@ module.exports = {
 		 */
 		count: {
 			cache: {
-				keys: [ "search" ]
+				keys: ["search"]
 			},
 			handler(ctx) {
 				return this.count(ctx);
 			}
-		},		
+		},
 
 		/**
 		 * 
@@ -73,7 +73,7 @@ module.exports = {
 		 */
 		get: {
 			cache: {
-				keys: [ "id" ]
+				keys: ["id"]
 			},
 			handler(ctx) {
 				return this.get(ctx);
@@ -85,7 +85,7 @@ module.exports = {
 		 */
 		model: {
 			cache: {
-				keys: [ "id" ]
+				keys: ["id"]
 			},
 			handler(ctx) {
 				return this.model(ctx);
@@ -135,7 +135,7 @@ module.exports = {
 				uri = this.settings.db.uri;
 				opts = this.settings.db.opts;
 			} else {
-				uri = this.settings.db;			
+				uri = this.settings.db;
 			}
 
 			this.logger.debug(`Connecting to MongoDB (${uri})...`);
@@ -145,20 +145,20 @@ module.exports = {
 				this.logger.info("Connected to MongoDB.");
 
 				// Call an 'afterConnected' handler in schema
-				if (_.isFunction(this.schema.afterConnected)) 
-					this.schema.afterConnected.call(this);	
+				if (_.isFunction(this.schema.afterConnected))
+					this.schema.afterConnected.call(this);
 
 				this.db.on("disconnected", function mongoDisconnected() {
 					this.logger.warn("Disconnected from MongoDB.");
-				}.bind(this));	
-											
+				}.bind(this));
+
 			}).catch(err => {
 				this.logger.warn("Could not connect to MongoDB! ", err.message);
 				setTimeout(() => {
 					this.connect();
 				}, 1000);
 
-			});			
+			});
 		},
 
 		/**
@@ -205,7 +205,9 @@ module.exports = {
 		 */
 		create(ctx) {
 			return this.Promise.resolve(ctx.params)
-				.then(({ entity }) => {
+				.then(({
+					entity
+				}) => {
 					const item = new this.collection(entity);
 					return item.save();
 				})
@@ -221,7 +223,9 @@ module.exports = {
 		 */
 		get(ctx) {
 			return this.Promise.resolve(ctx.params)
-				.then(({ id }) => this.collection.findById(id).lean().exec())
+				.then(({
+					id
+				}) => this.collection.findById(id).lean().exec())
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
 
@@ -237,7 +241,9 @@ module.exports = {
 		 */
 		resolveModels(params) {
 			return this.Promise.resolve(params)
-				.then(({ id }) => {
+				.then(({
+					id
+				}) => {
 					let query;
 					if (_.isArray(id)) {
 						query = this.collection.find({
@@ -292,7 +298,12 @@ module.exports = {
 		 */
 		update(ctx) {
 			return this.Promise.resolve(ctx.params)
-				.then(({id, update }) => this.collection.findByIdAndUpdate(id, update, { "new": true }))
+				.then(({
+					id,
+					update
+				}) => this.collection.findByIdAndUpdate(id, update, {
+					"new": true
+				}))
 				.then(docs => this.transformDocuments(ctx, docs))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -305,7 +316,9 @@ module.exports = {
 		 */
 		remove(ctx) {
 			return this.Promise.resolve(ctx.params)
-				.then(({ id }) => this.collection.findByIdAndRemove(id))
+				.then(({
+					id
+				}) => this.collection.findByIdAndRemove(id))
 				.then(docs => this.transformDocuments(ctx, docs))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -323,26 +336,50 @@ module.exports = {
 		/**
 		 * Add filters to query
 		 * Available filters: 
+		 *  - search
+		 * 	- sort
 		 * 	- limit
 		 * 	- offset
-		 * 	- sort
 		 * 
-		 * @param {any} q 
-		 * @param {any} params 
-		 * @returns 
+		 * @param {MongoQuery} q 
+		 * @param {Object} params 
+		 * @returns {MongoQuery}
 		 */
 		applyFilters(q, params) {
 			if (params) {
-				if (_.isNumber(params.limit))
-					q = q.limit(params.limit);
+				// Full-text search
+				// More info: https://docs.mongodb.com/manual/reference/operator/query/text/
+				if (_.isString(params.search) && params.search !== "") {
+					q.find({
+						$text: {
+							$search: params.search
+						}
+					});
+					q._fields = {
+						_score: {
+							$meta: "textScore"
+						}
+					};
+					q.sort({
+						_score: {
+							$meta: "textScore"
+						}
+					});
+				} else {
+					// Sort
+					if (_.isString(params.sort))
+						q.sort(params.sort.replace(/,/, " "));
+					else if (Array.isArray(params.sort))
+						q.sort(params.sort.join(" "));					
+				}
 
+				// Limit
+				if (_.isNumber(params.limit) && params.limit > 0)
+					q.limit(params.limit);
+
+				// Offset
 				if (_.isNumber(params.offset))
-					q = q.skip(params.offset);
-
-				if (_.isString(params.sort))
-					q = q.sort(params.sort.replace(/,/, " "));
-
-				// TODO `search` with `searchField`
+					q.skip(params.offset);
 			}
 			return q;
 		},
@@ -363,6 +400,7 @@ module.exports = {
 		 * @returns {Array|Object}
 		 */
 		transformDocuments(ctx, docs) {
+			//console.log(docs);
 			return this.Promise.resolve(docs)
 				.then(json => {
 					if (ctx.params.populate !== false)
@@ -389,7 +427,7 @@ module.exports = {
 
 			if (_.isArray(docs)) {
 				return docs.map(doc => this.convertToJSON(doc, fields));
-			} else {			
+			} else {
 				return this.convertToJSON(docs, fields);
 			}
 		},
@@ -404,7 +442,7 @@ module.exports = {
 		convertToJSON(doc, fields) {
 			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
 
-			if (json._id instanceof ObjectId) 
+			if (json._id instanceof ObjectId)
 				json._id = json._id.toString();
 
 			// Apply field filter (support nested paths)
@@ -434,7 +472,7 @@ module.exports = {
 				let promises = [];
 				_.forIn(populateRules, (rules, field) => {
 					// if the rule is a function, call it
-					if(_.isFunction(rules)) {
+					if (_.isFunction(rules)) {
 						promises.push(this.Promise.method(rules.call(this, field, ctx, docs)));
 						return;
 					}
