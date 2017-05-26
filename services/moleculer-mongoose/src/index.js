@@ -6,8 +6,10 @@
 
 "use strict";
 
-const _ 		= require("lodash");
-const mongoose 	= require("mongoose");
+const _ 			= require("lodash");
+const mongoose 		= require("mongoose");
+const { Schema } 	= require("mongoose");
+const ObjectId 		= require("mongoose").Types.ObjectId;
 
 module.exports = {
 	// Must overwrite it
@@ -154,7 +156,7 @@ module.exports = {
 			}).catch(err => {
 				this.logger.warn("Could not connect to MongoDB! ", err.message);
 				setTimeout(() => {
-					this.tryConnect();
+					this.connect();
 				}, 1000);
 
 			});			
@@ -233,16 +235,35 @@ module.exports = {
 		model(ctx) {
 			return this.Promise.resolve(ctx.params)
 				.then(({ id }) => {
-					return this.collection.findById(id).lean().exec();
+					let query;
+					if (_.isArray(id)) {
+						query = this.collection.find({
+							_id: {
+								$in: id
+							}
+						});
+					} else
+						query = this.collection.findById(id);
+
+					return query.lean().exec();
 				})
 				.then(doc => {
-					if (ctx.params.propertyFilter != null)
+					if (ctx.params.propertyFilter !== false)
 						return this.toJSON(doc, ctx.params.propertyFilter);
 					return doc;
 				})
 				.then(json => {
 					if (ctx.params.populate === true)
 						return this.populateDocs(ctx, json);
+					return json;
+				})
+				.then(json => {
+					if (_.isArray(json) && ctx.params.resultAsObject === true) {
+						let res = {};
+						json.forEach(doc => res[doc._id] = doc);
+
+						return res;
+					}
 					return json;
 				});
 		},
@@ -352,6 +373,9 @@ module.exports = {
 		convertToJSON(doc, props) {
 			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
 
+			if (json._id instanceof ObjectId)
+				json._id = json._id.toString();
+
 			if (props != null)
 				return _.pick(json, props);
 
@@ -375,14 +399,19 @@ module.exports = {
 						let items = Array.isArray(docs) ? docs : [docs];
 
 						// Collect IDs from field of docs (flatten, compact & unique list) 
-						let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
-						if (idList.length > 0) {
+						let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => {
+							let id = doc[field];
+							if (id instanceof ObjectId)
+								id = id.toString();
+							return id;
+						}))));
 
+						if (idList.length > 0) {
 							// Call the target action & collect the promises
 							promises.push(ctx.call(actionName, {
 								id: idList,
 								resultAsObject: true,
-								propFilter: true
+								populate: true
 							}).then(populatedDocs => {
 								// Replace the received models according to IDs in the original docs
 								items.forEach(doc => {

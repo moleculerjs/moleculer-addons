@@ -15,7 +15,10 @@ let PostSchema = new Schema({
 	votes: {
 		type: Number,
 		default: 0
-	}
+	},
+	author: {
+		type: Schema.ObjectId
+	}	
 
 }, {
 	timestamps: true

@@ -13,7 +13,7 @@
 			"cwd": "${workspaceRoot}",
 			"args": [
 				"services\\moleculer-mongoose",
-				"simple"
+				"populates"
 			]
 		},
 
