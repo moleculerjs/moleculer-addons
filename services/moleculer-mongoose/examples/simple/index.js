@@ -20,9 +20,9 @@ broker.createService(MongooseService, {
 
 		propertyFilter: "_id title content votes",
 
-		populates: {
+		/*populates: {
 			"author": "persons.model"
-		}
+		}*/
 	},
 
 	actions: {
@@ -51,8 +51,8 @@ broker.start().delay(500).then(() => {
 	let id;
 	Promise.resolve()
 		// Drop all posts
-		.then(() => console.log("\n--- DROP ---"))
-		.then(() => broker.call("posts.drop").then(console.log))
+		.then(() => console.log("\n--- CLEAR ---"))
+		.then(() => broker.call("posts.clear").then(console.log))
 
 		// Count of posts
 		.then(() => console.log("\n--- COUNT ---"))
@@ -68,8 +68,8 @@ broker.start().delay(500).then(() => {
 		)
 
 		// List posts
-		.then(() => console.log("\n--- LIST ---"))
-		.then(() => broker.call("posts.list").then(console.log))
+		.then(() => console.log("\n--- FIND ---"))
+		.then(() => broker.call("posts.find").then(console.log))
 
 		// Get a post
 		.then(() => console.log("\n--- GET ---"))

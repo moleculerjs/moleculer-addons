@@ -20,7 +20,7 @@ module.exports = {
 		// Connection string
 		db: null,
 
-		// Field list for search
+		// Field find for search
 		searchFields: null,
 
 		// Property filter
@@ -37,12 +37,12 @@ module.exports = {
 		/**
 		 * 
 		 */
-		list: {
+		find: {
 			cache: {
 				keys: [ "limit", "offset", "sort", "search" ]
 			},
 			handler(ctx) {
-				return this.list(ctx);
+				return this.find(ctx);
 			}
 		},
 
@@ -112,9 +112,9 @@ module.exports = {
 		/**
 		 * 
 		 */
-		drop: {
+		clear: {
 			handler(ctx) {
-				return this.drop(ctx);
+				return this.clear(ctx);
 			}
 		}
 	},
@@ -176,7 +176,7 @@ module.exports = {
 		 * @param {any} ctx 
 		 * @returns 
 		 */
-		list(ctx) {
+		find(ctx) {
 			const filter = {};
 
 			const query = this.collection.find(filter);
@@ -242,7 +242,7 @@ module.exports = {
 				})
 				.then(json => {
 					if (ctx.params.populate === true)
-						return this.popuplateModels(ctx, json);
+						return this.populateDocs(ctx, json);
 					return json;
 				});
 		},
@@ -278,7 +278,7 @@ module.exports = {
 		 * 
 		 * @returns 
 		 */
-		drop() {
+		clear() {
 			return this.collection.remove({})
 				.then(() => this.clearCache());
 		},
@@ -324,7 +324,7 @@ module.exports = {
 		transformDocuments(ctx, docs) {
 			return this.Promise.resolve(docs)
 				.then(docs => this.toJSON(docs))
-				.then(json => this.popuplateModels(ctx, json));
+				.then(json => this.populateDocs(ctx, json));
 		},
 
 		/**
@@ -332,37 +332,82 @@ module.exports = {
 		 * With `propFilter` can be filter the properties
 		 * 
 		 * @param {MongoDocument} 	docs		MongoDB document(s)
-		 * @param {String|Array} 			propFilter	Filter properties of model. It is a space-separated `String` or an `Array`
-		 * @returns								Object|Array
+		 * @param {String|Array} 	propFilter	Filter properties of model. It is a space-separated `String` or an `Array`
+		 * @returns	{Object|Array}
 		 * 
 		 * @memberOf Service
 		 */
-		toJSON(docs, propFilter) {
-			let func = function (doc) {
-				let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
-
-				if (propFilter != null)
-					return _.pick(json, propFilter);
-
-				return json;
-			};
-
-			if (propFilter == null) {
-				propFilter = this.settings.propertyFilter;
+		toJSON(docs, propFilter = this.settings.propertyFilter) {
+			if (_.isString(propFilter)) {
+				propFilter = propFilter.split(" ");
 			}
 
-			if (_.isString(propFilter))
-				propFilter = propFilter.split(" ");
-
 			if (_.isArray(docs)) {
-				return docs.map(doc => func(doc, propFilter));
-			} else if (_.isObject(docs)) {
-				return func(docs);
+				return docs.map(doc => this.convertToJSON(doc, propFilter));
+			} else {			
+				return this.convertToJSON(docs, propFilter);
 			}
 		},
 
-		popuplateModels(ctx, docs) {
-			return docs;
+		convertToJSON(doc, props) {
+			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
+
+			if (props != null)
+				return _.pick(json, props);
+
+			return json;
+		},
+
+		/**
+		 * Populate docs
+		 * 
+		 * @param {Context} ctx				Context
+		 * @param {Array} 	docs			Models
+		 * @param {Object?}	populateSchema	schema for population
+		 * @returns	{Promise}
+		 */
+		populateDocs(ctx, docs, populateSchema) {
+			populateSchema = populateSchema || this.settings.populates;
+			if (docs != null && populateSchema) {
+				let promises = [];
+				_.forIn(populateSchema, (actionName, field) => {
+					if (_.isString(actionName)) {
+						let items = Array.isArray(docs) ? docs : [docs];
+
+						// Collect IDs from field of docs (flatten, compact & unique list) 
+						let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
+						if (idList.length > 0) {
+
+							// Call the target action & collect the promises
+							promises.push(ctx.call(actionName, {
+								id: idList,
+								resultAsObject: true,
+								propFilter: true
+							}).then(populatedDocs => {
+								// Replace the received models according to IDs in the original docs
+								items.forEach(doc => {
+									let id = doc[field];
+									if (_.isArray(id)) {
+										let models = _.compact(id.map(_id => populatedDocs[_id]));
+										doc[field] = models;
+									} else {
+										doc[field] = populatedDocs[id];
+									}
+								});
+							}));
+						}
+					} else if(_.isFunction(actionName)) {
+						promises.push(this.Promise.method(actionName.call(this, field, ctx, docs)));
+					}
+				});
+
+				if (promises.length > 0) {
+					return this.Promise.all(promises).then(() => docs);
+				}
+			}
+
+			// Fallback, if no populate defined
+			return this.Promise.resolve(docs);
 		}
 	},
 
