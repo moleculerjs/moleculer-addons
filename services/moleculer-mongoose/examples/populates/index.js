@@ -21,10 +21,15 @@ broker.createService(MongooseService, {
 		// Connection string
 		db: "mongodb://localhost/moleculer-demo",
 
-		propertyFilter: "_id title content votes author",
+		fields: "_id title content votes author",
 
 		populates: {
-			"author": "users.model"
+			"author": {
+				action: "users.model",
+				params: {
+					fields: "username fullName"
+				}
+			}
 		}
 	},
 
@@ -76,7 +81,7 @@ broker.createService(MongooseService, {
 	settings: {
 		// Connection string
 		db: "mongodb://localhost/moleculer-demo",
-		propertyFilter: "_id username fullName"
+		fields: "_id username fullName email"
 	},
 
 	afterConnected() {
@@ -104,7 +109,7 @@ broker.start().delay(500).then(() => {
 	Promise.resolve()
 		// List posts
 		.then(() => console.log("\n--- FIND POSTS ---"))
-		.then(() => broker.call("posts.find", { limit: 3, sort: "title", offset: 1, populate: true, fields: ["title", "votes", "author"] }).then(console.log))
+		.then(() => broker.call("posts.find", { limit: 3, sort: "title", offset: 0, populate: true, fields: ["title", "votes", "author.fullName"] }).then(console.log))
 
 		// Error handling
 		.catch(console.error)

@@ -24,8 +24,8 @@ module.exports = {
 		// Field find for search
 		searchFields: null,
 
-		// Property filter
-		propertyFilter: null,
+		// Fields filter
+		fields: null,
 
 		// Auto populates
 		populates: null
@@ -225,14 +225,18 @@ module.exports = {
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
 
+		getID(doc) {
+			return (doc._id instanceof ObjectId) ? doc._id.toString() : doc._id;
+		},
+
 		/**
 		 * 
 		 * 
-		 * @param {any} ctx 
+		 * @param {any} params 
 		 * @returns 
 		 */
-		model(ctx) {
-			return this.Promise.resolve(ctx.params)
+		resolveModels(params) {
+			return this.Promise.resolve(params)
 				.then(({ id }) => {
 					let query;
 					if (_.isArray(id)) {
@@ -241,14 +245,27 @@ module.exports = {
 								$in: id
 							}
 						});
-					} else
+					} else {
 						query = this.collection.findById(id);
+					}
 
 					return query.lean().exec();
-				})
+				});
+		},
+
+		/**
+		 * 
+		 * 
+		 * @param {any} ctx 
+		 * @returns 
+		 */
+		model(ctx) {
+			let origDoc;
+			return this.resolveModels(ctx.params)
 				.then(doc => {
-					if (ctx.params.propertyFilter !== false)
-						return this.toJSON(doc, ctx.params.propertyFilter);
+					origDoc = doc;
+					if (ctx.params.fields !== false)
+						return this.toFilteredJSON(doc, ctx.params.fields);
 					return doc;
 				})
 				.then(json => {
@@ -259,7 +276,7 @@ module.exports = {
 				.then(json => {
 					if (_.isArray(json) && ctx.params.resultAsObject === true) {
 						let res = {};
-						json.forEach(doc => res[doc._id] = doc);
+						json.forEach((doc, i) => res[origDoc[i]._id] = doc);
 
 						return res;
 					}
@@ -294,7 +311,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Delete all records
 		 * 
 		 * @returns 
 		 */
@@ -304,7 +321,11 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Add filters to query
+		 * Available filters: 
+		 * 	- limit
+		 * 	- offset
+		 * 	- sort
 		 * 
 		 * @param {any} q 
 		 * @param {any} params 
@@ -336,10 +357,10 @@ module.exports = {
 		},
 
 		/**
+		 * Transform the fetched documents
 		 * 
-		 * 
-		 * @param {any} docs 
-		 * @returns 
+		 * @param {Array|Object} docs 
+		 * @returns {Array|Object}
 		 */
 		transformDocuments(ctx, docs) {
 			return this.Promise.resolve(docs)
@@ -348,40 +369,48 @@ module.exports = {
 						return this.populateDocs(ctx, json);
 					return json;
 				})
-				.then(docs => this.toJSON(docs, ctx.params.fields));
+				.then(docs => this.toFilteredJSON(docs, ctx.params.fields));
 		},
 
 		/**
 		 * Convert the `docs` MongoDB model to JSON object.
-		 * With `propFilter` can be filter the properties
+		 * With `fields` can be filter the fields
 		 * 
-		 * @param {MongoDocument} 	docs		MongoDB document(s)
-		 * @param {String|Array} 	propFilter	Filter properties of model. It is a space-separated `String` or an `Array`
+		 * @param {MongoDocument} 	docs	MongoDB document(s)
+		 * @param {String|Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
 		 * @returns	{Object|Array}
 		 * 
 		 * @memberOf Service
 		 */
-		toJSON(docs, propFilter = this.settings.propertyFilter) {
-			if (_.isString(propFilter)) {
-				propFilter = propFilter.split(" ");
+		toFilteredJSON(docs, fields = this.settings.fields) {
+			if (_.isString(fields)) {
+				fields = fields.split(" ");
 			}
 
 			if (_.isArray(docs)) {
-				return docs.map(doc => this.convertToJSON(doc, propFilter));
+				return docs.map(doc => this.convertToJSON(doc, fields));
 			} else {			
-				return this.convertToJSON(docs, propFilter);
+				return this.convertToJSON(docs, fields);
 			}
 		},
 
-		convertToJSON(doc, props) {
+		/**
+		 * 
+		 * 
+		 * @param {Object} doc 
+		 * @param {Array} fields 
+		 * @returns 
+		 */
+		convertToJSON(doc, fields) {
 			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
 
-			if (json._id instanceof ObjectId)
+			if (json._id instanceof ObjectId) 
 				json._id = json._id.toString();
 
-			if (props != null) {
+			// Apply field filter (support nested paths)
+			if (Array.isArray(fields)) {
 				let res = {};
-				props.forEach(n => {
+				fields.forEach(n => {
 					const v = _.get(json, n);
 					if (v !== undefined)
 						_.set(res, n, v);
@@ -393,50 +422,60 @@ module.exports = {
 		},
 
 		/**
-		 * Populate docs
+		 * Populate documents
 		 * 
 		 * @param {Context} ctx				Context
 		 * @param {Array} 	docs			Models
-		 * @param {Object?}	populateSchema	schema for population
+		 * @param {Object?}	populateRules	schema for population
 		 * @returns	{Promise}
 		 */
-		populateDocs(ctx, docs, populateSchema) {
-			populateSchema = populateSchema || this.settings.populates;
-			if (docs != null && populateSchema) {
+		populateDocs(ctx, docs, populateRules = this.settings.populates) {
+			if (docs != null && populateRules) {
 				let promises = [];
-				_.forIn(populateSchema, (actionName, field) => {
-					if (_.isString(actionName)) {
-						let items = Array.isArray(docs) ? docs : [docs];
+				_.forIn(populateRules, (rules, field) => {
+					// if the rule is a function, call it
+					if(_.isFunction(rules)) {
+						promises.push(this.Promise.method(rules.call(this, field, ctx, docs)));
+						return;
+					}
 
-						// Collect IDs from field of docs (flatten, compact & unique list) 
-						let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => {
-							let id = doc[field];
-							if (id instanceof ObjectId)
-								id = id.toString();
-							return id;
-						}))));
+					// If string, convert to object
+					if (_.isString(rules)) {
+						rules = {
+							action: rules
+						};
+					}
 
-						if (idList.length > 0) {
-							// Call the target action & collect the promises
-							promises.push(ctx.call(actionName, {
-								id: idList,
-								resultAsObject: true,
-								populate: true
-							}).then(populatedDocs => {
-								// Replace the received models according to IDs in the original docs
-								items.forEach(doc => {
-									let id = doc[field];
-									if (_.isArray(id)) {
-										let models = _.compact(id.map(_id => populatedDocs[_id]));
-										doc[field] = models;
-									} else {
-										doc[field] = populatedDocs[id];
-									}
-								});
-							}));
-						}
-					} else if(_.isFunction(actionName)) {
-						promises.push(this.Promise.method(actionName.call(this, field, ctx, docs)));
+					let items = Array.isArray(docs) ? docs : [docs];
+
+					// Collect IDs from field of docs (flatten, compact & unique list) 
+					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => {
+						let id = doc[field];
+						if (id instanceof ObjectId)
+							id = id.toString();
+						return id;
+					}))));
+
+					if (idList.length > 0) {
+						// Call the target action & collect the promises
+						const params = Object.assign({
+							id: idList,
+							resultAsObject: true,
+							populate: false
+						}, rules.params || []);
+
+						promises.push(ctx.call(rules.action, params).then(populatedDocs => {
+							// Replace the received models according to IDs in the original docs
+							items.forEach(doc => {
+								let id = doc[field];
+								if (_.isArray(id)) {
+									let models = _.compact(id.map(_id => populatedDocs[_id]));
+									doc[field] = models;
+								} else {
+									doc[field] = populatedDocs[id];
+								}
+							});
+						}));
 					}
 				});
 
