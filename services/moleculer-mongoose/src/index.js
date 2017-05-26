@@ -378,7 +378,7 @@ module.exports = {
 					q.limit(params.limit);
 
 				// Offset
-				if (_.isNumber(params.offset))
+				if (_.isNumber(params.offset) && params.offset > 0)
 					q.skip(params.offset);
 			}
 			return q;
