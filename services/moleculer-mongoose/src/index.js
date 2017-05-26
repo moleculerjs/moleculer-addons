@@ -10,8 +10,8 @@ const _ 		= require("lodash");
 const mongoose 	= require("mongoose");
 
 module.exports = {
-
-	name: "mongoose",
+	// Must overwrite it
+	name: "",
 
 	/**
 	 * Default settings
@@ -123,10 +123,10 @@ module.exports = {
 	 * Methods
 	 */
 	methods: {
+
 		/**
 		 * 
 		 * 
-		 * @returns 
 		 */
 		connect() {
 			let uri, opts;
@@ -138,9 +138,36 @@ module.exports = {
 			}
 
 			this.logger.debug(`Connecting to MongoDB (${uri})...`);
-			this.db = mongoose.connect(uri, opts).connection;
+			const conn = mongoose.connect(uri, opts);
+			return conn.then(() => {
+				this.db = conn.connection;
+				this.logger.info("Connected to MongoDB.");
 
-			return this.db;
+				// Call an 'afterConnected' handler in schema
+				if (_.isFunction(this.schema.afterConnected)) 
+					this.schema.afterConnected.call(this);	
+
+				this.db.on("disconnected", function mongoDisconnected() {
+					this.logger.warn("Disconnected from MongoDB.");
+				}.bind(this));	
+											
+			}).catch(err => {
+				this.logger.warn("Could not connect to MongoDB! ", err.message);
+				setTimeout(() => {
+					this.tryConnect();
+				}, 1000);
+
+			});			
+		},
+
+		/**
+		 * 
+		 * 
+		 */
+		disconnect() {
+			if (this.db) {
+				this.db.close();
+			}
 		},
 
 		/**
@@ -204,9 +231,9 @@ module.exports = {
 		 * @returns 
 		 */
 		model(ctx) {
-			return this.Promise.resolve(ctx)
-				.then(ctx => {
-					return this.collection.findById(ctx.params.id).lean().exec();
+			return this.Promise.resolve(ctx.params)
+				.then(({ id }) => {
+					return this.collection.findById(id).lean().exec();
 				})
 				.then(doc => {
 					if (ctx.params.propertyFilter != null)
@@ -357,42 +384,12 @@ module.exports = {
 	 */
 	started() {
 		this.connect();
-
-		if (this.db) {
-			this.db.on("error", function mongoConnectionError(err) {
-				if (err.message.code === "ETIMEDOUT") {
-					this.logger.warn("Mongo connection timeout!", err);
-					setTimeout(() => {
-						this.connect();
-					}, 1000);
-					return;
-				}
-
-				this.logger.error("Could not connect to MongoDB!", this.settings.db);
-				this.logger.error(err);
-
-			}.bind(this));
-
-			this.db.once("open", function mongoAfterOpen() {
-				this.logger.info("Connected to MongoDB.");
-
-				// Call an 'afterConnected' handler in schema
-				if (_.isFunction(this.schema.afterConnected)) 
-					this.schema.afterConnected.call(this);
-			}.bind(this));	
-
-			this.db.on("disconnected", function mongoDisconnected() {
-				this.logger.warn("Disconnected from MongoDB.");
-			}.bind(this));	
-		}	
 	},
 
 	/**
 	 * Service stopped lifecycle event handler
 	 */
 	stopped() {
-		if (this.db) {
-			this.db.close();
-		}
+		this.disconnect();
 	}
 };
