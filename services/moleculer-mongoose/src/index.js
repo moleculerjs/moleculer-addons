@@ -42,6 +42,12 @@ module.exports = {
 			cache: {
 				keys: ["limit", "offset", "sort", "search"]
 			},
+			params: {
+				limit: { type: "number", integer: true, min: 0, optional: true },
+				offset: { type: "number", integer: true, min: 0, optional: true },
+				sort: { type: "string", optional: true },
+				search: { type: "string", optional: true }
+			},
 			handler(ctx) {
 				return this.find(ctx);
 			}
@@ -54,6 +60,9 @@ module.exports = {
 			cache: {
 				keys: ["search"]
 			},
+			params: {
+				search: { type: "string", optional: true }
+			},			
 			handler(ctx) {
 				return this.count(ctx.params);
 			}
@@ -63,6 +72,9 @@ module.exports = {
 		 * 
 		 */
 		create: {
+			params: {
+				entity: { type: "any" }
+			},			
 			handler(ctx) {
 				return this.create(ctx);
 			}
@@ -75,6 +87,9 @@ module.exports = {
 			cache: {
 				keys: ["id"]
 			},
+			params: {
+				id: { type: "any" }
+			},			
 			handler(ctx) {
 				return this.get(ctx);
 			}
@@ -87,6 +102,9 @@ module.exports = {
 			cache: {
 				keys: ["id"]
 			},
+			params: {
+				id: { type: "any" }
+			},			
 			handler(ctx) {
 				return this.model(ctx);
 			}
@@ -96,6 +114,10 @@ module.exports = {
 		 * 
 		 */
 		update: {
+			params: {
+				id: { type: "any" },
+				update: { type: "any" }
+			},			
 			handler(ctx) {
 				return this.update(ctx);
 			}
@@ -105,6 +127,9 @@ module.exports = {
 		 * 
 		 */
 		remove: {
+			params: {
+				id: { type: "any" }
+			},			
 			handler(ctx) {
 				return this.remove(ctx);
 			}
