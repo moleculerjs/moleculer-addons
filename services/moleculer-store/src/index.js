@@ -200,7 +200,7 @@ module.exports = {
 		 * @returns 
 		 */
 		create(ctx) {
-			return this.adapter.save(ctx.params.entity)
+			return this.adapter.insert(ctx.params.entity)
 				.then(entity => this.transformDocuments(ctx, entity))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -224,7 +224,14 @@ module.exports = {
 		 */
 		model(ctx) {
 			let origDoc;
-			return this.adapter.resolveEntities(ctx.params)
+			return this.Promise.resolve(ctx.params)
+				.then(({ id }) => {
+					if (_.isArray(id)) {
+						return this.adapter.findByIds(id);
+					} else {
+						return this.adapter.findById(id);
+					}
+				})
 				.then(doc => {
 					origDoc = doc;
 					if (ctx.params.fields !== false)
@@ -279,57 +286,6 @@ module.exports = {
 		clear() {
 			return this.adapter.clear()
 				.then(() => this.clearCache());
-		},
-
-		/**
-		 * Add filters to query
-		 * Available filters: 
-		 *  - search
-		 * 	- sort
-		 * 	- limit
-		 * 	- offset
-		 * 
-		 * @param {MongoQuery} q 
-		 * @param {Object} params 
-		 * @returns {MongoQuery}
-		 */
-		applyFilters(q, params) {
-			if (params) {
-				// Full-text search
-				// More info: https://docs.mongodb.com/manual/reference/operator/query/text/
-				if (_.isString(params.search) && params.search !== "") {
-					q.find({
-						$text: {
-							$search: params.search
-						}
-					});
-					q._fields = {
-						_score: {
-							$meta: "textScore"
-						}
-					};
-					q.sort({
-						_score: {
-							$meta: "textScore"
-						}
-					});
-				} else {
-					// Sort
-					if (_.isString(params.sort))
-						q.sort(params.sort.replace(/,/, " "));
-					else if (Array.isArray(params.sort))
-						q.sort(params.sort.join(" "));					
-				}
-
-				// Limit
-				if (_.isNumber(params.limit) && params.limit > 0)
-					q.limit(params.limit);
-
-				// Offset
-				if (_.isNumber(params.offset) && params.offset > 0)
-					q.skip(params.offset);
-			}
-			return q;
 		},
 
 		/**

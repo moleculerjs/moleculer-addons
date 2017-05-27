@@ -1,7 +1,7 @@
 {
   "name": "moleculer-mongoose",
   "version": "0.0.0",
-  "description": "Mongoose collection handler service for Moleculer",
+  "description": "Mongoose store adapter for Moleculer Store services",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",
