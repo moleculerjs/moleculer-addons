@@ -1,5 +1,5 @@
 /*
- * moleculer-mongoose
+ * moleculer-store
  * Copyright (c) 2017 Ice Services (https://github.com/ice-services/moleculer-addons)
  * MIT Licensed
  */
@@ -7,12 +7,13 @@
 "use strict";
 
 const _ = require("lodash");
-const mongoose = require("mongoose");
-const ObjectId = require("mongoose").Types.ObjectId;
 
 module.exports = {
 	// Must overwrite it
 	name: "",
+
+	// Store adapter
+	adapter: null,
 
 	/**
 	 * Default settings
@@ -21,13 +22,10 @@ module.exports = {
 		// Connection settings
 		db: null,
 
-		// Field find for search
-		searchFields: null,
-
 		// Fields filter
 		fields: null,
 
-		// Auto populates
+		// Auto populates schema
 		populates: null
 	},
 
@@ -36,7 +34,7 @@ module.exports = {
 	 */
 	actions: {
 		/**
-		 * 
+		 * Find all entities by filters
 		 */
 		find: {
 			cache: {
@@ -54,7 +52,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Get count of entities by filters
 		 */
 		count: {
 			cache: {
@@ -69,7 +67,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Create a new entity
 		 */
 		create: {
 			params: {
@@ -81,7 +79,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Get entity by ID
 		 */
 		get: {
 			cache: {
@@ -96,7 +94,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Get entity by ID or IDs. For internal use!
 		 */
 		model: {
 			cache: {
@@ -111,7 +109,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Update an entity by ID
 		 */
 		update: {
 			params: {
@@ -124,7 +122,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Remove an entity by ID
 		 */
 		remove: {
 			params: {
@@ -136,7 +134,7 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Clear all entities
 		 */
 		clear: {
 			handler(ctx) {
@@ -151,145 +149,82 @@ module.exports = {
 	methods: {
 
 		/**
-		 * 
-		 * 
+		 * Connect to database with adapter
 		 */
 		connect() {
-			let uri, opts;
-			if (_.isObject(this.settings.db) && this.settings.db.uri != null) {
-				uri = this.settings.db.uri;
-				opts = this.settings.db.opts;
-			} else {
-				uri = this.settings.db;
-			}
-
-			this.logger.debug(`Connecting to MongoDB (${uri})...`);
-			const conn = mongoose.connect(uri, opts);
-			return conn.then(() => {
-				this.db = conn.connection;
-				this.logger.info("Connected to MongoDB.");
-
+			return this.adapter.connect().then(() => {
 				// Call an 'afterConnected' handler in schema
 				if (_.isFunction(this.schema.afterConnected))
 					this.schema.afterConnected.call(this);
 
-				this.db.on("disconnected", function mongoDisconnected() {
-					this.logger.warn("Disconnected from MongoDB.");
-				}.bind(this));
-
-			}).catch(err => {
-				this.logger.warn("Could not connect to MongoDB! ", err.message);
+			}).catch(() => {
 				setTimeout(() => {
+					this.logger.warn("Reconnecting...");
 					this.connect();
 				}, 1000);
-
 			});
 		},
 
 		/**
-		 * 
-		 * 
+		 * Disconnect from database with adapter
 		 */
 		disconnect() {
-			if (this.db) {
-				this.db.close();
-			}
+			this.adapter.disconnect();
 		},
 
 		/**
-		 * 
+		 * Find all entities
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		find(ctx) {
-			const query = this.collection.find(ctx.params.where);
-			return this.applyFilters(query, ctx.params).lean().exec()
+			return this.adapter.findAll(ctx.params)
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
 
 		/**
-		 * 
+		 * Get count of entities
 		 * 
 		 * @param {Context?} ctx 
 		 * @returns 
 		 */
 		count(params = {}) {
-			const query = this.collection.find(params.where);
-			return this.applyFilters(query, params).count();
+			return this.adapter.count(params);
 		},
 
 		/**
-		 * 
+		 * Create a new entity
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		create(ctx) {
-			return this.Promise.resolve(ctx.params)
-				.then(({
-					entity
-				}) => {
-					const item = new this.collection(entity);
-					return item.save();
-				})
-				.then(docs => this.transformDocuments(ctx, docs))
+			return this.adapter.save(ctx.params.entity)
+				.then(entity => this.transformDocuments(ctx, entity))
 				.then(json => this.clearCache().then(() => json));
 		},
 
 		/**
-		 * 
+		 * Get an entity by ID
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		get(ctx) {
-			return this.Promise.resolve(ctx.params)
-				.then(({
-					id
-				}) => this.collection.findById(id).lean().exec())
-				.then(docs => this.transformDocuments(ctx, docs));
-		},
-
-		getID(doc) {
-			return (doc._id instanceof ObjectId) ? doc._id.toString() : doc._id;
+			return this.adapter.findById(ctx.params.id)
+				.then(entity => this.transformDocuments(ctx, entity));
 		},
 
 		/**
-		 * 
-		 * 
-		 * @param {any} params 
-		 * @returns 
-		 */
-		resolveModels(params) {
-			return this.Promise.resolve(params)
-				.then(({
-					id
-				}) => {
-					let query;
-					if (_.isArray(id)) {
-						query = this.collection.find({
-							_id: {
-								$in: id
-							}
-						});
-					} else {
-						query = this.collection.findById(id);
-					}
-
-					return query.lean().exec();
-				});
-		},
-
-		/**
-		 * 
+		 * Get entities by IDs. For internal use!
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		model(ctx) {
 			let origDoc;
-			return this.resolveModels(ctx.params)
+			return this.adapter.resolveEntities(ctx.params)
 				.then(doc => {
 					origDoc = doc;
 					if (ctx.params.fields !== false)
@@ -313,45 +248,36 @@ module.exports = {
 		},
 
 		/**
-		 * 
+		 * Update an entity by ID
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		update(ctx) {
-			return this.Promise.resolve(ctx.params)
-				.then(({
-					id,
-					update
-				}) => this.collection.findByIdAndUpdate(id, update, {
-					"new": true
-				}))
-				.then(docs => this.transformDocuments(ctx, docs))
+			return this.adapter.updateById(ctx.params.id, ctx.params.update)
+				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
 		/**
-		 * 
+		 * Remove an entity by ID
 		 * 
 		 * @param {any} ctx 
 		 * @returns 
 		 */
 		remove(ctx) {
-			return this.Promise.resolve(ctx.params)
-				.then(({
-					id
-				}) => this.collection.findByIdAndRemove(id))
-				.then(docs => this.transformDocuments(ctx, docs))
+			return this.adapter.removeById(ctx.params.id)
+				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
 		/**
-		 * Delete all records
+		 * Delete all entities
 		 * 
 		 * @returns 
 		 */
 		clear() {
-			return this.collection.remove({})
+			return this.adapter.clear()
 				.then(() => this.clearCache());
 		},
 
@@ -395,13 +321,13 @@ module.exports = {
 						q.sort(params.sort.join(" "));					
 				}
 
-				// Offset
-				if (_.isNumber(params.offset) && params.offset > 0)
-					q.skip(params.offset);
-
 				// Limit
 				if (_.isNumber(params.limit) && params.limit > 0)
 					q.limit(params.limit);
+
+				// Offset
+				if (_.isNumber(params.offset) && params.offset > 0)
+					q.skip(params.offset);
 			}
 			return q;
 		},
@@ -464,9 +390,6 @@ module.exports = {
 		convertToJSON(doc, fields) {
 			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
 
-			if (json._id instanceof ObjectId)
-				json._id = json._id.toString();
-
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
 				let res = {};
@@ -509,12 +432,7 @@ module.exports = {
 					let items = Array.isArray(docs) ? docs : [docs];
 
 					// Collect IDs from field of docs (flatten, compact & unique list) 
-					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => {
-						let id = doc[field];
-						if (id instanceof ObjectId)
-							id = id.toString();
-						return id;
-					}))));
+					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
 
 					if (idList.length > 0) {
 						// Call the target action & collect the promises
@@ -553,26 +471,25 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		if (!this.schema.collection)
-			throw new Error("Missing `collection` definition!");
+		if (!this.adapter)
+			throw new Error("Please set the store adapter in schema!");
 
-		mongoose.Promise = this.Promise;
-		this.collection = this.schema.collection;
-
-		this.db = null;
+		this.adapter = this.schema.adapter;
 	},
 
 	/**
 	 * Service started lifecycle event handler
 	 */
 	started() {
-		this.connect();
+		if (this.adapter)
+			this.connect();
 	},
 
 	/**
 	 * Service stopped lifecycle event handler
 	 */
 	stopped() {
-		this.disconnect();
+		if (this.adapter)
+			this.disconnect();
 	}
 };
