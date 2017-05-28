@@ -65,7 +65,7 @@ module.exports = {
 				search: { type: "string", optional: true }
 			},			
 			handler(ctx) {
-				return this.count(ctx.params);
+				return this.count(ctx);
 			}
 		},
 
@@ -189,11 +189,11 @@ module.exports = {
 		/**
 		 * Get count of entities
 		 * 
-		 * @param {Context?} ctx 
+		 * @param {Context<} ctx 
 		 * @returns 
 		 */
-		count(params = {}) {
-			return this.adapter.count(params);
+		count(ctx) {
+			return this.adapter.count(ctx.params);
 		},
 
 		/**
@@ -430,10 +430,11 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		if (!this.adapter)
+		if (!this.schema.adapter)
 			throw new Error("Please set the store adapter in schema!");
 
 		this.adapter = this.schema.adapter;
+		this.adapter.init(this.broker, this);
 	},
 
 	/**
