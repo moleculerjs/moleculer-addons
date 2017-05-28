@@ -16,7 +16,6 @@ This is a monorepo, contains multiple npm packages.
 | ---- | ------- | ----------- |
 | [moleculer-fake](/services/moleculer-fake) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by Fakerator |
 | [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
-| [moleculer-mongoose](/services/moleculer-mongoose) | [![NPM version](https://img.shields.io/npm/v/moleculer-mongoose.svg)](https://www.npmjs.com/package/moleculer-mongoose) | Mongoose collection handler service for Moleculer |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
