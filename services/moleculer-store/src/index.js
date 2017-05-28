@@ -26,7 +26,10 @@ module.exports = {
 		fields: null,
 
 		// Auto populates schema
-		populates: null
+		populates: null,
+
+		// Field list for searching
+		searchFields: null
 	},
 
 	/**

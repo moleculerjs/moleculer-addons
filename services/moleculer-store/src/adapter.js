@@ -32,14 +32,14 @@ class MemoryStoreAdapter {
 	}
 
 	disconnect() {
-		this.db.close(); //?
-		return Promise.resolve;
+		this.db = null;
+		return Promise.resolve();
 	}
 
 	findAll(params) {
 		return new Promise((resolve, reject) => {
-			const q = this.db.find(params.where);
-			this.applyFilters(q, params).exec((err, docs) => {
+			this.doFiltering(params).exec((err, docs) => {
+				/* istanbul ignore next */
 				if (err)
 					return reject(err);
 
@@ -56,6 +56,7 @@ class MemoryStoreAdapter {
 	findByIds(ids) {
 		return new Promise((resolve, reject) => {
 			this.db.find({ _id: { $in: ids } }).exec((err, docs) => {
+				/* istanbul ignore next */
 				if (err)
 					return reject(err);
 
@@ -68,6 +69,7 @@ class MemoryStoreAdapter {
 	count(params = {}) {
 		return new Promise((resolve, reject) => {
 			this.db.count(params.where, (err, count) => {
+				/* istanbul ignore next */
 				if (err)
 					return reject(err);
 
@@ -113,36 +115,51 @@ class MemoryStoreAdapter {
 	 * 	- limit
 	 * 	- offset
 	 * 
-	 * @param {MongoQuery} q 
 	 * @param {Object} params 
-	 * @returns {MongoQuery}
+	 * @returns {Query}
 	 */
-	applyFilters(q, params) {
+	doFiltering(params) {
 		if (params) {
-			// Full-text search
-			// More info: https://docs.mongodb.com/manual/reference/operator/query/text/
+			let q;
+
+			// Text search
 			if (_.isString(params.search) && params.search !== "") {
-				q.find({
-					$text: {
-						$search: params.search
-					}
-				});
-				q._fields = {
-					_score: {
-						$meta: "textScore"
-					}
-				};
-				q.sort({
-					_score: {
-						$meta: "textScore"
+				q = this.db.find({ 
+					$where: function() {
+						let item = this;
+						if (params.searchFields) {
+							const fields = _.isString(params.searchFields) ? params.searchFields.split(" ") : params.searchFields;
+
+							if (fields.length > 0)
+								item = _.pick(this, fields);
+						}
+
+						const res = _.values(item).find(v => String(v).toLowerCase().indexOf(params.search.toLowerCase()) !== -1);
+
+						return res != null;
 					}
 				});
 			} else {
-				// Sort
+				if (params.query) 
+					q = this.db.find(params.query);
+				else
+					q = this.db.find({});
+			}
+
+			// Sort
+			if (params.sort) {
+				let sort = params.sort;
 				if (_.isString(params.sort))
-					q.sort(params.sort.replace(/,/, " "));
-				else if (Array.isArray(params.sort))
-					q.sort(params.sort.join(" "));					
+					sort = params.sort.replace(/,/, " ").split(" ");
+				
+				const sortFields = {};
+				sort.forEach(field => {
+					if (field.startsWith("-"))
+						sortFields[field.slice(1)] = -1;
+					else 
+						sortFields[field] = 1;
+				});
+				q.sort(sortFields);
 			}
 
 			// Limit
@@ -152,8 +169,11 @@ class MemoryStoreAdapter {
 			// Offset
 			if (_.isNumber(params.offset) && params.offset > 0)
 				q.skip(params.offset);
+
+			return q;
 		}
-		return q;
+
+		return this.db.find({});
 	}
 }
 
