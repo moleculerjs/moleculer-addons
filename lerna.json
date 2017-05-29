@@ -4,6 +4,7 @@
     "cachers/*",
     "serializers/*",
     "services/*",
+    "stores/*",
     "transporters/*"
   ],
   "version": "independent",
