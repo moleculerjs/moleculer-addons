@@ -128,7 +128,7 @@ describe("Test MongooseStoreAdapter", () => {
 
 		it("call without params", () => {
 			adapter.collection.find.mockClear();
-			let q = adapter.doFiltering();
+			adapter.doFiltering();
 			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
 			expect(adapter.collection.find).toHaveBeenCalledWith();
 		});
@@ -136,7 +136,7 @@ describe("Test MongooseStoreAdapter", () => {
 		it("call with query", () => {
 			adapter.collection.find.mockClear();
 			let query = {};
-			let q = adapter.doFiltering({ query });
+			adapter.doFiltering({ query });
 			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
 			expect(adapter.collection.find).toHaveBeenCalledWith(query);
 		});
