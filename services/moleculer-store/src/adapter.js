@@ -19,16 +19,19 @@ class MemoryStoreAdapter {
 	init(broker, service) {
 		this.broker = broker;
 		this.service = service;
-		this.Promise = broker.Promise;
 	}
 
 	connect() {
-		this.db = new Datastore(); // in-memory
+		this.db = new Datastore(this.opts); // in-memory
 
-		["insert", "findOne", "count", "update", "remove", "ensureIndex", "removeIndex"].forEach(method => {
+		["loadDatabase", "insert", "findOne", "count", "remove", "ensureIndex", "removeIndex"].forEach(method => {
 			this.db[method] = Promise.promisify(this.db[method]);
 		});
-		return Promise.resolve();
+		["update"].forEach(method => {
+			this.db[method] = Promise.promisify(this.db[method], { multiArgs: true });
+		});
+
+		return this.db.loadDatabase();
 	}
 
 	disconnect() {
@@ -68,12 +71,12 @@ class MemoryStoreAdapter {
 
 	count(params = {}) {
 		return new Promise((resolve, reject) => {
-			this.db.count(params.where, (err, count) => {
+			this.doFiltering(params).exec((err, docs) => {
 				/* istanbul ignore next */
 				if (err)
 					return reject(err);
 
-				resolve(count);
+				resolve(docs.length);
 			});
 
 		});
@@ -88,11 +91,11 @@ class MemoryStoreAdapter {
 	}
 
 	update(params) {
-		return this.db.update(params.query, params.update, { multi: true });
+		return this.db.update(params.query, params.update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
 	updateById(_id, update) {
-		return this.db.update({ _id }, update);
+		return this.db.update({ _id }, update, { returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
 	remove(params) {

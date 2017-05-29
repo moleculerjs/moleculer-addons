@@ -160,8 +160,9 @@ module.exports = {
 				if (_.isFunction(this.schema.afterConnected))
 					this.schema.afterConnected.call(this);
 
-			}).catch(() => {
+			}).catch(err => {
 				setTimeout(() => {
+					this.logger.error("Connection error!", err);
 					this.logger.warn("Reconnecting...");
 					this.connect();
 				}, 1000);
@@ -189,11 +190,11 @@ module.exports = {
 		/**
 		 * Get count of entities
 		 * 
-		 * @param {Context<} ctx 
+		 * @param {Context?} ctx 
 		 * @returns 
 		 */
 		count(ctx) {
-			return this.adapter.count(ctx.params);
+			return this.adapter.count(ctx ? ctx.params : {});
 		},
 
 		/**
@@ -372,7 +373,7 @@ module.exports = {
 		 * @returns	{Promise}
 		 */
 		populateDocs(ctx, docs, populateRules = this.settings.populates) {
-			if (docs != null && populateRules) {
+			if (docs != null && populateRules && (_.isObject(docs) || Array.isArray(docs))) {
 				let promises = [];
 				_.forIn(populateRules, (rules, field) => {
 					// if the rule is a function, call it
@@ -442,7 +443,9 @@ module.exports = {
 	 */
 	started() {
 		if (this.adapter)
-			this.connect();
+			return this.connect();
+
+		return Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
 	/**
@@ -450,6 +453,8 @@ module.exports = {
 	 */
 	stopped() {
 		if (this.adapter)
-			this.disconnect();
+			return this.disconnect();
+
+		return Promise.reject(new Error("Please set the store adapter in schema!"));
 	}
 };
