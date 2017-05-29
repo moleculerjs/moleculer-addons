@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const Adapter = require("../../src/adapter");
+const Adapter = require("../../src/memory-adapter");
 
 
 function protectReject(err) {

@@ -2,8 +2,8 @@
 
 let { ServiceBroker } = require("moleculer");
 let StoreService = require("../../index");
-let StoreAdapterNeDB = require("../../src/adapter");
 let _ = require("lodash");
+let chalk = require("chalk");
 let path = require("path");
 let fakerator = require("fakerator")();
 
@@ -17,7 +17,7 @@ let broker = new ServiceBroker({
 
 broker.createService(StoreService, {
 	name: "posts",
-	adapter: new StoreAdapterNeDB({ filename: path.join(__dirname, "posts.db") }),
+	adapter: new StoreService.MemoryAdapter({ filename: path.join(__dirname, "posts.db") }),
 	settings: {
 		fields: "_id title content votes author",
 
@@ -48,7 +48,7 @@ broker.createService(StoreService, {
 	},
 
 	afterConnected() {
-		console.log("afterConnected: Connected successfully");
+		this.logger.info(chalk.green.bold("Connected successfully"));
 		return this.count().delay(500).then(count => {
 			if (count == 0) {
 				this.logger.info("Seed Posts collection...");
@@ -79,13 +79,13 @@ broker.createService(StoreService, {
 // Load my service
 broker.createService(StoreService, {
 	name: "users",
-	adapter: new StoreAdapterNeDB({ filename: path.join(__dirname, "users.db") }),
+	adapter: new StoreService.MemoryAdapter({ filename: path.join(__dirname, "users.db") }),
 	settings: {
 		fields: "_id username fullName email"
 	},
 
 	afterConnected() {
-		console.log("afterConnected: Connected successfully");
+		this.logger.info(chalk.green.bold("Connected successfully"));
 		return this.count().then(count => {
 			if (count == 0) {
 				this.logger.info("Seed Users collection...");
@@ -111,9 +111,12 @@ broker.createService(StoreService, {
 broker.start().delay(1000).then(() => {
 	Promise.resolve()
 		// List posts
-		.then(() => console.log("\n--- FIND POSTS ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (search: 'ipsam') ---")))
 		.then(() => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "ipsam", populate: true, fields: ["title", "votes", "author"] }).then(console.log))
+		.then(() => console.log(chalk.yellow.bold("\n--- COUNT POSTS (search: 'ipsam') ---")))
 		.then(() => broker.call("posts.count", { search: "ipsam" }).then(console.log))
+		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (limit: 3, offset: 2, sort: title) ---")))
+		.then(() => broker.call("posts.find", { limit: 3, offset: 2, sort: "title", fields: ["title", "votes"] }).then(console.log))
 
 		// Error handling
 		.catch(console.error)

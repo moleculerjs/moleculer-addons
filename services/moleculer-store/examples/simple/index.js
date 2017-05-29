@@ -1,8 +1,8 @@
 "use strict";
 
+let chalk = require("chalk");
 let { ServiceBroker } = require("moleculer");
 let StoreService = require("../../index");
-let StoreAdapterNeDB = require("../../src/adapter");
 
 // Create broker
 let broker = new ServiceBroker({
@@ -13,7 +13,6 @@ let broker = new ServiceBroker({
 // Load my service
 broker.createService(StoreService, {
 	name: "posts",
-	adapter: new StoreAdapterNeDB(),
 	settings: {
 		propertyFilter: "_id title content votes"
 	},
@@ -35,7 +34,7 @@ broker.createService(StoreService, {
 	},
 
 	afterConnected() {
-		console.log("afterConnected: Connected successfully");
+		this.logger.info(chalk.green.bold("Connected successfully"));
 	}
 });
 
@@ -44,15 +43,15 @@ broker.start().delay(500).then(() => {
 	let id;
 	Promise.resolve()
 		// Drop all posts
-		.then(() => console.log("\n--- CLEAR ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- CLEAR ---")))
 		.then(() => broker.call("posts.clear").then(console.log))
 
 		// Count of posts
-		.then(() => console.log("\n--- COUNT ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
 		.then(() => broker.call("posts.count").then(console.log))
 		
 		// Create new Posts
-		.then(() => console.log("\n--- CREATE ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- CREATE ---")))
 		.then(() => broker.call("posts.create", { entity: { title: "Hello", content: "Post content", votes: 0, createdAt: new Date(), updatedAt: null, author: null } })
 			.then(doc => {
 				id = doc._id;
@@ -61,21 +60,21 @@ broker.start().delay(500).then(() => {
 		)
 
 		// List posts
-		.then(() => console.log("\n--- FIND ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- FIND ---")))
 		.then(() => broker.call("posts.find").then(console.log))
 
 		// Get a post
-		.then(() => console.log("\n--- GET ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- GET ---")))
 		.then(() => broker.call("posts.get", { id }).then(console.log))
 
 		// Vote a post
-		.then(() => console.log("\n--- VOTE ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- VOTE ---")))
 		.then(() => broker.call("posts.vote", { 
 			id
 		}).then(console.log))
 
 		// Update a posts
-		.then(() => console.log("\n--- UPDATE ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- UPDATE ---")))
 		.then(() => broker.call("posts.update", { 
 			id, 
 			update: { 
@@ -88,25 +87,25 @@ broker.start().delay(500).then(() => {
 		}).then(console.log))
 
 		// Get a post
-		.then(() => console.log("\n--- GET ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- GET ---")))
 		.then(() => broker.call("posts.get", { id }).then(console.log))
 
 		// Unvote a post
-		.then(() => console.log("\n--- UNVOTE ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- UNVOTE ---")))
 		.then(() => broker.call("posts.unvote", { 
 			id
 		}).then(console.log))
 		
 		// Count of posts
-		.then(() => console.log("\n--- COUNT ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
 		.then(() => broker.call("posts.count").then(console.log))
 		
 		// Remove a post
-		.then(() => console.log("\n--- REMOVE ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- REMOVE ---")))
 		.then(() => broker.call("posts.remove", { id }).then(console.log))
 
 		// Count of posts
-		.then(() => console.log("\n--- COUNT ---"))
+		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
 		.then(() => broker.call("posts.count").then(console.log))
 
 		// Error handling

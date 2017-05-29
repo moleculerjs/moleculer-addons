@@ -7,12 +7,13 @@
 "use strict";
 
 const _ = require("lodash");
+const MemoryAdapter = require("./memory-adapter");
 
 module.exports = {
 	// Must overwrite it
 	name: "",
 
-	// Store adapter
+	// Store adapter (default is a NeDB memory adapter)
 	adapter: null,
 
 	/**
@@ -231,14 +232,14 @@ module.exports = {
 				})
 				.then(doc => {
 					origDoc = doc;
+					if (ctx.params.populate === true)
+						return this.populateDocs(ctx, doc);
+					return doc;
+				})
+				.then(doc => {
 					if (ctx.params.fields !== false)
 						return this.toFilteredJSON(doc, ctx.params.fields);
 					return doc;
-				})
-				.then(json => {
-					if (ctx.params.populate === true)
-						return this.populateDocs(ctx, json);
-					return json;
 				})
 				.then(json => {
 					if (_.isArray(json) && ctx.params.resultAsObject === true) {
@@ -301,7 +302,6 @@ module.exports = {
 		 * @returns {Array|Object}
 		 */
 		transformDocuments(ctx, docs) {
-			//console.log(docs);
 			return this.Promise.resolve(docs)
 				.then(json => {
 					if (ctx.params.populate !== false)
@@ -341,20 +341,18 @@ module.exports = {
 		 * @returns 
 		 */
 		convertToJSON(doc, fields) {
-			let json = (_.isFunction(doc.toJSON)) ? doc.toJSON() : doc;
-
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
 				let res = {};
 				fields.forEach(n => {
-					const v = _.get(json, n);
+					const v = _.get(doc, n);
 					if (v !== undefined)
 						_.set(res, n, v);
 				});
 				return res;
 			}
 
-			return json;
+			return doc;
 		},
 
 		/**
@@ -434,11 +432,11 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		/* istanbul ignore next */
 		if (!this.schema.adapter)
-			throw new Error("Please set the store adapter in schema!");
-
-		this.adapter = this.schema.adapter;
+			this.adapter = new MemoryAdapter();
+		else
+			this.adapter = this.schema.adapter;
+			
 		this.adapter.init(this.broker, this);
 	},
 
@@ -477,5 +475,8 @@ module.exports = {
 
 		/* istanbul ignore next */
 		return Promise.reject(new Error("Please set the store adapter in schema!"));
-	}
+	},
+
+	// Export Memory Adapter class
+	MemoryAdapter
 };

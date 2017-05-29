@@ -465,15 +465,6 @@ describe("Test convertToJSON method", () => {
 		});
 	});
 
-	it("should call toJSON if the doc is a Model", () => {
-		doc.toJSON = jest.fn(() => doc);
-		const res = service.convertToJSON(doc, ["name"]);
-		expect(res).toEqual({
-			name: "Walter"
-		});
-		expect(doc.toJSON).toHaveBeenCalledTimes(1);
-	});
-
 });
 
 describe("Test toFilteredJSON method", () => {
