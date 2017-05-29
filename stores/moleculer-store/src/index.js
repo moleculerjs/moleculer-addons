@@ -163,6 +163,7 @@ module.exports = {
 					try {
 						this.schema.afterConnected.call(this);
 					} catch(err) {
+						/* istanbul ignore next */
 						this.logger.error("afterConnected error!", err);
 					}
 				}
