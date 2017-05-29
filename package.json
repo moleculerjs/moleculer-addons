@@ -1,6 +1,6 @@
 {
   "name": "moleculer-addons",
-  "description": ":gift: Official addons (services, transporters, cachers...etc) for Moleculer framework",
+  "description": ":gift: Official addons (services, stores, transporters...etc) for Moleculer framework",
   "version": "1.0.0",
   "scripts": {
     "setup": "npm install && lerna bootstrap",
@@ -10,6 +10,7 @@
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "init:service": "cd services && moleculer init addon",
+    "init:store": "cd stores && moleculer init addon",
     "release": "lerna publish",
     "readme": "node readme-generator.js"
   },

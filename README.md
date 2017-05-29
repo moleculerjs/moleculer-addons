@@ -18,18 +18,15 @@ This is a monorepo, contains multiple npm packages.
 | [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
- 
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=stores&title=Store modules) -->
+<!-- AUTO-GENERATED-CONTENT:END -->
+
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
- 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
- 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
