@@ -11,7 +11,7 @@ describe.only("Test CRUD methods", () => {
 	// Create broker
 	let broker = new ServiceBroker({
 		logger: console,
-		logLevel: "info"
+		logLevel: "error"
 	});
 
 	// Load my service
