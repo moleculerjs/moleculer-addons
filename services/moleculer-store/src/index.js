@@ -289,7 +289,7 @@ module.exports = {
 		 */
 		clear() {
 			return this.adapter.clear()
-				.then(() => this.clearCache());
+				.then(count => this.clearCache().then(() => count));
 		},
 
 		/**
@@ -375,19 +375,22 @@ module.exports = {
 		populateDocs(ctx, docs, populateRules = this.settings.populates) {
 			if (docs != null && populateRules && (_.isObject(docs) || Array.isArray(docs))) {
 				let promises = [];
-				_.forIn(populateRules, (rules, field) => {
-					// if the rule is a function, call it
-					if (_.isFunction(rules)) {
-						promises.push(this.Promise.method(rules.call(this, field, ctx, docs)));
-						return;
+				_.forIn(populateRules, (rule, field) => {
+
+					// if the rule is a function, save as a custom handler
+					if (_.isFunction(rule)) {
+						rule = {
+							handler: this.Promise.method(rule)
+						};
 					}
 
 					// If string, convert to object
-					if (_.isString(rules)) {
-						rules = {
-							action: rules
+					if (_.isString(rule)) {
+						rule = {
+							action: rule
 						};
 					}
+					rule.field = field;
 
 					let items = Array.isArray(docs) ? docs : [docs];
 
@@ -395,15 +398,9 @@ module.exports = {
 					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
 
 					if (idList.length > 0) {
-						// Call the target action & collect the promises
-						const params = Object.assign({
-							id: idList,
-							resultAsObject: true,
-							populate: false
-						}, rules.params || []);
 
-						promises.push(ctx.call(rules.action, params).then(populatedDocs => {
-							// Replace the received models according to IDs in the original docs
+						// Replace the received models according to IDs in the original docs
+						const resultTransform = (populatedDocs) => {
 							items.forEach(doc => {
 								let id = doc[field];
 								if (_.isArray(id)) {
@@ -413,7 +410,20 @@ module.exports = {
 									doc[field] = populatedDocs[id];
 								}
 							});
-						}));
+						};
+
+						if (rule.handler) {
+							promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
+						} else {
+							// Call the target action & collect the promises
+							const params = Object.assign({
+								id: idList,
+								resultAsObject: true,
+								populate: !!rule.populate
+							}, rule.params || []);
+
+							promises.push(ctx.call(rule.action, params).then(resultTransform));
+						}
 					}
 				});
 

@@ -3,6 +3,11 @@
 const { ServiceBroker } = require("moleculer");
 const Adapter = require("../../src/adapter");
 
+
+function protectReject(err) {
+	expect(err).toBe(true);
+}
+
 describe("Test Adapter constructor", () => {
 	it("should be created", () => {
 		const adapter = new Adapter();
@@ -16,7 +21,9 @@ describe("Test Adapter methods", () => {
 		name: "test"
 	});
 
-	const adapter = new Adapter();
+	const opts = {};
+
+	const adapter = new Adapter(opts);
 	adapter.init(broker, service);
 
 	it("should connect", () => {
@@ -36,7 +43,7 @@ describe("Test Adapter methods", () => {
 		.then(res => {
 			expect(res).toEqual(Object.assign({}, doc, { _id: jasmine.any(String) }));
 			savedDoc = res;
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	let multipleDocs;
@@ -58,7 +65,7 @@ describe("Test Adapter methods", () => {
 			expect(res[2].age).toBe(35);
 
 			multipleDocs = res;
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should find by ID", () => {
@@ -72,7 +79,7 @@ describe("Test Adapter methods", () => {
 	it("should find all without filter", () => {
 		return adapter.findAll().then(res => {
 			expect(res.length).toBe(4);
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should find all 'name' with raw query", () => {
@@ -85,7 +92,7 @@ describe("Test Adapter methods", () => {
 			expect(res[0].age).toEqual(35);
 			expect(res[1].age).toEqual(35);
 
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should find all 'Doe'", () => {
@@ -94,13 +101,13 @@ describe("Test Adapter methods", () => {
 			expect(res[0].name).toMatch("Doe");
 			expect(res[1].name).toMatch("Doe");
 
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should find all 'Doe' in filtered fields", () => {
 		return adapter.findAll({ search: "Doe", searchFields: ["email"] }).then(res => {
 			expect(res.length).toBe(0);
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should find all 'walter' in filtered fields", () => {
@@ -108,7 +115,7 @@ describe("Test Adapter methods", () => {
 			expect(res.length).toBe(1);
 			expect(res[0]).toEqual(savedDoc);
 
-		}).catch(err => expect(err).toBe(true));
+		}).catch(protectReject);
 	});
 
 	it("should count all 'walter' in filtered fields", () => {
@@ -169,7 +176,7 @@ describe("Test Adapter methods", () => {
 			expect(res.length).toBe(2);
 			expect(res[0].gender).toBe("male");
 			expect(res[1].gender).toBe("male");
-		}).catch(err => expect(err).toBe(true));		
+		}).catch(protectReject);		
 	});	
 
 	it("should remove by ID", () => {
