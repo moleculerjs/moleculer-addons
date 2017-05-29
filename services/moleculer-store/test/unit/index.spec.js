@@ -386,7 +386,6 @@ const mockAdapter = {
 };
 
 describe("Test transformDocuments method", () => {
-	const docs = [];
 	const doc = { id : 1 };
 
 	const broker = new ServiceBroker({ validation: false });
@@ -503,7 +502,6 @@ describe("Test toFilteredJSON method", () => {
 
 describe("Test populateDocs method", () => {
 	const docs = [{ id: 1, author: 3 }, { id: 2, author: 5, comments: [8, 3, 8] }, { id: 3, author: 8 }];
-	const doc = { id : 1 };
 
 	const broker = new ServiceBroker({ validation: false });
 	const service = broker.createService(StoreService, {
@@ -602,7 +600,7 @@ describe("Test populateDocs method", () => {
 		};
 
 		const rules = {
-			author: jest.fn(ids => {
+			author: jest.fn(() => {
 				return { 
 					"8": { name: "Adams" } 
 				};
