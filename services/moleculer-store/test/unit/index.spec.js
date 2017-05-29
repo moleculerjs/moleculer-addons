@@ -2,6 +2,7 @@
 
 const { ServiceBroker, Context } = require("moleculer");
 const StoreService = require("../../src");
+const lolex = require("lolex");
 
 function protectReject(err) {
 	expect(err).toBe(true);
@@ -110,6 +111,27 @@ describe("Test StoreService actions", () => {
 			expect(service.disconnect).toHaveBeenCalledTimes(1);
 		}).catch(protectReject);
 	});
+});
+
+describe("Test reconnecting", () => {
+	const adapter = {
+		init: jest.fn(() => Promise.resolve()),
+		connect: jest.fn()
+			.mockImplementationOnce(() => Promise.reject("Error"))
+			.mockImplementationOnce(() => Promise.resolve())
+	};
+	const broker = new ServiceBroker();
+	const service = broker.createService(StoreService, {
+		name: "store",
+		adapter,
+	});
+
+	it("should connect after error", () => {
+		return service.schema.started.call(service).then(() => {
+			expect(adapter.connect).toHaveBeenCalledTimes(2);
+		}).catch(protectReject);
+	});	
+
 });
 
 

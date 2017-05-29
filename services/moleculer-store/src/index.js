@@ -159,13 +159,6 @@ module.exports = {
 				// Call an 'afterConnected' handler in schema
 				if (_.isFunction(this.schema.afterConnected))
 					this.schema.afterConnected.call(this);
-
-			}).catch(err => {
-				setTimeout(() => {
-					this.logger.error("Connection error!", err);
-					this.logger.warn("Reconnecting...");
-					this.connect();
-				}, 1000);
 			});
 		},
 
@@ -453,8 +446,23 @@ module.exports = {
 	 * Service started lifecycle event handler
 	 */
 	started() {
-		if (this.adapter)
-			return this.connect();
+		if (this.adapter) {
+			return new this.Promise(resolve => {
+				let connecting = () => {
+					this.connect().then(() => {
+						resolve();
+					}).catch(err => {
+						setTimeout(() => {
+							this.logger.error("Connection error!", err);
+							this.logger.warn("Reconnecting...");
+							connecting();
+						}, 1000);
+					});
+				};
+
+				connecting();
+			});
+		}
 
 		/* istanbul ignore next */
 		return Promise.reject(new Error("Please set the store adapter in schema!"));
