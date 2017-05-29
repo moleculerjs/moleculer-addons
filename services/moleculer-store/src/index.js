@@ -103,7 +103,10 @@ module.exports = {
 				keys: ["id"]
 			},
 			params: {
-				id: { type: "any" }
+				id: { type: "any" },
+				populate: { type: "boolean", optional: true },
+				fields: { type: "any", optional: true },
+				resultAsObject: { type: "boolean", optional: true }
 			},			
 			handler(ctx) {
 				return this.model(ctx);
