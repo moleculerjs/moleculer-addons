@@ -27,10 +27,7 @@ module.exports = {
 		fields: null,
 
 		// Auto populates schema
-		populates: null,
-
-		// Field list for searching
-		searchFields: null
+		populates: null
 	},
 
 	/**
@@ -42,13 +39,14 @@ module.exports = {
 		 */
 		find: {
 			cache: {
-				keys: ["limit", "offset", "sort", "search"]
+				keys: ["limit", "offset", "sort", "search", "searchFields"]
 			},
 			params: {
 				limit: { type: "number", integer: true, min: 0, optional: true },
 				offset: { type: "number", integer: true, min: 0, optional: true },
 				sort: { type: "string", optional: true },
-				search: { type: "string", optional: true }
+				search: { type: "string", optional: true },
+				searchFields: { type: "array", optional: true }
 			},
 			handler(ctx) {
 				return this.find(ctx);
@@ -436,7 +434,7 @@ module.exports = {
 			this.adapter = new MemoryAdapter();
 		else
 			this.adapter = this.schema.adapter;
-			
+
 		this.adapter.init(this.broker, this);
 	},
 

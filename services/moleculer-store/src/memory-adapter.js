@@ -127,15 +127,16 @@ class MemoryStoreAdapter {
 
 			// Text search
 			if (_.isString(params.search) && params.search !== "") {
+				let fields = [];
+				if (params.searchFields) {
+					fields = _.isString(params.searchFields) ? params.searchFields.split(" ") : params.searchFields;
+				}
+
 				q = this.db.find({ 
 					$where: function() {
 						let item = this;
-						if (params.searchFields) {
-							const fields = _.isString(params.searchFields) ? params.searchFields.split(" ") : params.searchFields;
-
-							if (fields.length > 0)
-								item = _.pick(this, fields);
-						}
+						if (fields.length > 0)
+							item = _.pick(this, fields);
 
 						const res = _.values(item).find(v => String(v).toLowerCase().indexOf(params.search.toLowerCase()) !== -1);
 
