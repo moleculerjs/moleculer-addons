@@ -245,7 +245,7 @@ module.exports = {
 				})
 				.then(doc => {
 					if (ctx.params.fields !== false)
-						return this.toFilteredJSON(doc, ctx.params.fields);
+						return this.filterFields(doc, ctx.params.fields);
 					return doc;
 				})
 				.then(json => {
@@ -315,12 +315,11 @@ module.exports = {
 						return this.populateDocs(ctx, json);
 					return json;
 				})
-				.then(docs => this.toFilteredJSON(docs, ctx.params.fields));
+				.then(docs => this.filterFields(docs, ctx.params.fields));
 		},
 
 		/**
-		 * Convert the `docs` MongoDB model to JSON object.
-		 * With `fields` can be filter the fields
+		 * Filter fields in the entity object
 		 * 
 		 * @param {MongoDocument} 	docs	MongoDB document(s)
 		 * @param {String|Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
@@ -328,7 +327,7 @@ module.exports = {
 		 * 
 		 * @memberOf Service
 		 */
-		toFilteredJSON(docs, fields = this.settings.fields) {
+		filterFields(docs, fields = this.settings.fields) {
 			if (_.isString(fields)) {
 				fields = fields.split(" ");
 			}

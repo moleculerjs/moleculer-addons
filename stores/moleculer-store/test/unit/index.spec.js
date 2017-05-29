@@ -243,7 +243,7 @@ describe("Test StoreService methods", () => {
 
 	
 	describe("Test `this.model` method", () => {
-		service.toFilteredJSON = jest.fn(doc => Promise.resolve(doc));
+		service.filterFields = jest.fn(doc => Promise.resolve(doc));
 		service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
 
 		it("call with one ID", () => {
@@ -256,8 +256,8 @@ describe("Test StoreService methods", () => {
 				expect(adapter.findById).toHaveBeenCalledTimes(1);
 				expect(adapter.findById).toHaveBeenCalledWith(ctx.params.id);
 
-				expect(service.toFilteredJSON).toHaveBeenCalledTimes(1);
-				expect(service.toFilteredJSON).toHaveBeenCalledWith(doc, undefined);
+				expect(service.filterFields).toHaveBeenCalledTimes(1);
+				expect(service.filterFields).toHaveBeenCalledWith(doc, undefined);
 
 				expect(service.populateDocs).toHaveBeenCalledTimes(0);
 				//expect(service.populateDocs).toHaveBeenCalledWith(ctx, doc);
@@ -267,7 +267,7 @@ describe("Test StoreService methods", () => {
 
 		it("call with multi IDs", () => {
 			adapter.findByIds.mockClear();
-			service.toFilteredJSON.mockClear();
+			service.filterFields.mockClear();
 			const ctx = { params: { id: [5, 3, 8], fields: false, populate: true } };
 
 			return service.model(ctx).then(res => {
@@ -276,7 +276,7 @@ describe("Test StoreService methods", () => {
 				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
 				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
 
-				expect(service.toFilteredJSON).toHaveBeenCalledTimes(0);
+				expect(service.filterFields).toHaveBeenCalledTimes(0);
 
 				expect(service.populateDocs).toHaveBeenCalledTimes(1);
 				expect(service.populateDocs).toHaveBeenCalledWith(ctx, docs);
@@ -286,7 +286,7 @@ describe("Test StoreService methods", () => {
 
 		it("call with multi IDs, and should convert the result to object", () => {
 			adapter.findByIds.mockClear();
-			service.toFilteredJSON.mockClear();
+			service.filterFields.mockClear();
 			service.populateDocs.mockClear();
 			const ctx = { params: { id: [5, 3, 8], fields: false, resultAsObject: true } };
 
@@ -315,7 +315,7 @@ describe("Test StoreService methods", () => {
 				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
 				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
 
-				expect(service.toFilteredJSON).toHaveBeenCalledTimes(0);
+				expect(service.filterFields).toHaveBeenCalledTimes(0);
 				expect(service.populateDocs).toHaveBeenCalledTimes(0);
 
 			}).catch(protectReject);
@@ -395,29 +395,29 @@ describe("Test transformDocuments method", () => {
 	});
 
 	service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
-	service.toFilteredJSON = jest.fn(docs => Promise.resolve(docs));
+	service.filterFields = jest.fn(docs => Promise.resolve(docs));
 
-	it("should call 'populateDocs' & toFilteredJSON methods", () => {
+	it("should call 'populateDocs' & filterFields methods", () => {
 		const ctx = { params: {} };
 		return service.transformDocuments(ctx, doc).then(() => {
 			expect(service.populateDocs).toHaveBeenCalledTimes(1);
 			expect(service.populateDocs).toHaveBeenCalledWith(ctx, doc);
 
-			expect(service.toFilteredJSON).toHaveBeenCalledTimes(1);
-			expect(service.toFilteredJSON).toHaveBeenCalledWith(doc, undefined);
+			expect(service.filterFields).toHaveBeenCalledTimes(1);
+			expect(service.filterFields).toHaveBeenCalledWith(doc, undefined);
 		}).catch(protectReject);
 	});
 
-	it("should not call 'populateDocs' but toFilteredJSON methods", () => {
+	it("should not call 'populateDocs' but filterFields methods", () => {
 		service.populateDocs.mockClear();
-		service.toFilteredJSON.mockClear();
+		service.filterFields.mockClear();
 		
 		const ctx = { params: { populate: false, fields: "name" } };
 		return service.transformDocuments(ctx, doc).then(() => {
 			expect(service.populateDocs).toHaveBeenCalledTimes(0);
 
-			expect(service.toFilteredJSON).toHaveBeenCalledTimes(1);
-			expect(service.toFilteredJSON).toHaveBeenCalledWith(doc, "name");
+			expect(service.filterFields).toHaveBeenCalledTimes(1);
+			expect(service.filterFields).toHaveBeenCalledWith(doc, "name");
 		}).catch(protectReject);
 	});
 
@@ -466,7 +466,7 @@ describe("Test convertToJSON method", () => {
 
 });
 
-describe("Test toFilteredJSON method", () => {
+describe("Test filterFields method", () => {
 	const docs = [{ id: 1 }, { id: 2 }, { id: 3 }];
 	const doc = { id : 1 };
 
@@ -482,7 +482,7 @@ describe("Test toFilteredJSON method", () => {
 	service.convertToJSON = jest.fn(docs => docs);
 
 	it("should call 'convertToJSON' with object", () => {
-		service.toFilteredJSON(doc);
+		service.filterFields(doc);
 		expect(service.convertToJSON).toHaveBeenCalledTimes(1);
 		expect(service.convertToJSON).toHaveBeenCalledWith(doc, ["id", "name", "status"]);
 	});
@@ -490,7 +490,7 @@ describe("Test toFilteredJSON method", () => {
 	it("should call 'convertToJSON' with array", () => {
 		service.convertToJSON.mockClear();
 
-		service.toFilteredJSON(docs, ["name", "email"]);
+		service.filterFields(docs, ["name", "email"]);
 		expect(service.convertToJSON).toHaveBeenCalledTimes(3);
 		expect(service.convertToJSON).toHaveBeenCalledWith(docs[0], ["name", "email"]);
 		expect(service.convertToJSON).toHaveBeenCalledWith(docs[1], ["name", "email"]);
