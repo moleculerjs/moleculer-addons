@@ -348,7 +348,7 @@ module.exports = {
 		 * @returns 
 		 */
 		convertToJSON(doc, fields) {
-			let json = (doc.constructor && doc.constructor.name === "model") ? doc.toJSON() : doc;
+			let json = (_.isFunction(doc.toJSON)) ? doc.toJSON() : doc;
 
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
@@ -441,6 +441,7 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
+		/* istanbul ignore next */
 		if (!this.schema.adapter)
 			throw new Error("Please set the store adapter in schema!");
 
@@ -455,6 +456,7 @@ module.exports = {
 		if (this.adapter)
 			return this.connect();
 
+		/* istanbul ignore next */
 		return Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
@@ -465,6 +467,7 @@ module.exports = {
 		if (this.adapter)
 			return this.disconnect();
 
+		/* istanbul ignore next */
 		return Promise.reject(new Error("Please set the store adapter in schema!"));
 	}
 };

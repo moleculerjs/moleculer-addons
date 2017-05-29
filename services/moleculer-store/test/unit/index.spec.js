@@ -350,15 +350,6 @@ describe("Test StoreService methods", () => {
 		}).catch(protectReject);
 	});
 
-	/*
-		model
-		transformDocuments
-		toFilteredJSON
-		convertToJSON
-		populateDocs
-	*/
-
-
 	it("should call 'disconnect' of adapter", () => {
 		return broker.stop().delay(100).then(() => {
 			expect(adapter.disconnect).toHaveBeenCalledTimes(1);
@@ -407,6 +398,58 @@ describe("Test transformDocuments method", () => {
 			expect(service.toFilteredJSON).toHaveBeenCalledTimes(1);
 			expect(service.toFilteredJSON).toHaveBeenCalledWith(doc, "name");
 		}).catch(protectReject);
+	});
+
+});
+
+describe("Test convertToJSON method", () => {
+	const doc = { 
+		id : 1,
+		name: "Walter",
+		address: {
+			city: "Albuquerque",
+			state: "NM",			
+			zip: 87111
+		}
+	};
+
+	const broker = new ServiceBroker({ validation: false });
+	const service = broker.createService(StoreService, {
+		name: "store",
+		adapter: mockAdapter
+	});
+
+	it("should not touch the doc", () => {
+		const res = service.convertToJSON(doc);
+		expect(res).toBe(doc);
+	});
+
+	it("should filter the fields", () => {
+		const res = service.convertToJSON(doc, ["name", "address"]);
+		expect(res).toEqual({
+			name: "Walter",
+			address: doc.address
+		});
+	});
+
+	it("should filter with nested fields", () => {
+		const res = service.convertToJSON(doc, ["name", "address.city", "address.zip"]);
+		expect(res).toEqual({
+			name: "Walter",
+			address: {
+				city: "Albuquerque",
+				zip: 87111
+			}
+		});
+	});
+
+	it("should call toJSON if the doc is a Model", () => {
+		doc.toJSON = jest.fn(() => doc);
+		const res = service.convertToJSON(doc, ["name"]);
+		expect(res).toEqual({
+			name: "Walter"
+		});
+		expect(doc.toJSON).toHaveBeenCalledTimes(1);
 	});
 
 });
@@ -596,6 +639,16 @@ describe("Test populateDocs method", () => {
 				{ author: undefined },
 				{ author: { name: "John" } },
 			]);
+
+		}).catch(protectReject);
+	});
+
+	it("should return docs if not population rules", () => {
+		const docs = [];
+		const ctx = { params: {} };
+
+		return service.populateDocs(ctx, docs).then(res => {
+			expect(res).toBe(docs);
 
 		}).catch(protectReject);
 	});
