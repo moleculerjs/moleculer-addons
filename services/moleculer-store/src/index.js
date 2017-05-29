@@ -159,8 +159,13 @@ module.exports = {
 		connect() {
 			return this.adapter.connect().then(() => {
 				// Call an 'afterConnected' handler in schema
-				if (_.isFunction(this.schema.afterConnected))
-					this.schema.afterConnected.call(this);
+				if (_.isFunction(this.schema.afterConnected)) {
+					try {
+						this.schema.afterConnected.call(this);
+					} catch(err) {
+						this.logger.error("afterConnected error!", err);
+					}
+				}
 			});
 		},
 

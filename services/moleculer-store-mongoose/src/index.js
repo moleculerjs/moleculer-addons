@@ -22,16 +22,24 @@ class MongooseStoreAdapter {
 		this.broker = broker;
 		this.service = service;
 
-		this.collection = this.service.collection;
+		this.collection = this.service.schema.collection;
+		if (!this.collection)
+			throw new Error("Missing `collection` definition in schema of service!");
+
 	}
 
 	connect() {
 		let uri, opts;
-		if (_.isObject(this.settings.db) && this.settings.db.uri != null) {
-			uri = this.settings.db.uri;
-			opts = this.settings.db.opts;
+		if (_.isObject(this.opts) && this.opts.uri != null) {
+			uri = this.opts.uri;
+			opts = this.opts.opts;
 		} else {
-			uri = this.settings.db;
+			uri = this.opts;
+		}
+
+		if (mongoose.connection.readyState != 0) {
+			this.db = mongoose.connection;
+			return Promise.resolve();
 		}
 
 		const conn = mongoose.connect(uri, opts);
@@ -68,7 +76,7 @@ class MongooseStoreAdapter {
 	}
 
 	count(params = {}) {
-		return this.doFiltering(params).count();
+		return this.doFiltering(params).count().exec();
 	}
 
 	insert(entity) {
@@ -97,7 +105,7 @@ class MongooseStoreAdapter {
 	}
 
 	clear() {
-		return this.collection.remove({});
+		return this.collection.remove({}).then(() => null);
 	}
 
 	/**
