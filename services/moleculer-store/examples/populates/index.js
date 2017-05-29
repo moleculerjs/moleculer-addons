@@ -120,5 +120,4 @@ broker.start().delay(1000).then(() => {
 
 		// Stop
 		.then(() => broker.stop());
-
 });

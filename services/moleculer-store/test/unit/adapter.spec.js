@@ -10,7 +10,7 @@ describe("Test Adapter constructor", () => {
 	});
 });
 
-describe("Test Adapter constructor", () => {
+describe("Test Adapter methods", () => {
 	const broker = new ServiceBroker();
 	const service = broker.createService({
 		name: "test"
@@ -103,12 +103,16 @@ describe("Test Adapter constructor", () => {
 		}).catch(err => expect(err).toBe(true));
 	});
 
-	it("should find all 'gmail' in filtered fields", () => {
+	it("should find all 'walter' in filtered fields", () => {
 		return adapter.findAll({ search: "walter", searchFields: "email name" }).then(res => {
 			expect(res.length).toBe(1);
 			expect(res[0]).toEqual(savedDoc);
 
 		}).catch(err => expect(err).toBe(true));
+	});
+
+	it("should count all 'walter' in filtered fields", () => {
+		return expect(adapter.count({ search: "walter", searchFields: "email name" })).resolves.toBe(1);
 	});
 
 	it("should sort the result", () => {
@@ -150,18 +154,22 @@ describe("Test Adapter constructor", () => {
 	});
 
 	it("should count filtered entities", () => {
-		return expect(adapter.count({ where: { email: { $exists: true } }})).resolves.toBe(2);
+		return expect(adapter.count({ query: { email: { $exists: true } }})).resolves.toBe(2);
 	});
 
 	it("should update a document", () => {
-		return expect(adapter.updateById(savedDoc._id, { $set: { e: 1234 } })).resolves.toBe(1);
+		return expect(adapter.updateById(savedDoc._id, { $set: { e: 1234 } })).resolves.toEqual(Object.assign({}, savedDoc, { e: 1234 }));
 	});	
 
 	it("should update many documents", () => {
-		return expect(adapter.update({
+		return adapter.update({
 			query: { age: 35 }, 
 			update: { $set: { gender: "male" } }
-		})).resolves.toBe(2);
+		}).then(res => {
+			expect(res.length).toBe(2);
+			expect(res[0].gender).toBe("male");
+			expect(res[1].gender).toBe("male");
+		}).catch(err => expect(err).toBe(true));		
 	});	
 
 	it("should remove by ID", () => {
