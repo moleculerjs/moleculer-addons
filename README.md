@@ -18,7 +18,7 @@ This is a monorepo, contains multiple npm packages.
 | [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=database&title=Database access modules) -->
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=databases&title=Database access modules) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
