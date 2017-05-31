@@ -10,7 +10,9 @@ function protectReject(err) {
 
 describe("Test DbService actions", () => {
 	const adapter = {
-		init: jest.fn()
+		init: jest.fn(() => Promise.resolve()),
+		connect: jest.fn(() => Promise.resolve()),
+		disconnect: jest.fn(() => Promise.resolve())
 	};
 	const broker = new ServiceBroker({ validation: false });
 	const service = broker.createService(DbService, {
@@ -125,7 +127,8 @@ describe("Test reconnecting", () => {
 		init: jest.fn(() => Promise.resolve()),
 		connect: jest.fn()
 			.mockImplementationOnce(() => Promise.reject("Error"))
-			.mockImplementationOnce(() => Promise.resolve())
+			.mockImplementationOnce(() => Promise.resolve()),
+		disconnect: jest.fn(() => Promise.resolve())
 	};
 	const broker = new ServiceBroker();
 	const service = broker.createService(DbService, {
@@ -134,9 +137,9 @@ describe("Test reconnecting", () => {
 	});
 
 	it("should connect after error", () => {
-		return service.schema.started.call(service).then(() => {
+		return service.schema.started.call(service).catch(protectReject).then(() => {
 			expect(adapter.connect).toHaveBeenCalledTimes(2);
-		}).catch(protectReject);
+		});
 	});	
 
 });

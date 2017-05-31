@@ -1,5 +1,9 @@
 "use strict";
 
+const Adapter = require("../../src/memory-adapter");
+
+require("../common/crud.test")(new Adapter());
+/*
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../src");
 
@@ -147,3 +151,4 @@ describe("Test CRUD methods", () => {
 		});
 	});	
 });
+*/

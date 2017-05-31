@@ -174,7 +174,8 @@ module.exports = {
 		 * Disconnect from database with adapter
 		 */
 		disconnect() {
-			this.adapter.disconnect();
+			if (_.isFunction(this.adapter.disconnect))
+				this.adapter.disconnect();
 		},
 
 		/**
