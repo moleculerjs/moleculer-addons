@@ -1,19 +1,19 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const StoreService = require("../../src");
-const lolex = require("lolex");
+const DbService = require("../../src");
+//const lolex = require("lolex");
 
 function protectReject(err) {
 	expect(err).toBe(true);
 }
 
-describe("Test StoreService actions", () => {
+describe("Test DbService actions", () => {
 	const adapter = {
 		init: jest.fn()
 	};
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter,
 	});
@@ -33,64 +33,71 @@ describe("Test StoreService actions", () => {
 
 	it("should call the 'find' method", () => {
 		service.find = jest.fn();
+		const p = {};
 
-		return broker.call("store.find").then(() => {
+		return broker.call("store.find", p).then(() => {
 			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'count' method", () => {
 		service.count = jest.fn();
+		const p = {};
 
-		return broker.call("store.count").then(() => {
+		return broker.call("store.count", p).then(() => {
 			expect(service.count).toHaveBeenCalledTimes(1);
-			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'create' method", () => {
 		service.create = jest.fn();
+		const p = {};
 
-		return broker.call("store.create").then(() => {
+		return broker.call("store.create", p).then(() => {
 			expect(service.create).toHaveBeenCalledTimes(1);
-			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'get' method", () => {
 		service.get = jest.fn();
+		const p = {};
 
-		return broker.call("store.get").then(() => {
+		return broker.call("store.get", p).then(() => {
 			expect(service.get).toHaveBeenCalledTimes(1);
-			expect(service.get).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.get).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'model' method", () => {
 		service.model = jest.fn();
+		const p = {};
 
-		return broker.call("store.model").then(() => {
+		return broker.call("store.model", p).then(() => {
 			expect(service.model).toHaveBeenCalledTimes(1);
-			expect(service.model).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.model).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'update' method", () => {
 		service.update = jest.fn();
+		const p = {};
 
-		return broker.call("store.update").then(() => {
+		return broker.call("store.update", p).then(() => {
 			expect(service.update).toHaveBeenCalledTimes(1);
-			expect(service.update).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.update).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'remove' method", () => {
 		service.remove = jest.fn();
+		const p = {};
 
-		return broker.call("store.remove").then(() => {
+		return broker.call("store.remove", p).then(() => {
 			expect(service.remove).toHaveBeenCalledTimes(1);
-			expect(service.remove).toHaveBeenCalledWith(jasmine.any(Context));
+			expect(service.remove).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
@@ -121,7 +128,7 @@ describe("Test reconnecting", () => {
 			.mockImplementationOnce(() => Promise.resolve())
 	};
 	const broker = new ServiceBroker();
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter,
 	});
@@ -135,7 +142,7 @@ describe("Test reconnecting", () => {
 });
 
 
-describe("Test StoreService methods", () => {
+describe("Test DbService methods", () => {
 	const docs = [];
 	const doc = { id : 1 };
 
@@ -159,7 +166,7 @@ describe("Test StoreService methods", () => {
 	const afterConnected = jest.fn();
 
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter,
 		afterConnected
@@ -185,7 +192,7 @@ describe("Test StoreService methods", () => {
 		const ctx = { params: {} };
 		service.transformDocuments = jest.fn((ctx, docs) => Promise.resolve(docs));
 
-		return service.find(ctx).then(res => {
+		return service.find(ctx, ctx.params).then(res => {
 			expect(res).toBe(docs);
 
 			expect(adapter.findAll).toHaveBeenCalledTimes(1);
@@ -199,7 +206,7 @@ describe("Test StoreService methods", () => {
 	it("should call 'count' of adapter", () => {
 		const ctx = { params: {} };
 
-		return service.count(ctx).then(res => {
+		return service.count(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
 			
 			expect(adapter.count).toHaveBeenCalledTimes(1);
@@ -212,7 +219,7 @@ describe("Test StoreService methods", () => {
 		service.transformDocuments.mockClear();
 		service.clearCache = jest.fn(() => Promise.resolve());
 
-		return service.create(ctx).then(res => {
+		return service.create(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
 			expect(adapter.insert).toHaveBeenCalledTimes(1);
@@ -225,19 +232,17 @@ describe("Test StoreService methods", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call 'findById' of adapter", () => {
+	it("should call 'this.model'", () => {
 		const ctx = { params: { id: 5 } };
-		service.transformDocuments.mockClear();
 
-		return service.get(ctx).then(res => {
-			expect(res).toBe(doc);
+		const origModelMethod = service.model;
+		service.model = jest.fn(() => Promise.resolve());
 
-			expect(adapter.findById).toHaveBeenCalledTimes(1);
-			expect(adapter.findById).toHaveBeenCalledWith(ctx.params.id);
+		return service.get(ctx, ctx.params).then(() => {
+			expect(service.model).toHaveBeenCalledTimes(1);
+			expect(service.model).toHaveBeenCalledWith(ctx, { id: 5, populate: true });
 
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, doc);
-
+			service.model = origModelMethod;
 		}).catch(protectReject);
 	});
 
@@ -250,7 +255,7 @@ describe("Test StoreService methods", () => {
 			adapter.findById.mockClear();
 			const ctx = { params: { id: 5 } };
 
-			return service.model(ctx).then(res => {
+			return service.model(ctx, ctx.params).then(res => {
 				expect(res).toBe(doc);
 
 				expect(adapter.findById).toHaveBeenCalledTimes(1);
@@ -270,7 +275,7 @@ describe("Test StoreService methods", () => {
 			service.filterFields.mockClear();
 			const ctx = { params: { id: [5, 3, 8], fields: false, populate: true } };
 
-			return service.model(ctx).then(res => {
+			return service.model(ctx, ctx.params).then(res => {
 				expect(res).toBe(docs);
 
 				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
@@ -296,7 +301,7 @@ describe("Test StoreService methods", () => {
 				{ _id: 8, name: "Jane" }
 			]));
 
-			return service.model(ctx).then(res => {
+			return service.model(ctx, ctx.params).then(res => {
 				expect(res).toEqual({
 					"3": {
 						"_id": 3,
@@ -329,7 +334,7 @@ describe("Test StoreService methods", () => {
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
 
-		return service.update(ctx).then(res => {
+		return service.update(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
 			expect(adapter.updateById).toHaveBeenCalledTimes(1);
@@ -347,7 +352,7 @@ describe("Test StoreService methods", () => {
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
 
-		return service.remove(ctx).then(res => {
+		return service.remove(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
 
 			expect(adapter.removeById).toHaveBeenCalledTimes(1);
@@ -389,7 +394,7 @@ describe("Test transformDocuments method", () => {
 	const doc = { id : 1 };
 
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter: mockAdapter
 	});
@@ -435,7 +440,7 @@ describe("Test convertToJSON method", () => {
 	};
 
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter: mockAdapter
 	});
@@ -471,7 +476,7 @@ describe("Test filterFields method", () => {
 	const doc = { id : 1 };
 
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter: mockAdapter,
 		settings: {
@@ -504,7 +509,7 @@ describe("Test populateDocs method", () => {
 	const docs = [{ id: 1, author: 3 }, { id: 2, author: 5, comments: [8, 3, 8] }, { id: 3, author: 8 }];
 
 	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(StoreService, {
+	const service = broker.createService(DbService, {
 		name: "store",
 		adapter: mockAdapter,
 		settings: {

@@ -1,7 +1,7 @@
 "use strict";
 
 let { ServiceBroker } = require("moleculer");
-let StoreService = require("../../index");
+let DbService = require("../../index");
 let _ = require("lodash");
 let chalk = require("chalk");
 let path = require("path");
@@ -15,9 +15,9 @@ let broker = new ServiceBroker({
 
 // Load my service
 
-broker.createService(StoreService, {
+broker.createService(DbService, {
 	name: "posts",
-	adapter: new StoreService.MemoryAdapter({ filename: path.join(__dirname, "posts.db") }),
+	adapter: new DbService.MemoryAdapter({ filename: path.join(__dirname, "posts.db") }),
 	settings: {
 		fields: "_id title content votes author",
 
@@ -34,16 +34,12 @@ broker.createService(StoreService, {
 	actions: {
 		vote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.adapter.updateById(ctx.params.id, { $inc: { votes: 1 } }))
-				.then(docs => this.transformDocuments(ctx, docs))
-				.then(json => this.clearCache().then(() => json));		
+				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
 		},
 
 		unvote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.adapter.updateById(ctx.params.id, { $inc: { votes: -1 } }))
-				.then(docs => this.transformDocuments(ctx, docs))
-				.then(json => this.clearCache().then(() => json));		
+				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
 		}
 	},
 
@@ -77,9 +73,9 @@ broker.createService(StoreService, {
 });
 
 // Load my service
-broker.createService(StoreService, {
+broker.createService(DbService, {
 	name: "users",
-	adapter: new StoreService.MemoryAdapter({ filename: path.join(__dirname, "users.db") }),
+	adapter: new DbService.MemoryAdapter({ filename: path.join(__dirname, "users.db") }),
 	settings: {
 		fields: "_id username fullName email"
 	},

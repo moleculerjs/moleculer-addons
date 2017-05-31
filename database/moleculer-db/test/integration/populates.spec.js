@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const StoreService = require("../../src");
+const DbService = require("../../src");
 
 function protectReject(err) {
 	expect(err).toBe(true);
@@ -15,7 +15,7 @@ describe.only("Test populates feature", () => {
 	});
 
 	// Load my service
-	broker.createService(StoreService, {
+	broker.createService(DbService, {
 		name: "posts",
 		settings: {
 			fields: "_id title content author",
@@ -29,7 +29,7 @@ describe.only("Test populates feature", () => {
 	});
 
 	// Load my service
-	broker.createService(StoreService, {
+	broker.createService(DbService, {
 		name: "users",
 		settings: {
 			fields: "_id username name"

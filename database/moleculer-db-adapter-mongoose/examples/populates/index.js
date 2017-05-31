@@ -38,16 +38,12 @@ broker.createService(StoreService, {
 	actions: {
 		vote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.adapter.updateById(ctx.params.id, { $inc: { votes: 1 } }))
-				.then(docs => this.transformDocuments(ctx, docs))
-				.then(json => this.clearCache().then(() => json));		
+				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
 		},
 
 		unvote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.adapter.updateById(ctx.params.id, { $inc: { votes: -1 } }))
-				.then(docs => this.transformDocuments(ctx, docs))
-				.then(json => this.clearCache().then(() => json));		
+				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
 		}
 	},
 

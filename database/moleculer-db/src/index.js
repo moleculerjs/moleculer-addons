@@ -134,7 +134,7 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.remove(ctx, ctx.params.id);
+				return this.remove(ctx, ctx.params);
 			}
 		},
 
