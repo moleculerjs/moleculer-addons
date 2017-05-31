@@ -7,7 +7,7 @@ function protectReject(err) {
 	expect(err).toBe(true);
 }
 
-describe.only("Test CRUD methods", () => {
+describe("Test CRUD methods", () => {
 	// Create broker
 	let broker = new ServiceBroker({
 		logger: console,
