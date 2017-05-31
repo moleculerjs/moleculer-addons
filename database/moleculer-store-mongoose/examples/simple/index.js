@@ -2,7 +2,7 @@
 
 let chalk = require("chalk");
 let { ServiceBroker } = require("moleculer");
-let StoreService = require("../../../moleculer-store/index");
+let StoreService = require("../../../moleculer-db/index");
 let MongooseAdapter = require("../../index");
 let Post = require("../models/posts");
 
@@ -15,7 +15,7 @@ let broker = new ServiceBroker({
 // Load my service
 broker.createService(StoreService, {
 	name: "posts",
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-store-demo"),
+	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	collection: Post,
 	settings: {
 		propertyFilter: "_id title content votes"

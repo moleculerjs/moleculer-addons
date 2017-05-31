@@ -12,7 +12,7 @@
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"stores\\moleculer-store-mongoose",
+				"stores\\moleculer-db-mongoose",
 				"populates"
 			]
 		},

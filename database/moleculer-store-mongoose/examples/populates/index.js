@@ -1,7 +1,7 @@
 "use strict";
 
 let { ServiceBroker } = require("moleculer");
-let StoreService = require("../../../moleculer-store/index");
+let StoreService = require("../../../moleculer-db/index");
 let MongooseAdapter = require("../../index");
 let Post = require("../models/posts");
 let User = require("../models/users");
@@ -20,7 +20,7 @@ let broker = new ServiceBroker({
 // Load my service
 broker.createService(StoreService, {
 	name: "posts",
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-store-demo"),
+	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	collection: Post,
 	settings: {
 		fields: "_id title content votes author",
@@ -81,7 +81,7 @@ broker.createService(StoreService, {
 // Load my service
 broker.createService(StoreService, {
 	name: "users",
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-store-demo"),
+	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	collection: User,
 	settings: {
 		fields: "_id username fullName email"

@@ -1,5 +1,5 @@
 {
-  "name": "moleculer-store-mongoose",
+  "name": "moleculer-db-mongoose",
   "version": "0.0.0",
   "description": "Mongoose adapter for Moleculer Store service",
   "main": "index.js",
@@ -33,7 +33,7 @@
     "jest-cli": "20.0.3",
     "lolex": "1.6.0",
     "moleculer": "^0.7.3",
-    "moleculer-store": "*",
+    "moleculer-db": "*",
     "nodemon": "1.11.0",
     "npm-check": "5.4.4"
   },

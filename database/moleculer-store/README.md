@@ -1,6 +1,6 @@
 ![Moleculer logo](http://moleculer.services/images/banner.png)
 
-# moleculer-store [![NPM version](https://img.shields.io/npm/v/moleculer-store.svg)](https://www.npmjs.com/package/moleculer-store)
+# moleculer-db [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db)
 
 Service mixin to store entities in database
 
@@ -9,11 +9,11 @@ Service mixin to store entities in database
 ## Install
 
 ```bash
-$ npm install moleculer-store --save
+$ npm install moleculer-db --save
 ```
 or
 ```bash
-$ yarn add moleculer-store
+$ yarn add moleculer-db
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ const { ServiceBroker } = require("moleculer");
 const broker = new ServiceBroker();
 
 // Load service
-broker.createService(require("moleculer-store"));
+broker.createService(require("moleculer-db"));
 
 // Call
 broker.call("store.xyz", {}).then(console.log);

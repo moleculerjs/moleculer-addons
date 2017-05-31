@@ -1,5 +1,5 @@
 /*
- * moleculer-store
+ * moleculer-db-mongoose
  * Copyright (c) 2017 Ice Services (https://github.com/ice-services/moleculer-addons)
  * MIT Licensed
  */
