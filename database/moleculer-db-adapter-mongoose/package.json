@@ -1,7 +1,7 @@
 {
   "name": "moleculer-db-adapter-mongoose",
   "version": "0.0.0",
-  "description": "Mongoose adapter for Moleculer Store service",
+  "description": "Mongoose adapter for Moleculer DB service",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",

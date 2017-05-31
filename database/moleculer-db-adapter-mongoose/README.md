@@ -2,7 +2,7 @@
 
 # moleculer-db-adapter-mongoose [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose)
 
-Mongoose adapter for Moleculer Store service
+Mongoose adapter for Moleculer DB service
 
 ## Features
 
@@ -21,15 +21,6 @@ $ yarn add moleculer-db-adapter-mongoose
 ```js
 "use strict";
 
-const { ServiceBroker } = require("moleculer");
-const broker = new ServiceBroker();
-
-// Load service
-broker.createService(require("moleculer-db-adapter-mongoose"));
-
-// Call
-broker.call("store-mongoose.xyz", {}).then(console.log);
-/* Result: ??? */
 
 ```
 
