@@ -46,15 +46,17 @@ broker.createService({
     }
 });
 
-// Get all users
-broker.call("users.find").then(console.log);
-
-// Save a new user
-broker.call("users.create" { entity: {
+broker.start()
+// Create a new user
+.then(() => broker.call("users.create", { entity: {
     username: "john",
     name: "John Doe",
     status: 1
-}});
+}}))
+
+// Get all users
+.then(() => broker.call("users.find").then(console.log));
+
 ```
 
 ## Settings

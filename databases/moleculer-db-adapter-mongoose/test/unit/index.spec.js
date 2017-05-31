@@ -19,7 +19,7 @@ const leanCB = jest.fn(() => ({ exec: execCB }));
 const countCB = jest.fn(() => ({ exec: execCB }));
 const query = jest.fn(() => ({ lean: leanCB, count: countCB }));
 
-const fakeCollection = Object.assign(jest.fn(() => ({ save: saveCB })), {
+const fakeModel = Object.assign(jest.fn(() => ({ save: saveCB })), {
 	find: jest.fn(() => query()),
 	findById: jest.fn(() => query()),
 	insertMany: jest.fn(() => Promise.resolve()),
@@ -40,7 +40,7 @@ describe("Test MongooseStoreAdapter", () => {
 	const broker = new ServiceBroker();
 	const service = broker.createService({
 		name: "store",
-		collection: fakeCollection
+		model: fakeModel
 	});
 
 	const opts = {};
@@ -69,7 +69,7 @@ describe("Test MongooseStoreAdapter", () => {
 		adapter.init(broker, service);
 		expect(adapter.broker).toBe(broker);
 		expect(adapter.service).toBe(service);
-		expect(adapter.collection).toBe(fakeCollection);
+		expect(adapter.model).toBe(fakeModel);
 	});
 
 	it("call connect with uri", () => {
@@ -116,7 +116,7 @@ describe("Test MongooseStoreAdapter", () => {
 
 	describe("Test doFiltering", () => {
 		it("init", () => {
-			adapter.collection.find = jest.fn(() => ({
+			adapter.model.find = jest.fn(() => ({
 				find: jest.fn(),
 				sort: jest.fn(),
 				skip: jest.fn(),
@@ -127,47 +127,47 @@ describe("Test MongooseStoreAdapter", () => {
 		});
 
 		it("call without params", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			adapter.doFiltering();
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith();
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith();
 		});
 
 		it("call with query", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			let query = {};
 			adapter.doFiltering({ query });
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith(query);
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith(query);
 		});
 
 		it("call with sort string", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			let query = {};
 			let q = adapter.doFiltering({ query, sort: "-votes title" });
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith(query);
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith(query);
 			
 			expect(q.sort).toHaveBeenCalledTimes(1);
 			expect(q.sort).toHaveBeenCalledWith("-votes title");
 		});
 
 		it("call with sort array", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			let query = {};
 			let q = adapter.doFiltering({ query, sort: ["createdAt", "title"] });
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith(query);
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith(query);
 			
 			expect(q.sort).toHaveBeenCalledTimes(1);
 			expect(q.sort).toHaveBeenCalledWith("createdAt title");
 		});
 
 		it("call with limit & offset", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			let q = adapter.doFiltering({ limit: 5, offset: 10 });
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith(undefined);
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith(undefined);
 			
 			expect(q.limit).toHaveBeenCalledTimes(1);
 			expect(q.limit).toHaveBeenCalledWith(5);
@@ -176,10 +176,10 @@ describe("Test MongooseStoreAdapter", () => {
 		});
 
 		it("call with full-text search", () => {
-			adapter.collection.find.mockClear();
+			adapter.model.find.mockClear();
 			let q = adapter.doFiltering({ search: "walter" });
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith(undefined);
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith(undefined);
 			
 			expect(q.find).toHaveBeenCalledTimes(1);
 			expect(q.find).toHaveBeenCalledWith({"$text": {"$search": "walter"}});
@@ -209,8 +209,8 @@ describe("Test MongooseStoreAdapter", () => {
 		execCB.mockClear();
 
 		return adapter.findById(5).catch(protectReject).then(() => {
-			expect(adapter.collection.findById).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.findById).toHaveBeenCalledWith(5);
+			expect(adapter.model.findById).toHaveBeenCalledTimes(1);
+			expect(adapter.model.findById).toHaveBeenCalledWith(5);
 
 			expect(leanCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);
@@ -218,13 +218,13 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 	it("call findByIds", () => {
-		adapter.collection.find.mockClear();
+		adapter.model.find.mockClear();
 		leanCB.mockClear();
 		execCB.mockClear();
 
 		return adapter.findByIds(5).catch(protectReject).then(() => {
-			expect(adapter.collection.find).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.find).toHaveBeenCalledWith({"_id": {"$in": 5}});
+			expect(adapter.model.find).toHaveBeenCalledTimes(1);
+			expect(adapter.model.find).toHaveBeenCalledWith({"_id": {"$in": 5}});
 
 			expect(leanCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);
@@ -249,8 +249,8 @@ describe("Test MongooseStoreAdapter", () => {
 	it("call insert", () => {
 		let entity = {};
 		return adapter.insert(entity).catch(protectReject).then(() => {
-			expect(fakeCollection).toHaveBeenCalledTimes(1);
-			expect(fakeCollection).toHaveBeenCalledWith(entity);
+			expect(fakeModel).toHaveBeenCalledTimes(1);
+			expect(fakeModel).toHaveBeenCalledWith(entity);
 
 			expect(saveCB).toHaveBeenCalledTimes(1);
 		});
@@ -260,8 +260,8 @@ describe("Test MongooseStoreAdapter", () => {
 	it("call insertMany", () => {
 		let entities = [];
 		return adapter.insertMany(entities).catch(protectReject).then(() => {
-			expect(adapter.collection.insertMany).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.insertMany).toHaveBeenCalledWith(entities);
+			expect(adapter.model.insertMany).toHaveBeenCalledTimes(1);
+			expect(adapter.model.insertMany).toHaveBeenCalledWith(entities);
 		});
 	});
 
@@ -271,8 +271,8 @@ describe("Test MongooseStoreAdapter", () => {
 			update: {}
 		};
 		return adapter.update(params).catch(protectReject).then(() => {
-			expect(adapter.collection.update).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.update).toHaveBeenCalledWith(params.query, params.update, { multi: true, "new": true });
+			expect(adapter.model.update).toHaveBeenCalledTimes(1);
+			expect(adapter.model.update).toHaveBeenCalledWith(params.query, params.update, { multi: true, "new": true });
 
 			expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		});
@@ -283,8 +283,8 @@ describe("Test MongooseStoreAdapter", () => {
 
 		let update = {};
 		return adapter.updateById(5, update).catch(protectReject).then(() => {
-			expect(adapter.collection.findByIdAndUpdate).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.findByIdAndUpdate).toHaveBeenCalledWith(5, update, { "new": true });
+			expect(adapter.model.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+			expect(adapter.model.findByIdAndUpdate).toHaveBeenCalledWith(5, update, { "new": true });
 
 			expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		});
@@ -295,23 +295,23 @@ describe("Test MongooseStoreAdapter", () => {
 			query: {}
 		};
 		return adapter.remove(params).catch(protectReject).then(() => {
-			expect(adapter.collection.remove).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.remove).toHaveBeenCalledWith(params.query);
+			expect(adapter.model.remove).toHaveBeenCalledTimes(1);
+			expect(adapter.model.remove).toHaveBeenCalledWith(params.query);
 		});
 	});
 
 	it("call removeById", () => {
 		return adapter.removeById(5).catch(protectReject).then(() => {
-			expect(adapter.collection.findByIdAndRemove).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.findByIdAndRemove).toHaveBeenCalledWith(5);
+			expect(adapter.model.findByIdAndRemove).toHaveBeenCalledTimes(1);
+			expect(adapter.model.findByIdAndRemove).toHaveBeenCalledWith(5);
 		});
 	});	
 
 	it("call clear", () => {
-		adapter.collection.remove.mockClear();
+		adapter.model.remove.mockClear();
 		return adapter.clear().catch(protectReject).then(() => {
-			expect(adapter.collection.remove).toHaveBeenCalledTimes(1);
-			expect(adapter.collection.remove).toHaveBeenCalledWith({});
+			expect(adapter.model.remove).toHaveBeenCalledTimes(1);
+			expect(adapter.model.remove).toHaveBeenCalledWith({});
 		});
 	});	
 });

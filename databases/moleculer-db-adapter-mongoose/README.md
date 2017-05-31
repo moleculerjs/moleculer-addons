@@ -24,7 +24,7 @@ $ yarn add moleculer-db moleculer-db-adapter-mongoose
 const { ServiceBroker } = require("moleculer");
 const DbService = require("moleculer-db");
 const MongooseAdapter = require("moleculer-db-adapter-mongoose");
-const Post = require("./post.model");
+const mongoose = require("mongoose");
 
 const broker = new ServiceBroker();
 
@@ -32,19 +32,25 @@ const broker = new ServiceBroker();
 broker.createService({
     name: "posts",
     mixins: DbService,
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
-	collection: Post
+	adapter: new MongooseAdapter("mongodb://localhost/moleculer-demo"),
+	model: mongoose.model("Post", mongoose.Schema({
+		title: { type: String },
+		content: { type: String },
+		votes: { type: Number, default: 0}
+	}))
 });
 
-// Get all posts
-broker.call("posts.find").then(console.log);
 
-// Save a new post
-broker.call("posts.create" { entity: {
-    title: "My first post",
-    content: "Lorem ipsum...",
-    votes: 0
-}});
+broker.start()
+// Create a new post
+.then(() => broker.call("posts.create", { entity: {
+	title: "My first post",
+	content: "Lorem ipsum...",
+	votes: 0
+}}))
+
+// Get all posts
+.then(() => broker.call("posts.find").then(console.log));
 ```
 
 ## Options

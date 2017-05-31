@@ -36,10 +36,10 @@ class MongooseStoreAdapter {
 		this.broker = broker;
 		this.service = service;
 
-		this.collection = this.service.schema.collection;
-		if (!this.collection) {
+		this.model = this.service.schema.model;
+		if (!this.model) {
 			/* istanbul ignore next */
-			throw new Error("Missing `collection` definition in schema of service!");
+			throw new Error("Missing `model` definition in schema of service!");
 		}
 	}
 
@@ -111,7 +111,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	findById(_id) {
-		return this.collection.findById(_id).lean().exec();
+		return this.model.findById(_id).lean().exec();
 	}
 
 	/**
@@ -123,7 +123,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	findByIds(idList) {
-		return this.collection.find({
+		return this.model.find({
 			_id: {
 				$in: idList
 			}
@@ -151,7 +151,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	insert(entity) {
-		const item = new this.collection(entity);
+		const item = new this.model(entity);
 		return item.save();
 	}
 
@@ -164,7 +164,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	insertMany(entities) {
-		return this.collection.insertMany(entities);
+		return this.model.insertMany(entities);
 	}
 
 	/**
@@ -176,7 +176,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	update(params) {
-		return this.collection.update(params.query, params.update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
+		return this.model.update(params.query, params.update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
 	}
 
 	/**
@@ -189,7 +189,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	updateById(_id, update) {
-		return this.collection.findByIdAndUpdate(_id, update, { "new": true }).then(res => res.toJSON());
+		return this.model.findByIdAndUpdate(_id, update, { "new": true }).then(res => res.toJSON());
 	}
 
 	/**
@@ -201,7 +201,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	remove(params) {
-		return this.collection.remove(params.query);
+		return this.model.remove(params.query);
 	}
 
 	/**
@@ -213,7 +213,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	removeById(_id) {
-		return this.collection.findByIdAndRemove(_id);
+		return this.model.findByIdAndRemove(_id);
 	}
 
 	/**
@@ -224,7 +224,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	clear() {
-		return this.collection.remove({}).then(() => null);
+		return this.model.remove({}).then(() => null);
 	}
 
 	/**
@@ -240,7 +240,7 @@ class MongooseStoreAdapter {
 	 */
 	doFiltering(params) {
 		if (params) {
-			const q = this.collection.find(params.query);
+			const q = this.model.find(params.query);
 			// Full-text search
 			// More info: https://docs.mongodb.com/manual/reference/operator/query/text/
 			if (_.isString(params.search) && params.search !== "") {
@@ -277,7 +277,7 @@ class MongooseStoreAdapter {
 
 			return q;
 		}
-		return this.collection.find();
+		return this.model.find();
 	}
 
 }

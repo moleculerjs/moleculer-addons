@@ -16,7 +16,7 @@ let broker = new ServiceBroker({
 broker.createService(StoreService, {
 	name: "posts",
 	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
-	collection: Post,
+	model: Post,
 	settings: {
 		fields: "_id title content votes"
 	},
