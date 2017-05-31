@@ -20,9 +20,6 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-		// Connection settings
-		db: null,
-
 		// Fields filter
 		fields: null,
 
@@ -58,10 +55,11 @@ module.exports = {
 		 */
 		count: {
 			cache: {
-				keys: ["search"]
+				keys: ["search", "searchFields"]
 			},
 			params: {
-				search: { type: "string", optional: true }
+				search: { type: "string", optional: true },
+				searchFields: { type: "array", optional: true }
 			},			
 			handler(ctx) {
 				return this.count(ctx, ctx.params);

@@ -18,7 +18,7 @@ broker.createService(StoreService, {
 	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	collection: Post,
 	settings: {
-		propertyFilter: "_id title content votes"
+		fields: "_id title content votes"
 	},
 
 	actions: {

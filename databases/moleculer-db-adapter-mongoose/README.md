@@ -9,11 +9,11 @@ Mongoose adapter for Moleculer DB service
 ## Install
 
 ```bash
-$ npm install moleculer-db-adapter-mongoose --save
+$ npm install moleculer-db moleculer-db-adapter-mongoose --save
 ```
 or
 ```bash
-$ yarn add moleculer-db-adapter-mongoose
+$ yarn add moleculer-db moleculer-db-adapter-mongoose
 ```
 
 ## Usage
@@ -21,16 +21,54 @@ $ yarn add moleculer-db-adapter-mongoose
 ```js
 "use strict";
 
+const { ServiceBroker } = require("moleculer");
+const DbService = require("moleculer-db");
+const MongooseAdapter = require("moleculer-db-adapter-mongoose");
+const Post = require("./post.model");
 
+const broker = new ServiceBroker();
+
+// Create a Mongoose service for `post` entities
+broker.createService({
+    name: "posts",
+    mixins: DbService,
+	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
+	collection: Post
+});
+
+// Get all posts
+broker.call("posts.find").then(console.log);
+
+// Save a new post
+broker.call("posts.create" { entity: {
+    title: "My first post",
+    content: "Lorem ipsum...",
+    votes: 0
+}});
 ```
 
-## Settings
-| Property | Description |
-| -------- | ----------- |
+## Options
+The constructor options need to be a `String` or an `Object`.
 
-## Actions
-| Name | Params | Result | Description |
-| ---- | ------ | ------ | ----------- |
+**Example with connection URI**
+```js
+new MongooseAdapter("mongodb://localhost/moleculer-db")
+```
+
+**Example with connection options**
+```js
+new MongooseAdapter({
+	uri: "mongodb://db-server-hostname/my-db",
+	options: {
+		user: process.env.MONGO_USERNAME,
+		pass: process.env.MONGO_PASSWORD
+		server: {
+			socketOptions: {
+				keepAlive: 1
+			}
+		}
+	})
+```
 
 # Test
 ```

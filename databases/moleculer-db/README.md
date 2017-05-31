@@ -5,6 +5,12 @@
 Service mixin to store entities in database
 
 ## Features
+- CRUD actions
+- pluggable adapters
+- cached queries
+- default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
+- filtering properties in entity
+- populate connections between services
 
 ## Install
 
@@ -22,24 +28,77 @@ $ yarn add moleculer-db
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
+const DbService = require("moleculer-db");
+
 const broker = new ServiceBroker();
 
-// Load service
-broker.createService(require("moleculer-db"));
+// Create a DB service for `user` entities
+broker.createService({
+    name: "users",
+    mixins: DbService,
 
-// Call
-broker.call("store.xyz", {}).then(console.log);
-/* Result: ??? */
+    settings: {
+        fields: "_id username name"
+    },
 
+    afterConnected() {
+        // Seed the DB with ˙this.create`
+    }
+});
+
+// Get all users
+broker.call("users.find").then(console.log);
+
+// Save a new user
+broker.call("users.create" { entity: {
+    username: "john",
+    name: "John Doe",
+    status: 1
+}});
 ```
 
 ## Settings
 | Property | Description |
 | -------- | ----------- |
+| `fields` | Field list for filtering. It can be an `Array` or a space-separated `String`. If the value is `null` or `undefined` doesn't filter the fields. |
+| `populates` | Populate schema |
+
 
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
+| `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
+| `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
+| `create` | `entity` | `Object` | Save a new entity. |
+| `get` | `id` | `Object` | Get an entity by ID. |
+| `model` | `id`, `populate`, `fields`, `resultAsObject` | `Object` | Get entities by ID/IDs. **For internal use only!** |
+| `update` | `id`, `update` | `Object` | Update an entity by ID. |
+| `remove` | `id` | `` | Remove an entity by ID. |
+| `clear` | - | `` | Clear all entities. |
+
+## Populating
+
+```js
+broker.createService({
+    name: "posts",
+    mixins: DbService,
+    settings: {
+        populates: {
+            // Shorthand populate rule. Resolve the `voters` values with `users.model` action.
+            "voters": "users.model",
+
+            // Define the params of action call. It will receive only with username & full name of author.
+            "author": {
+                action: "users.model",
+                params: {
+                    fields: "username fullName"
+                }
+            }
+        }
+    }
+});
+```
+
 
 # Test
 ```
