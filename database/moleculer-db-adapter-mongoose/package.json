@@ -1,5 +1,5 @@
 {
-  "name": "moleculer-db-mongoose",
+  "name": "moleculer-db-adapter-mongoose",
   "version": "0.0.0",
   "description": "Mongoose adapter for Moleculer Store service",
   "main": "index.js",
