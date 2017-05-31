@@ -19,14 +19,26 @@ This is a monorepo, contains multiple npm packages.
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=databases&title=Database access modules) -->
+## Database access modules
+| Name | Version | Description |
+| ---- | ------- | ----------- |
+| [moleculer-db](/databases/moleculer-db) | [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db) | Service mixin to store entities in database |
+| [moleculer-db-adapter-mongoose](/databases/moleculer-db-adapter-mongoose) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose) | Mongoose adapter for Moleculer DB service |
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=databases&title=Database access modules) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
+ 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
+ 
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
+ 
 <!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
 <!-- AUTO-GENERATED-CONTENT:END -->
 
