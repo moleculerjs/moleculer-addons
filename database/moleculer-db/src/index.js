@@ -49,7 +49,7 @@ module.exports = {
 				searchFields: { type: "array", optional: true }
 			},
 			handler(ctx) {
-				return this.find(ctx);
+				return this.find(ctx, ctx.params);
 			}
 		},
 
@@ -64,7 +64,7 @@ module.exports = {
 				search: { type: "string", optional: true }
 			},			
 			handler(ctx) {
-				return this.count(ctx);
+				return this.count(ctx, ctx.params);
 			}
 		},
 
@@ -76,7 +76,7 @@ module.exports = {
 				entity: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.create(ctx);
+				return this.create(ctx, ctx.params);
 			}
 		},
 
@@ -91,7 +91,7 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.get(ctx);
+				return this.get(ctx, ctx.params);
 			}
 		},
 
@@ -100,7 +100,7 @@ module.exports = {
 		 */
 		model: {
 			cache: {
-				keys: ["id"]
+				keys: ["id", "populate", "fields", "resultAsObject"]
 			},
 			params: {
 				id: { type: "any" },
@@ -109,7 +109,7 @@ module.exports = {
 				resultAsObject: { type: "boolean", optional: true }
 			},			
 			handler(ctx) {
-				return this.model(ctx);
+				return this.model(ctx, ctx.params);
 			}
 		},
 
@@ -122,7 +122,7 @@ module.exports = {
 				update: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.update(ctx);
+				return this.update(ctx, ctx.params);
 			}
 		},
 
@@ -134,7 +134,7 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.remove(ctx);
+				return this.remove(ctx, ctx.params.id);
 			}
 		},
 
@@ -180,56 +180,61 @@ module.exports = {
 		/**
 		 * Find all entities
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} params
 		 * @returns 
 		 */
-		find(ctx) {
-			return this.adapter.findAll(ctx.params)
+		find(ctx, params) {
+			return this.adapter.findAll(params)
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
 
 		/**
 		 * Get count of entities
 		 * 
-		 * @param {Context?} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} params
 		 * @returns 
 		 */
-		count(ctx) {
-			return this.adapter.count(ctx ? ctx.params : {});
+		count(ctx, params) {
+			return this.adapter.count(params);
 		},
 
 		/**
 		 * Create a new entity
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} entity
 		 * @returns 
 		 */
-		create(ctx) {
-			return this.adapter.insert(ctx.params.entity)
-				.then(entity => this.transformDocuments(ctx, entity))
+		create(ctx, params) {
+			return this.adapter.insert(params.entity)
+				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
 		/**
 		 * Get an entity by ID
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} params
 		 * @returns 
 		 */
-		get(ctx) {
-			return this.adapter.findById(ctx.params.id)
-				.then(entity => this.transformDocuments(ctx, entity));
+		get(ctx, params) {
+			const populate = params.populate != null ? params.populate : true;
+			return this.model(ctx, { id: params.id, populate });
 		},
 
 		/**
 		 * Get entities by IDs. For internal use!
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} params
 		 * @returns 
 		 */
-		model(ctx) {
+		model(ctx, params) {
 			let origDoc;
-			return this.Promise.resolve(ctx.params)
+			return this.Promise.resolve(params)
 				.then(({ id }) => {
 					if (_.isArray(id)) {
 						return this.adapter.findByIds(id);
@@ -239,17 +244,17 @@ module.exports = {
 				})
 				.then(doc => {
 					origDoc = doc;
-					if (ctx.params.populate === true)
+					if (params.populate === true)
 						return this.populateDocs(ctx, doc);
 					return doc;
 				})
 				.then(doc => {
-					if (ctx.params.fields !== false)
-						return this.filterFields(doc, ctx.params.fields);
+					if (params.fields !== false)
+						return this.filterFields(doc, params.fields);
 					return doc;
 				})
 				.then(json => {
-					if (_.isArray(json) && ctx.params.resultAsObject === true) {
+					if (_.isArray(json) && params.resultAsObject === true) {
 						let res = {};
 						json.forEach((doc, i) => res[origDoc[i]._id] = doc);
 
@@ -262,11 +267,12 @@ module.exports = {
 		/**
 		 * Update an entity by ID
 		 * 
-		 * @param {any} ctx 
+		 * @param {Context} ctx 
+		 * @param {Object} params
 		 * @returns 
 		 */
-		update(ctx) {
-			return this.adapter.updateById(ctx.params.id, ctx.params.update)
+		update(ctx, params) {
+			return this.adapter.updateById(params.id, params.update)
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -277,8 +283,8 @@ module.exports = {
 		 * @param {any} ctx 
 		 * @returns 
 		 */
-		remove(ctx) {
-			return this.adapter.removeById(ctx.params.id)
+		remove(ctx, params) {
+			return this.adapter.removeById(params.id)
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
