@@ -39,8 +39,8 @@ module.exports = {
 				keys: ["limit", "offset", "sort", "search", "searchFields"]
 			},
 			params: {
-				limit: { type: "number", integer: true, min: 0, optional: true },
-				offset: { type: "number", integer: true, min: 0, optional: true },
+				limit: { type: "number", integer: true, min: 0, optional: true, convert: true },
+				offset: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
 				search: { type: "string", optional: true },
 				searchFields: { type: "array", optional: true }
