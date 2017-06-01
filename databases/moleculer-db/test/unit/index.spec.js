@@ -43,6 +43,22 @@ describe("Test DbService actions", () => {
 		}).catch(protectReject);
 	});
 
+	it("should call the 'find' method with params", () => {
+		service.find = jest.fn();
+		const p = {
+			limit: 5,
+			offset: "3"
+		};
+
+		return broker.call("store.find", p).then(() => {
+			expect(service.find).toHaveBeenCalledTimes(1);
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), {
+				limit: 5,
+				offset: 3
+			});
+		}).catch(protectReject);
+	});
+
 	it("should call the 'count' method", () => {
 		service.count = jest.fn();
 		const p = {};

@@ -46,6 +46,11 @@ module.exports = {
 				searchFields: { type: "array", optional: true }
 			},
 			handler(ctx) {
+				if (typeof(ctx.params.limit) === "string")
+					ctx.params.limit = Number(ctx.params.limit);
+				if (typeof(ctx.params.offset) === "string")
+					ctx.params.offset = Number(ctx.params.offset);
+
 				return this.find(ctx, ctx.params);
 			}
 		},
