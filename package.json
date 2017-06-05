@@ -30,7 +30,7 @@
     "jest-cli": "20.0.4",
     "lerna": "2.0.0-rc.5",
     "lodash": "4.17.4",
-    "markdown-magic": "0.1.16",
+    "markdown-magic": "0.1.17",
     "nodemon": "1.11.0"
   },
   "dependencies": {
