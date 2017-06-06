@@ -20,6 +20,9 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
+		// Name of "_id" field
+		idField: "_id",
+		
 		// Fields filter
 		fields: null,
 
@@ -260,7 +263,7 @@ module.exports = {
 				.then(json => {
 					if (_.isArray(json) && params.resultAsObject === true) {
 						let res = {};
-						json.forEach((doc, i) => res[origDoc[i]._id] = doc);
+						json.forEach((doc, i) => res[origDoc[i][this.settings.idField]] = doc);
 
 						return res;
 					}
@@ -411,7 +414,7 @@ module.exports = {
 							items.forEach(doc => {
 								let id = doc[field];
 								if (_.isArray(id)) {
-									let models = _.compact(id.map(_id => populatedDocs[_id]));
+									let models = _.compact(id.map(id => populatedDocs[id]));
 									doc[field] = models;
 								} else {
 									doc[field] = populatedDocs[id];
