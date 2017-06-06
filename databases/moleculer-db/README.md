@@ -62,6 +62,7 @@ broker.start()
 ## Settings
 | Property | Description |
 | -------- | ----------- |
+| `idField` | Name of ID field. Default: `_id` |
 | `fields` | Field list for filtering. It can be an `Array` or a space-separated `String`. If the value is `null` or `undefined` doesn't filter the fields. |
 | `populates` | Populate schema |
 
