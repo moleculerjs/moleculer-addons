@@ -689,3 +689,74 @@ describe("Test populateDocs method", () => {
 	});
 
 });
+
+
+describe("Test validateEntity method", () => {
+
+	describe("Test with custom validator function", () => {
+
+		const validator = jest.fn();
+
+		const broker = new ServiceBroker({ validation: false });
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter,
+			settings: {
+				entityValidator: validator
+			}
+		});
+
+		it("should call 'entityValidator'", () => {
+			let entity = {};
+			return service.validateEntity(entity).catch(protectReject).then(() => {
+				expect(validator).toHaveBeenCalledTimes(1);
+				expect(validator).toHaveBeenCalledWith(entity);
+			});
+		});
+
+		it("should call 'entityValidator' multiple times", () => {
+			validator.mockClear();
+			let entities = [{}, {}];
+			return service.validateEntity(entities).catch(protectReject).then(() => {
+				expect(validator).toHaveBeenCalledTimes(2);
+				expect(validator).toHaveBeenCalledWith(entities[0]);
+				expect(validator).toHaveBeenCalledWith(entities[1]);
+			});
+		});
+
+	});
+
+	describe("Test with built-in validator function", () => {
+
+		const broker = new ServiceBroker({ validation: true });
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter,
+			settings: {
+				entityValidator: {
+					id: "number",
+					name: "string"
+				}
+			}
+		});
+
+		it("should call validator with correct entity", () => {
+			let entity = { id: 5, name: "John" };
+			return service.validateEntity(entity).catch(protectReject).then(res => {
+				expect(res).toBe(entity);
+			});
+		});
+
+		it("should call validator with incorrect entity", () => {
+			let entities = [{ id: 5, name: "John" }, { name: "Jane" }];
+			return service.validateEntity(entities).then(protectReject).catch(err => {
+				expect(err).toBeDefined();
+				expect(err[0].type).toBe("required");
+				expect(err[0].field).toBe("id");
+			});
+		});
+
+	});
+
+});
+

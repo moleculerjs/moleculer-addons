@@ -27,7 +27,10 @@ module.exports = {
 		fields: null,
 
 		// Auto populates schema
-		populates: null
+		populates: null,
+
+		// Validator schema or function to validate the incoming entity from "users.create"
+		entityValidator: null,
 	},
 
 	/**
@@ -215,7 +218,8 @@ module.exports = {
 		 * @returns 
 		 */
 		create(ctx, params) {
-			return this.adapter.insert(params.entity)
+			return this.validateEntity(params.entity)
+				.then(entity => this.adapter.insert(entity))
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -444,6 +448,14 @@ module.exports = {
 
 			// Fallback, if no populate defined
 			return this.Promise.resolve(docs);
+		},
+
+		validateEntity(entity) {
+			if (!this.settings.entityValidator)
+				return this.Promise.resolve(entity);
+
+			let entities = Array.isArray(entity) ? entity : [entity];
+			return this.Promise.all(entities.map(entity => this.settings.entityValidator(entity))).then(() => entity);
 		}
 	},
 
@@ -457,6 +469,19 @@ module.exports = {
 			this.adapter = this.schema.adapter;
 
 		this.adapter.init(this.broker, this);
+
+		// Transform validation schema to checker function
+		if (this.broker.validator && _.isObject(this.settings.entityValidator)) {
+			const check = this.broker.validator.compile(this.settings.entityValidator);
+			this.settings.entityValidator = entity => {
+				const res = check(entity);
+				if (res === true)
+					return Promise.resolve();
+				else
+					return Promise.reject(res);
+			};
+		}
+		
 	},
 
 	/**
