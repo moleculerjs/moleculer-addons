@@ -13,7 +13,7 @@ module.exports = {
 	// Must overwrite it
 	name: "",
 
-	// Store adapter (default is a NeDB memory adapter)
+	// Store adapter (default is the NeDB memory adapter)
 	adapter: null,
 
 	/**

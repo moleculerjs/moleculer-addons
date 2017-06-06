@@ -10,7 +10,7 @@ const _ 		= require("lodash");
 const Promise	= require("bluebird");
 const Datastore = require("nedb");
 
-class MemoryStoreAdapter {
+class MemoryDbAdapter {
 
 	constructor(opts) {
 		this.opts = opts;
@@ -181,4 +181,4 @@ class MemoryStoreAdapter {
 	}
 }
 
-module.exports = MemoryStoreAdapter;
+module.exports = MemoryDbAdapter;
