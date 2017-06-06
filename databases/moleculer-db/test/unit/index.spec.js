@@ -237,9 +237,13 @@ describe("Test DbService methods", () => {
 		const ctx = { params: { entity: {} } };
 		service.transformDocuments.mockClear();
 		service.clearCache = jest.fn(() => Promise.resolve());
+		service.settings.entityValidator = jest.fn(entity => entity);
 
 		return service.create(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
+
+			expect(service.settings.entityValidator).toHaveBeenCalledTimes(1);
+			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entity);
 
 			expect(adapter.insert).toHaveBeenCalledTimes(1);
 			expect(adapter.insert).toHaveBeenCalledWith(ctx.params.entity);

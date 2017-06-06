@@ -451,7 +451,7 @@ module.exports = {
 		},
 
 		validateEntity(entity) {
-			if (!this.settings.entityValidator)
+			if (!_.isFunction(this.settings.entityValidator))
 				return this.Promise.resolve(entity);
 
 			let entities = Array.isArray(entity) ? entity : [entity];
