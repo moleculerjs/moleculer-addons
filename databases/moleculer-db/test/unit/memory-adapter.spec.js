@@ -169,10 +169,7 @@ describe("Test Adapter methods", () => {
 	});	
 
 	it("should update many documents", () => {
-		return adapter.update({
-			query: { age: 35 }, 
-			update: { $set: { gender: "male" } }
-		}).then(res => {
+		return adapter.update({ age: 35 }, { $set: { gender: "male" } }).then(res => {
 			expect(res.length).toBe(2);
 			expect(res[0].gender).toBe("male");
 			expect(res[1].gender).toBe("male");
@@ -184,9 +181,7 @@ describe("Test Adapter methods", () => {
 	});	
 
 	it("should remove many documents", () => {
-		return expect(adapter.remove({
-			query: { name: { $regex: /Doe/ } }
-		})).resolves.toBe(1);
+		return expect(adapter.remove({ name: { $regex: /Doe/ } })).resolves.toBe(1);
 	});	
 
 	it("should count all entities", () => {

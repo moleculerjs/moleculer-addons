@@ -266,13 +266,12 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 	it("call update", () => {
-		let params = {
-			query: {},
-			update: {}
-		};
-		return adapter.update(params).catch(protectReject).then(() => {
+		let query = {};
+		let update = {};
+		
+		return adapter.update(query, update).catch(protectReject).then(() => {
 			expect(adapter.model.update).toHaveBeenCalledTimes(1);
-			expect(adapter.model.update).toHaveBeenCalledWith(params.query, params.update, { multi: true, "new": true });
+			expect(adapter.model.update).toHaveBeenCalledWith(query, update, { multi: true, "new": true });
 
 			expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		});
@@ -291,12 +290,11 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 	it("call remove", () => {
-		let params = {
-			query: {}
-		};
-		return adapter.remove(params).catch(protectReject).then(() => {
+		let query = {};
+
+		return adapter.remove(query).catch(protectReject).then(() => {
 			expect(adapter.model.remove).toHaveBeenCalledTimes(1);
-			expect(adapter.model.remove).toHaveBeenCalledWith(params.query);
+			expect(adapter.model.remove).toHaveBeenCalledWith(query);
 		});
 	});
 

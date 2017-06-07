@@ -39,9 +39,9 @@ class MemoryDbAdapter {
 		return Promise.resolve();
 	}
 
-	findAll(params) {
+	findAll(filters) {
 		return new Promise((resolve, reject) => {
-			this.doFiltering(params).exec((err, docs) => {
+			this.doFiltering(filters).exec((err, docs) => {
 				/* istanbul ignore next */
 				if (err)
 					return reject(err);
@@ -69,9 +69,9 @@ class MemoryDbAdapter {
 		});
 	}
 
-	count(params = {}) {
+	count(filters = {}) {
 		return new Promise((resolve, reject) => {
-			this.doFiltering(params).exec((err, docs) => {
+			this.doFiltering(filters).exec((err, docs) => {
 				/* istanbul ignore next */
 				if (err)
 					return reject(err);
@@ -90,16 +90,16 @@ class MemoryDbAdapter {
 		return this.db.insert(entities);
 	}
 
-	update(params) {
-		return this.db.update(params.query, params.update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
+	update(query, update) {
+		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
 	updateById(_id, update) {
 		return this.db.update({ _id }, update, { returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
-	remove(params) {
-		return this.db.remove(params.query, { multi: true });
+	remove(query) {
+		return this.db.remove(query, { multi: true });
 	}
 
 	removeById(_id) {

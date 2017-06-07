@@ -93,13 +93,13 @@ class MongooseStoreAdapter {
 	/**
 	 * Find all entities by `query`
 	 * 
-	 * @param {any} params 
+	 * @param {any} filters 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	findAll(params) {
-		return this.doFiltering(params).lean().exec();
+	findAll(filters) {
+		return this.doFiltering(filters).lean().exec();
 	}
 
 	/**
@@ -131,15 +131,15 @@ class MongooseStoreAdapter {
 	}
 
 	/**
-	 * Count of entities by params
+	 * Count of entities by filters
 	 * 
-	 * @param {any} [params={}] 
+	 * @param {any} [filters={}] 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	count(params = {}) {
-		return this.doFiltering(params).count().exec();
+	count(filters = {}) {
+		return this.doFiltering(filters).count().exec();
 	}
 
 	/**
@@ -170,13 +170,14 @@ class MongooseStoreAdapter {
 	/**
 	 * Update entities by `query` and `update`
 	 * 
-	 * @param {any} params 
+	 * @param {any} query 
+	 * @param {any} update 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	update(params) {
-		return this.model.update(params.query, params.update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
+	update(query, update) {
+		return this.model.update(query, update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
 	}
 
 	/**
@@ -200,8 +201,8 @@ class MongooseStoreAdapter {
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	remove(params) {
-		return this.model.remove(params.query);
+	remove(query) {
+		return this.model.remove(query);
 	}
 
 	/**

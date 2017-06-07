@@ -450,6 +450,12 @@ module.exports = {
 			return this.Promise.resolve(docs);
 		},
 
+		/**
+		 * Validate an entity by validator
+		 * 
+		 * @param {any} entity 
+		 * @returns {Promise}
+		 */
 		validateEntity(entity) {
 			if (!_.isFunction(this.settings.entityValidator))
 				return this.Promise.resolve(entity);
