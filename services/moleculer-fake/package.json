@@ -23,16 +23,16 @@
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.7.3"
+    "moleculer": "^0.8.0"
   },
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
-    "eslint": "3.19.0",
-    "jest": "20.0.3",
-    "jest-cli": "20.0.3",
+    "eslint": "4.1.1",
+    "jest": "20.0.4",
+    "jest-cli": "20.0.4",
     "lolex": "1.6.0",
-    "moleculer": "^0.7.3",
+    "moleculer": "0.8.0",
     "nodemon": "1.11.0",
     "npm-check": "5.4.4"
   },
