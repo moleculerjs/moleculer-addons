@@ -24,7 +24,7 @@
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
     "coveralls": "2.13.1",
-    "eslint": "3.19.0",
+    "eslint": "4.1.1",
     "glob": "7.1.2",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
@@ -34,7 +34,7 @@
     "nodemon": "1.11.0"
   },
   "dependencies": {
-    "moleculer-cli": "0.3.0"
+    "moleculer-cli": "0.3.4"
   },
   "jest": {
     "testEnvironment": "node",
