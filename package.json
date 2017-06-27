@@ -10,7 +10,7 @@
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "init:service": "cd services && moleculer init addon",
-    "init:store": "cd stores && moleculer init addon",
+    "init:database": "cd databases && moleculer init addon",
     "release": "lerna publish",
     "readme": "node readme-generator.js"
   },
