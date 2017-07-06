@@ -79,6 +79,48 @@ broker.start()
 | `remove` | `id` | `` | Remove an entity by ID. |
 | `clear` | - | `` | Clear all entities. |
 
+## Methods
+
+### `this.find(ctx, params)`
+Find entities by filters. The `params` will be passed to adapter
+
+### `this.count(ctx, params)`
+Get count of find entities by filters. The `params` will be passed to adapter
+
+### `this.create(ctx, params)`
+Create a new entity. The `params.entity` will be passed to adapter
+
+### `this.get(ctx, params)`
+Get an entities by ID. The `params.id` will be passed to adapter
+
+### `this.model(ctx, params)`
+Get entities by IDs. For internal use only!
+
+### `this.updateById(ctx, params)`
+Update entity by ID. The `params.id` & `params.update` will be passed to adapter
+
+> After operation the cache will be cleared!
+
+### `this.updateMany(ctx, params)`
+Update multiple entities by query. The `params.query` & `params.update` will be passed to adapter
+
+> After operation the cache will be cleared!
+
+### `this.removeById(ctx, params)`
+Remove entity by ID. The `params.id` will be passed to adapter
+
+> After operation the cache will be cleared!
+
+### `this.removeMany(ctx, params)`
+Remove multiple entitites by query. The `params.query` will be passed to adapter
+
+> After operation the cache will be cleared!
+
+### `this.clear()`
+Delete all entitites. 
+
+> After operation the cache will be cleared!
+
 ## Populating
 
 ```js
