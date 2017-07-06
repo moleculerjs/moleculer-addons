@@ -158,12 +158,12 @@ module.exports = {
     },
 
     actions: {
-        // Increment `votes` field in a post entity
+        // Increment `votes` field by post ID
         vote(ctx) {
             return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
         },
 
-        // List post of an author
+        // List posts of an author
         byAuthors(ctx) {
             return this.find(ctx, {
                 query: {
