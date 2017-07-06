@@ -52,15 +52,15 @@ describe("Test MongooseStoreAdapter", () => {
 		expect(adapter.init).toBeDefined();
 		expect(adapter.connect).toBeDefined();
 		expect(adapter.disconnect).toBeDefined();
-		expect(adapter.findAll).toBeDefined();
+		expect(adapter.find).toBeDefined();
 		expect(adapter.findById).toBeDefined();
 		expect(adapter.findByIds).toBeDefined();
 		expect(adapter.count).toBeDefined();
 		expect(adapter.insert).toBeDefined();
 		expect(adapter.insertMany).toBeDefined();
-		expect(adapter.update).toBeDefined();
+		expect(adapter.updateMany).toBeDefined();
 		expect(adapter.updateById).toBeDefined();
-		expect(adapter.remove).toBeDefined();
+		expect(adapter.removeMany).toBeDefined();
 		expect(adapter.removeById).toBeDefined();
 		expect(adapter.clear).toBeDefined();
 	});
@@ -191,11 +191,11 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 
-	it("call findAll", () => {
+	it("call find", () => {
 		adapter.doFiltering = jest.fn(() => query());
 
 		let params = {};
-		return adapter.findAll(params).catch(protectReject).then(() => {
+		return adapter.find(params).catch(protectReject).then(() => {
 			expect(adapter.doFiltering).toHaveBeenCalledTimes(1);
 			expect(adapter.doFiltering).toHaveBeenCalledWith(params);
 
@@ -265,11 +265,11 @@ describe("Test MongooseStoreAdapter", () => {
 		});
 	});
 
-	it("call update", () => {
+	it("call updateMany", () => {
 		let query = {};
 		let update = {};
 		
-		return adapter.update(query, update).catch(protectReject).then(() => {
+		return adapter.updateMany(query, update).catch(protectReject).then(() => {
 			expect(adapter.model.update).toHaveBeenCalledTimes(1);
 			expect(adapter.model.update).toHaveBeenCalledWith(query, update, { multi: true, "new": true });
 
@@ -289,10 +289,10 @@ describe("Test MongooseStoreAdapter", () => {
 		});
 	});
 
-	it("call remove", () => {
+	it("call removeMany", () => {
 		let query = {};
 
-		return adapter.remove(query).catch(protectReject).then(() => {
+		return adapter.removeMany(query).catch(protectReject).then(() => {
 			expect(adapter.model.remove).toHaveBeenCalledTimes(1);
 			expect(adapter.model.remove).toHaveBeenCalledWith(query);
 		});

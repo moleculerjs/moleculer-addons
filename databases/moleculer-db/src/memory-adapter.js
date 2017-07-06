@@ -176,7 +176,7 @@ class MemoryDbAdapter {
 	}
 
 	/**
-	 * Update many entities by 'query'
+	 * Update many entities by `query` and `update`
 	 * 
 	 * @param {Object} query 
 	 * @param {Object} update 
@@ -200,7 +200,7 @@ class MemoryDbAdapter {
 	}
 
 	/**
-	 * Remove many entities by 'query'
+	 * Remove many entities which are matched by `query`
 	 * 
 	 * @param {Object} query 
 	 * @returns {Promise}

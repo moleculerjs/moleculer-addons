@@ -91,14 +91,22 @@ class MongooseStoreAdapter {
 	}
 
 	/**
-	 * Find all entities by `query`
+	 * Find all entities by filters.
+	 * 
+	 * Available filter props:
+	 * 	- limit
+	 *  - offset
+	 *  - sort
+	 *  - search
+	 *  - searchFields
+	 *  - query
 	 * 
 	 * @param {any} filters 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	findAll(filters) {
+	find(filters) {
 		return this.doFiltering(filters).lean().exec();
 	}
 
@@ -131,9 +139,14 @@ class MongooseStoreAdapter {
 	}
 
 	/**
-	 * Count of entities by filters
+	 * Get count of filtered entites
 	 * 
-	 * @param {any} [filters={}] 
+	 * Available filter props:
+	 *  - search
+	 *  - searchFields
+	 *  - query
+	 * 
+	 * @param {Object} [filters={}] 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
@@ -168,23 +181,23 @@ class MongooseStoreAdapter {
 	}
 
 	/**
-	 * Update entities by `query` and `update`
+	 * Update many entities by `query` and `update`
 	 * 
-	 * @param {any} query 
-	 * @param {any} update 
+	 * @param {Object} query 
+	 * @param {Object} update 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	update(query, update) {
+	updateMany(query, update) {
 		return this.model.update(query, update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
 	}
 
 	/**
-	 * Update an entity by ID and `update
+	 * Update an entity by ID and `update`
 	 * 
 	 * @param {any} _id 
-	 * @param {any} update 
+	 * @param {Object} update 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
@@ -196,12 +209,12 @@ class MongooseStoreAdapter {
 	/**
 	 * Remove entities which are matched by `query`
 	 * 
-	 * @param {any} params 
+	 * @param {Object} query 
 	 * @returns {Promise}
 	 * 
 	 * @memberof MongooseStoreAdapter
 	 */
-	remove(query) {
+	removeMany(query) {
 		return this.model.remove(query);
 	}
 
@@ -235,6 +248,7 @@ class MongooseStoreAdapter {
 	 * 	- sort
 	 * 	- limit
 	 * 	- offset
+	 *  - query
 	 * 
  	 * @param {Object} params 
 	 * @returns {MongoQuery}
