@@ -82,37 +82,37 @@ broker.start()
 ## Methods
 
 ### `this.find(ctx, params)`
-Find entities by filters. The `params` will be passed to adapter
+Find entities by filters. The `params` will be passed to the adapter.
 
 ### `this.count(ctx, params)`
-Get count of find entities by filters. The `params` will be passed to adapter
+Get count of find entities by filters. The `params` will be passed to the adapter.
 
 ### `this.create(ctx, params)`
-Create a new entity. The `params.entity` will be passed to adapter
+Create a new entity. The `params.entity` will be passed to the adapter.
 
 ### `this.get(ctx, params)`
-Get an entities by ID. The `params.id` will be passed to adapter
+Get an entities by ID. The `params.id` will be passed to the adapter.
 
 ### `this.model(ctx, params)`
 Get entities by IDs. For internal use only!
 
 ### `this.updateById(ctx, params)`
-Update entity by ID. The `params.id` & `params.update` will be passed to adapter
+Update entity by ID. The `params.id` & `params.update` will be passed to the adapter.
 
 > After operation the cache will be cleared!
 
 ### `this.updateMany(ctx, params)`
-Update multiple entities by query. The `params.query` & `params.update` will be passed to adapter
+Update multiple entities by query. The `params.query` & `params.update` will be passed to the adapter.
 
 > After operation the cache will be cleared!
 
 ### `this.removeById(ctx, params)`
-Remove entity by ID. The `params.id` will be passed to adapter
+Remove entity by ID. The `params.id` will be passed to the adapter.
 
 > After operation the cache will be cleared!
 
 ### `this.removeMany(ctx, params)`
-Remove multiple entitites by query. The `params.query` will be passed to adapter
+Remove multiple entitites by query. The `params.query` will be passed to the adapter.
 
 > After operation the cache will be cleared!
 
@@ -142,6 +142,39 @@ broker.createService({
         }
     }
 });
+```
+
+## Extend with custom actions
+
+```js
+const DbService = require("moleculer-db");
+
+module.exports = {
+	name: "posts",
+    mixins: [DbService],
+
+	settings: {
+		fields: "_id title content votes"
+	},
+
+	actions: {
+        // Increment `votes` field in a post entity
+		vote(ctx) {
+			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
+		},
+
+        // List post of an author
+        byAuthors(ctx) {
+            return this.find(ctx, {
+                query: {
+                    author: ctx.params.authorID
+                },
+                limit: ctx.params.limit || 10,
+                sort: "-createdAt"
+            })
+        }
+    }
+}
 ```
 
 
