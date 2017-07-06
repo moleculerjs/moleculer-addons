@@ -1,6 +1,6 @@
 {
   "name": "moleculer-mail",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Send emails",
   "main": "index.js",
   "scripts": {
