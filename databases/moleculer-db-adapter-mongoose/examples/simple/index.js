@@ -24,17 +24,18 @@ broker.createService(StoreService, {
 	actions: {
 		vote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
+				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
 		},
 
 		unvote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
+				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
 		}
 	},
 
 	afterConnected() {
 		this.logger.info(chalk.green.bold("Connected successfully"));
+		this.clear();
 	}
 });
 
@@ -42,10 +43,6 @@ broker.createService(StoreService, {
 broker.start().delay(500).then(() => {
 	let id;
 	Promise.resolve()
-		// Drop all posts
-		.then(() => console.log(chalk.yellow.bold("\n--- CLEAR ---")))
-		.then(() => broker.call("posts.clear").then(console.log))
-
 		// Count of posts
 		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
 		.then(() => broker.call("posts.count").then(console.log))

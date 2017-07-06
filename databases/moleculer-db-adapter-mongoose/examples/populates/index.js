@@ -65,7 +65,7 @@ broker.createService(StoreService, {
 							votes: fakerator.random.number(10)
 						});
 					})).then(() => {
-						this.adapter.findAll({}).then(res => console.log("Saved posts:", res ));
+						this.adapter.find({}).then(res => console.log("Saved posts:", res ));
 					});
 
 				});
@@ -97,7 +97,7 @@ broker.createService(StoreService, {
 						email: fakeUser.email
 					});
 				})).then(() => {
-					this.adapter.findAll({}).then(res => console.log("Saved users:", res ));
+					this.adapter.find({}).then(res => console.log("Saved users:", res ));
 				});
 			}
 		});
