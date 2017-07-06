@@ -103,7 +103,7 @@ module.exports = function(adapter) {
 		});	
 
 		it("should find filtered entities (limit, offset)", () => {
-			return broker.call("posts.find", { sort: "votes", limit: 2, offset: 1 }).catch(protectReject).then(res => {
+			return broker.call("posts.find", { sort: "votes", limit: "2", offset: 1 }).catch(protectReject).then(res => {
 				expect(res.length).toBe(2);
 				expect(res[0]).toEqual(posts[0]);
 				expect(res[1]).toEqual(posts[1]);
@@ -138,7 +138,7 @@ module.exports = function(adapter) {
 				expect(res).toBe(2);
 			});
 		});	
-
+		/*
 		it("should remove all entities", () => {
 			return broker.call("posts.clear").catch(protectReject).then(res => {
 				expect(res).toBe(2);
@@ -149,7 +149,8 @@ module.exports = function(adapter) {
 			return broker.call("posts.count").catch(protectReject).then(res => {
 				expect(res).toBe(0);
 			});
-		});	
+		});
+		*/	
 	});
 
 };

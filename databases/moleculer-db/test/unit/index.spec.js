@@ -100,33 +100,33 @@ describe("Test DbService actions", () => {
 	});
 
 	it("should call the 'update' method", () => {
-		service.update = jest.fn();
+		service.updateById = jest.fn();
 		const p = {};
 
 		return broker.call("store.update", p).then(() => {
-			expect(service.update).toHaveBeenCalledTimes(1);
-			expect(service.update).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.updateById).toHaveBeenCalledTimes(1);
+			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'remove' method", () => {
-		service.remove = jest.fn();
+		service.removeById = jest.fn();
 		const p = {};
 
 		return broker.call("store.remove", p).then(() => {
-			expect(service.remove).toHaveBeenCalledTimes(1);
-			expect(service.remove).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.removeById).toHaveBeenCalledTimes(1);
+			expect(service.removeById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
-	it("should call the 'clear' method", () => {
+	/*it("should call the 'clear' method", () => {
 		service.clear = jest.fn();
 
 		return broker.call("store.clear").then(() => {
 			expect(service.clear).toHaveBeenCalledTimes(1);
 			expect(service.clear).toHaveBeenCalledWith(jasmine.any(Context));
 		}).catch(protectReject);
-	});
+	});*/
 
 
 	it("should call the 'disconnect' method", () => {
@@ -169,15 +169,15 @@ describe("Test DbService methods", () => {
 		init: jest.fn(() => Promise.resolve()),
 		connect: jest.fn(() => Promise.resolve()),
 		disconnect: jest.fn(() => Promise.resolve()),
-		findAll: jest.fn(() => Promise.resolve(docs)),
+		find: jest.fn(() => Promise.resolve(docs)),
 		findById: jest.fn(() => Promise.resolve(doc)),
 		findByIds: jest.fn(() => Promise.resolve(docs)),
 		count: jest.fn(() => Promise.resolve(3)),
 		insert: jest.fn(() => Promise.resolve(doc)),
 		insertMany: jest.fn(() => Promise.resolve(docs)),
-		update: jest.fn(() => Promise.resolve(docs)),
+		updateMany: jest.fn(() => Promise.resolve(docs)),
 		updateById: jest.fn(() => Promise.resolve(doc)),
-		remove: jest.fn(() => Promise.resolve(3)),
+		removeMany: jest.fn(() => Promise.resolve(5)),
 		removeById: jest.fn(() => Promise.resolve(3)),
 		clear: jest.fn(() => Promise.resolve(3))
 	};
@@ -207,15 +207,15 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call 'findAll' of adapter", () => {
+	it("should call 'find' of adapter", () => {
 		const ctx = { params: {} };
 		service.transformDocuments = jest.fn((ctx, docs) => Promise.resolve(docs));
 
 		return service.find(ctx, ctx.params).then(res => {
 			expect(res).toBe(docs);
 
-			expect(adapter.findAll).toHaveBeenCalledTimes(1);
-			expect(adapter.findAll).toHaveBeenCalledWith(ctx.params);
+			expect(adapter.find).toHaveBeenCalledTimes(1);
+			expect(adapter.find).toHaveBeenCalledWith(ctx.params);
 
 			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, docs);
@@ -357,7 +357,7 @@ describe("Test DbService methods", () => {
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
 
-		return service.update(ctx, ctx.params).then(res => {
+		return service.updateById(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
 			expect(adapter.updateById).toHaveBeenCalledTimes(1);
@@ -370,12 +370,30 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
+	it("should call 'updateMany' of adapter", () => {
+		const ctx = { params: { query: {}, update: {} } };
+		service.transformDocuments.mockClear();
+		service.clearCache.mockClear();
+
+		return service.updateMany(ctx, ctx.params).then(res => {
+			expect(res).toBe(docs);
+
+			expect(adapter.updateMany).toHaveBeenCalledTimes(1);
+			expect(adapter.updateMany).toHaveBeenCalledWith(ctx.params.query, ctx.params.update);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, docs);
+
+			expect(service.clearCache).toHaveBeenCalledTimes(1);
+		}).catch(protectReject);
+	});
+
 	it("should call 'removeById' of adapter", () => {
 		const ctx = { params: { id: 5 } };
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
 
-		return service.remove(ctx, ctx.params).then(res => {
+		return service.removeById(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
 
 			expect(adapter.removeById).toHaveBeenCalledTimes(1);
@@ -383,6 +401,24 @@ describe("Test DbService methods", () => {
 
 			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, 3);
+
+			expect(service.clearCache).toHaveBeenCalledTimes(1);
+		}).catch(protectReject);
+	});
+
+	it("should call 'removeMany' of adapter", () => {
+		const ctx = { params: { query: {} } };
+		service.transformDocuments.mockClear();
+		service.clearCache.mockClear();
+
+		return service.removeMany(ctx, ctx.params).then(res => {
+			expect(res).toBe(5);
+
+			expect(adapter.removeMany).toHaveBeenCalledTimes(1);
+			expect(adapter.removeMany).toHaveBeenCalledWith(ctx.params.query);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, 5);
 
 			expect(service.clearCache).toHaveBeenCalledTimes(1);
 		}).catch(protectReject);

@@ -34,12 +34,12 @@ broker.createService(DbService, {
 	actions: {
 		vote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
+				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
 		},
 
 		unvote(ctx) {
 			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
+				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
 		}
 	},
 

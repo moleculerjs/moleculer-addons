@@ -13,7 +13,7 @@ module.exports = {
 	// Must overwrite it
 	name: "",
 
-	// Store adapter (default is the NeDB memory adapter)
+	// Store adapter (NeDB adapter is the default)
 	adapter: null,
 
 	/**
@@ -23,13 +23,13 @@ module.exports = {
 		// Name of "_id" field
 		idField: "_id",
 		
-		// Fields filter
+		// Fields filter for result entities
 		fields: null,
 
 		// Auto populates schema
 		populates: null,
 
-		// Validator schema or function to validate the incoming entity from "users.create"
+		// Validator schema or a function to validate the incoming entity in "users.create" action
 		entityValidator: null,
 	},
 
@@ -39,6 +39,8 @@ module.exports = {
 	actions: {
 		/**
 		 * Find all entities by filters
+		 * 
+		 * @cache true
 		 */
 		find: {
 			cache: {
@@ -63,6 +65,8 @@ module.exports = {
 
 		/**
 		 * Get count of entities by filters
+		 * 
+		 * @cache true
 		 */
 		count: {
 			cache: {
@@ -91,6 +95,8 @@ module.exports = {
 
 		/**
 		 * Get entity by ID
+		 * 
+		 * @cache true
 		 */
 		get: {
 			cache: {
@@ -105,7 +111,9 @@ module.exports = {
 		},
 
 		/**
-		 * Get entity by ID or IDs. For internal use!
+		 * Get entity by ID or IDs. For internal use only!
+		 * 
+		 * @cache true
 		 */
 		model: {
 			cache: {
@@ -131,7 +139,7 @@ module.exports = {
 				update: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.update(ctx, ctx.params);
+				return this.updateById(ctx, ctx.params);
 			}
 		},
 
@@ -143,16 +151,7 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.remove(ctx, ctx.params);
-			}
-		},
-
-		/**
-		 * Clear all entities
-		 */
-		clear: {
-			handler(ctx) {
-				return this.clear(ctx);
+				return this.removeById(ctx, ctx.params);
 			}
 		}
 	},
@@ -170,7 +169,7 @@ module.exports = {
 				// Call an 'afterConnected' handler in schema
 				if (_.isFunction(this.schema.afterConnected)) {
 					try {
-						this.schema.afterConnected.call(this);
+						return this.schema.afterConnected.call(this);
 					} catch(err) {
 						/* istanbul ignore next */
 						this.logger.error("afterConnected error!", err);
@@ -184,7 +183,7 @@ module.exports = {
 		 */
 		disconnect() {
 			if (_.isFunction(this.adapter.disconnect))
-				this.adapter.disconnect();
+				return this.adapter.disconnect();
 		},
 
 		/**
@@ -195,7 +194,7 @@ module.exports = {
 		 * @returns 
 		 */
 		find(ctx, params) {
-			return this.adapter.findAll(params)
+			return this.adapter.find(params)
 				.then(docs => this.transformDocuments(ctx, docs));
 		},
 
@@ -280,10 +279,23 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
-		update(ctx, params) {
+		updateById(ctx, params) {
 			return this.adapter.updateById(params.id, params.update)
+				.then(doc => this.transformDocuments(ctx, doc))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * Update multiple entities
+		 * 
+		 * @param {Context} ctx 
+		 * @param {Object} params
+		 * @returns {Promise}
+		 */
+		updateMany(ctx, params) {
+			return this.adapter.updateMany(params.query, params.update)
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -292,10 +304,22 @@ module.exports = {
 		 * Remove an entity by ID
 		 * 
 		 * @param {any} ctx 
-		 * @returns 
+		 * @returns {Promise}
 		 */
-		remove(ctx, params) {
+		removeById(ctx, params) {
 			return this.adapter.removeById(params.id)
+				.then(doc => this.transformDocuments(ctx, doc))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * Remove multiple entities
+		 * 
+		 * @param {any} ctx 
+		 * @returns {Promise}
+		 */
+		removeMany(ctx, params) {
+			return this.adapter.removeMany(params.query)
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -303,7 +327,7 @@ module.exports = {
 		/**
 		 * Delete all entities
 		 * 
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		clear() {
 			return this.adapter.clear()
@@ -313,10 +337,11 @@ module.exports = {
 		/**
 		 * Clear cache entities
 		 * 
+		 * @returns {Promise}
 		 */
 		clearCache() {
 			this.broker.emit("cache.clean", this.name + ".*");
-			return Promise.resolve();
+			return this.Promise.resolve();
 		},
 
 		/**
@@ -482,9 +507,9 @@ module.exports = {
 			this.settings.entityValidator = entity => {
 				const res = check(entity);
 				if (res === true)
-					return Promise.resolve();
+					return this.Promise.resolve();
 				else
-					return Promise.reject(res);
+					return this.Promise.reject(res);
 			};
 		}
 		
@@ -497,9 +522,7 @@ module.exports = {
 		if (this.adapter) {
 			return new this.Promise(resolve => {
 				let connecting = () => {
-					this.connect().then(() => {
-						resolve();
-					}).catch(err => {
+					this.connect().then(resolve).catch(err => {
 						setTimeout(() => {
 							this.logger.error("Connection error!", err);
 							this.logger.warn("Reconnecting...");
@@ -513,7 +536,7 @@ module.exports = {
 		}
 
 		/* istanbul ignore next */
-		return Promise.reject(new Error("Please set the store adapter in schema!"));
+		return this.Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
 	/**
@@ -524,7 +547,7 @@ module.exports = {
 			return this.disconnect();
 
 		/* istanbul ignore next */
-		return Promise.reject(new Error("Please set the store adapter in schema!"));
+		return this.Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
 	// Export Memory Adapter class

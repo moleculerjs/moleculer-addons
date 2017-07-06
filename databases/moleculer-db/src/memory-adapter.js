@@ -84,7 +84,7 @@ class MemoryDbAdapter {
 	 * @returns {Promise}
 	 * @memberof MemoryDbAdapter
 	 */
-	findAll(filters) {
+	find(filters) {
 		return new Promise((resolve, reject) => {
 			this.doFiltering(filters).exec((err, docs) => {
 				/* istanbul ignore next */
@@ -184,7 +184,7 @@ class MemoryDbAdapter {
 	 * @memberof MemoryDbAdapter
 	 */
 	updateMany(query, update) {
-		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true });
+		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
 	/**

@@ -5,7 +5,8 @@ const Adapter = require("../../src/memory-adapter");
 
 
 function protectReject(err) {
-	expect(err).toBe(true);
+	//console.error(err.stack);
+	expect().toBe(true);
 }
 
 describe("Test Adapter constructor", () => {
@@ -77,17 +78,17 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should find all without filter", () => {
-		return adapter.findAll().then(res => {
+		return adapter.find().then(res => {
 			expect(res.length).toBe(4);
 		}).catch(protectReject);
 	});
 
 	it("should find all 'name' with raw query", () => {
-		return expect(adapter.findAll({ query: { name: "John Doe" }})).resolves.toEqual([multipleDocs[0]]);
+		return expect(adapter.find({ query: { name: "John Doe" }})).resolves.toEqual([multipleDocs[0]]);
 	});
 
 	it("should find all 'age: 35'", () => {
-		return adapter.findAll({ query: { age: 35 }}).then(res => {
+		return adapter.find({ query: { age: 35 }}).then(res => {
 			expect(res.length).toBe(2);
 			expect(res[0].age).toEqual(35);
 			expect(res[1].age).toEqual(35);
@@ -96,7 +97,7 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should find all 'Doe'", () => {
-		return adapter.findAll({ search: "Doe" }).then(res => {
+		return adapter.find({ search: "Doe" }).then(res => {
 			expect(res.length).toBe(2);
 			expect(res[0].name).toMatch("Doe");
 			expect(res[1].name).toMatch("Doe");
@@ -105,13 +106,13 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should find all 'Doe' in filtered fields", () => {
-		return adapter.findAll({ search: "Doe", searchFields: ["email"] }).then(res => {
+		return adapter.find({ search: "Doe", searchFields: ["email"] }).then(res => {
 			expect(res.length).toBe(0);
 		}).catch(protectReject);
 	});
 
 	it("should find all 'walter' in filtered fields", () => {
-		return adapter.findAll({ search: "walter", searchFields: "email name" }).then(res => {
+		return adapter.find({ search: "walter", searchFields: "email name" }).then(res => {
 			expect(res.length).toBe(1);
 			expect(res[0]).toEqual(savedDoc);
 
@@ -123,7 +124,7 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should sort the result", () => {
-		return expect(adapter.findAll({ sort: "name" })).resolves.toEqual([
+		return expect(adapter.find({ sort: "name" })).resolves.toEqual([
 			multipleDocs[2],
 			multipleDocs[1],
 			multipleDocs[0], 
@@ -132,7 +133,7 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should sort by two fields in string", () => {
-		return expect(adapter.findAll({ sort: "age -name" })).resolves.toEqual([
+		return expect(adapter.find({ sort: "age -name" })).resolves.toEqual([
 			multipleDocs[1],
 			multipleDocs[2],
 			multipleDocs[0], 
@@ -141,7 +142,7 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should sort by two fields in array", () => {
-		return expect(adapter.findAll({ sort: ["-age", "-name"] })).resolves.toEqual([
+		return expect(adapter.find({ sort: ["-age", "-name"] })).resolves.toEqual([
 			savedDoc,
 			multipleDocs[0], 
 			multipleDocs[1],
@@ -150,7 +151,7 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should limit & skip the result", () => {
-		return expect(adapter.findAll({ sort: ["-age", "-name"], limit: 2, offset: 1 })).resolves.toEqual([
+		return expect(adapter.find({ sort: ["-age", "-name"], limit: 2, offset: 1 })).resolves.toEqual([
 			multipleDocs[0],
 			multipleDocs[1],
 		]);
@@ -169,7 +170,7 @@ describe("Test Adapter methods", () => {
 	});	
 
 	it("should update many documents", () => {
-		return adapter.update({ age: 35 }, { $set: { gender: "male" } }).then(res => {
+		return adapter.updateMany({ age: 35 }, { $set: { gender: "male" } }).then(res => {
 			expect(res.length).toBe(2);
 			expect(res[0].gender).toBe("male");
 			expect(res[1].gender).toBe("male");
@@ -181,7 +182,7 @@ describe("Test Adapter methods", () => {
 	});	
 
 	it("should remove many documents", () => {
-		return expect(adapter.remove({ name: { $regex: /Doe/ } })).resolves.toBe(1);
+		return expect(adapter.removeMany({ name: { $regex: /Doe/ } })).resolves.toBe(1);
 	});	
 
 	it("should count all entities", () => {
