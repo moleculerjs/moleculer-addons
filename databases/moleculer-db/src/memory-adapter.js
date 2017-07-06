@@ -10,17 +10,41 @@ const _ 		= require("lodash");
 const Promise	= require("bluebird");
 const Datastore = require("nedb");
 
+/**
+ * NeDB adapter for `moleculer-db`
+ * 
+ * @class MemoryDbAdapter
+ */
 class MemoryDbAdapter {
 
+	/**
+	 * Creates an instance of MemoryDbAdapter.
+	 * 
+	 * @param {Object} opts 
+	 * @memberof MemoryDbAdapter
+	 */
 	constructor(opts) {
 		this.opts = opts;
 	}
 
+	/**
+	 * Initialize adapter
+	 * 
+	 * @param {ServiceBroker} broker 
+	 * @param {Service} service 
+	 * @memberof MemoryDbAdapter
+	 */
 	init(broker, service) {
 		this.broker = broker;
 		this.service = service;
 	}
 
+	/**
+	 * Connect to database
+	 * 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	connect() {
 		this.db = new Datastore(this.opts); // in-memory
 
@@ -34,11 +58,32 @@ class MemoryDbAdapter {
 		return this.db.loadDatabase();
 	}
 
+	/**
+	 * Disconnect from database
+	 * 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	disconnect() {
 		this.db = null;
 		return Promise.resolve();
 	}
 
+	/**
+	 * Find all entities by filters.
+	 * 
+	 * Available filter props:
+	 * 	- limit
+	 *  - offset
+	 *  - sort
+	 *  - search
+	 *  - searchFields
+	 *  - query
+	 * 
+	 * @param {Object} filters 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	findAll(filters) {
 		return new Promise((resolve, reject) => {
 			this.doFiltering(filters).exec((err, docs) => {
@@ -52,10 +97,24 @@ class MemoryDbAdapter {
 		});
 	}
 
+	/**
+	 * Find an entity by ID
+	 * 
+	 * @param {any} _id 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	findById(_id) {
 		return this.db.findOne({ _id });
 	}
 
+	/**
+	 * Find all entites by IDs
+	 * 
+	 * @param {Array<Number>} ids 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	findByIds(ids) {
 		return new Promise((resolve, reject) => {
 			this.db.find({ _id: { $in: ids } }).exec((err, docs) => {
@@ -69,6 +128,18 @@ class MemoryDbAdapter {
 		});
 	}
 
+	/**
+	 * Get count of filtered entites
+	 * 
+	 * Available filter props:
+	 *  - search
+	 *  - searchFields
+	 *  - query
+	 * 
+	 * @param {Object} [filters={}] 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	count(filters = {}) {
 		return new Promise((resolve, reject) => {
 			this.doFiltering(filters).exec((err, docs) => {
@@ -82,42 +153,95 @@ class MemoryDbAdapter {
 		});
 	}
 
+	/**
+	 * Insert an entity
+	 * 
+	 * @param {Object} entity 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	insert(entity) {
 		return this.db.insert(entity);
 	}
 
+	/**
+	 * Insert multiple entities
+	 * 
+	 * @param {Array<Object>} entities 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	insertMany(entities) {
 		return this.db.insert(entities);
 	}
 
-	update(query, update) {
-		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
+	/**
+	 * Update many entities by 'query'
+	 * 
+	 * @param {Object} query 
+	 * @param {Object} update 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
+	updateMany(query, update) {
+		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true });
 	}
 
+	/**
+	 * Update an entity by ID
+	 * 
+	 * @param {any} _id 
+	 * @param {Object} update 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	updateById(_id, update) {
 		return this.db.update({ _id }, update, { returnUpdatedDocs: true }).then(res => res[1]);
 	}
 
-	remove(query) {
+	/**
+	 * Remove many entities by 'query'
+	 * 
+	 * @param {Object} query 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
+	removeMany(query) {
 		return this.db.remove(query, { multi: true });
 	}
 
+	/**
+	 * Remove an entity by ID
+	 * 
+	 * @param {any} _id 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	removeById(_id) {
 		return this.db.remove({ _id });
 	}
 
+	/**
+	 * Clear all entities from DB
+	 * 
+	 * @returns {Promise}
+	 * @memberof MemoryDbAdapter
+	 */
 	clear() {
 		return this.db.remove({}, { multi: true });
 	}
 
 	/**
 	 * Add filters to query
+	 * 
 	 * Available filters: 
 	 *  - search
+	 *  - searchFields
 	 * 	- sort
 	 * 	- limit
 	 * 	- offset
-	 * 
+	 *  - query
+	 *
 	 * @param {Object} params 
 	 * @returns {Query}
 	 */
