@@ -32,7 +32,7 @@
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
     "lolex": "1.6.0",
-    "moleculer": "0.8.0",
+    "moleculer": "0.8.2",
     "nodemon": "1.11.0",
     "npm-check": "5.4.4"
   },
