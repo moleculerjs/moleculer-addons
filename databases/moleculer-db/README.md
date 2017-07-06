@@ -150,18 +150,18 @@ broker.createService({
 const DbService = require("moleculer-db");
 
 module.exports = {
-	name: "posts",
+    name: "posts",
     mixins: [DbService],
 
-	settings: {
-		fields: "_id title content votes"
-	},
+    settings: {
+        fields: "_id title content votes"
+    },
 
-	actions: {
+    actions: {
         // Increment `votes` field in a post entity
-		vote(ctx) {
-			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
-		},
+        vote(ctx) {
+            return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
+        },
 
         // List post of an author
         byAuthors(ctx) {
