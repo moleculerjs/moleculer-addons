@@ -53,14 +53,15 @@ module.exports = {
 		 */
 		find: {
 			cache: {
-				keys: ["limit", "offset", "sort", "search", "searchFields"]
+				keys: ["limit", "offset", "sort", "search", "searchFields", "query"]
 			},
 			params: {
 				limit: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				offset: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
 				search: { type: "string", optional: true },
-				searchFields: { type: "array", optional: true }
+				searchFields: { type: "array", optional: true },
+				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
 				let params = Object.assign({}, ctx.params);
@@ -86,27 +87,34 @@ module.exports = {
 		 */
 		count: {
 			cache: {
-				keys: ["search", "searchFields"]
+				keys: ["search", "searchFields", "query"]
 			},
 			params: {
 				search: { type: "string", optional: true },
-				searchFields: { type: "array", optional: true }
+				searchFields: { type: "array", optional: true },
+				query: { type: "object", optional: true }
 			},			
 			handler(ctx) {
 				return this.count(ctx, ctx.params);
 			}
 		},
 
+		/**
+		 * List entities by filters and pagination results
+		 * 
+		 * @cache true
+		 */
 		list: {
 			cache: {
-				keys: ["page", "pageSize", "sort", "search", "searchFields"]
+				keys: ["page", "pageSize", "sort", "search", "searchFields", "query"]
 			},
 			params: {
 				page: { type: "number", integer: true, min: 1, optional: true, convert: true },
 				pageSize: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
 				search: { type: "string", optional: true },
-				searchFields: { type: "array", optional: true }
+				searchFields: { type: "array", optional: true },
+				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
 				let params = Object.assign({}, ctx.params);
