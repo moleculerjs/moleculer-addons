@@ -280,9 +280,9 @@ module.exports = {
 		 * @returns 
 		 */
 		count(ctx, params) {
-			if (params.limit)
+			if (params && params.limit)
 				params.limit = null;
-			if (params.offset)
+			if (params && params.offset)
 				params.offset = null;
 
 			return this.adapter.count(params);
