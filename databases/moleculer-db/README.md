@@ -10,6 +10,7 @@ Service mixin to store entities in database
 - cached queries
 - default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
 - filtering properties in entity
+- pagination support in `list` action
 - populate connections between services
 
 ## Install
@@ -65,12 +66,16 @@ broker.start()
 | `idField` | Name of ID field. Default: `_id` |
 | `fields` | Field list for filtering. It can be an `Array` or a space-separated `String`. If the value is `null` or `undefined` doesn't filter the fields. |
 | `populates` | Populate schema |
+| `pageSize` | Default page size in `list` action. Default: `10` |
+| `maxPageSize` | Maximum page size in `list` action. Default: `100` |
+| `maxLimit` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
 
 
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
 | `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
+| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPages`. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
 | `create` | `entity` | `Object` | Create a new entity. |
 | `get` | `id` | `Object` | Get an entity by ID. |
