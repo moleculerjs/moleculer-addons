@@ -23,6 +23,7 @@ module.exports = function(adapter) {
 			adapter: adapter,
 			settings: {
 				//fields: "_id title votes"
+				maxLimit: 10
 			}
 		});
 
@@ -110,6 +111,12 @@ module.exports = function(adapter) {
 			});
 		});	
 
+		it("should find filtered entities (max limit)", () => {
+			return broker.call("posts.find", { sort: "votes", limit: 999 }).catch(protectReject).then(res => {
+				expect(res.length).toBe(3);
+			});
+		});	
+
 		it("should find filtered entities (search)", () => {
 			return broker.call("posts.find", { search: "my", sort: "-votes" }).catch(protectReject).then(res => {
 				expect(res.length).toBe(3);
@@ -126,6 +133,42 @@ module.exports = function(adapter) {
 				expect(res[1]).toEqual(posts[2]);
 			});
 		});	
+
+		it("should list paginated entities", () => {
+			return broker.call("posts.list", { sort: "-votes" }).catch(protectReject).then(res => {
+				expect(res.page).toBe(1);
+				expect(res.pageSize).toBe(10);
+				expect(res.total).toBe(3);
+				expect(res.totalPage).toBe(1);
+
+				expect(res.rows.length).toBe(3);
+				expect(res.rows[0]).toEqual(posts[1]);
+				expect(res.rows[1]).toEqual(posts[0]);
+				expect(res.rows[2]).toEqual(posts[2]);
+			});
+		});			
+
+		it("should list paginated entities (page 2 & search)", () => {
+			return broker.call("posts.list", { page: 2, search: "my", searchFields: ["title"] }).catch(protectReject).then(res => {
+				expect(res.page).toBe(2);
+				expect(res.pageSize).toBe(10);
+				expect(res.total).toBe(2);
+				expect(res.totalPage).toBe(1);
+
+				expect(res.rows.length).toBe(0);
+			});
+		});			
+
+		it("should list paginated entities (page, pageSize as strings)", () => {
+			return broker.call("posts.list", { page: "1", pageSize: "2", }).catch(protectReject).then(res => {
+				expect(res.page).toBe(1);
+				expect(res.pageSize).toBe(2);
+				expect(res.total).toBe(3);
+				expect(res.totalPage).toBe(2);
+
+				expect(res.rows.length).toBe(2);
+			});
+		});			
 
 		it("should remove entity by ID", () => {
 			return broker.call("posts.remove", { id: posts[2]._id }).catch(protectReject).then(res => {

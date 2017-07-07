@@ -72,7 +72,7 @@ broker.start()
 | ---- | ------ | ------ | ----------- |
 | `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
-| `create` | `entity` | `Object` | Save a new entity. |
+| `create` | `entity` | `Object` | Create a new entity. |
 | `get` | `id` | `Object` | Get an entity by ID. |
 | `model` | `id`, `populate`, `fields`, `resultAsObject` | `Object` | Get entities by ID/IDs. **For internal use only!** |
 | `update` | `id`, `update` | `Object` | Update an entity by ID. |
@@ -89,6 +89,9 @@ Get count of find entities by filters. The `params` will be passed to the adapte
 
 ### `this.create(ctx, params)`
 Create a new entity. The `params.entity` will be passed to the adapter.
+
+### `this.createMany(ctx, params)`
+Create many new entities. The `params.entities` will be passed to the adapter.
 
 ### `this.get(ctx, params)`
 Get an entities by ID. The `params.id` will be passed to the adapter.

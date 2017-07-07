@@ -31,6 +31,15 @@ module.exports = {
 
 		// Validator schema or a function to validate the incoming entity in "users.create" action
 		entityValidator: null,
+
+		// Default page size
+		pageSize: 10,
+
+		// Maximum page size
+		maxPageSize: 100,
+
+		// Maximum value of limit in `find` action
+		maxLimit: -1
 	},
 
 	/**
@@ -54,12 +63,19 @@ module.exports = {
 				searchFields: { type: "array", optional: true }
 			},
 			handler(ctx) {
-				if (typeof(ctx.params.limit) === "string")
-					ctx.params.limit = Number(ctx.params.limit);
-				if (typeof(ctx.params.offset) === "string")
-					ctx.params.offset = Number(ctx.params.offset);
+				let params = Object.assign({}, ctx.params);
+				
+				// Convert from string to number
+				if (typeof(params.limit) === "string")
+					params.limit = Number(params.limit);				
+				if (typeof(params.offset) === "string")
+					params.offset = Number(params.offset);
 
-				return this.find(ctx, ctx.params);
+				// Limit the `limit`
+				if (this.settings.maxLimit > 0 && params.limit > this.settings.maxLimit)
+					params.limit = this.settings.maxLimit;
+
+				return this.find(ctx, params);
 			}
 		},
 
@@ -79,6 +95,64 @@ module.exports = {
 			handler(ctx) {
 				return this.count(ctx, ctx.params);
 			}
+		},
+
+		list: {
+			cache: {
+				keys: ["page", "pageSize", "sort", "search", "searchFields"]
+			},
+			params: {
+				page: { type: "number", integer: true, min: 1, optional: true, convert: true },
+				pageSize: { type: "number", integer: true, min: 0, optional: true, convert: true },
+				sort: { type: "string", optional: true },
+				search: { type: "string", optional: true },
+				searchFields: { type: "array", optional: true }
+			},
+			handler(ctx) {
+				let params = Object.assign({}, ctx.params);
+				// Convert from string to number
+				if (typeof(params.page) === "string")
+					params.page = Number(params.page);				
+				if (typeof(params.pageSize) === "string")
+					params.pageSize = Number(params.pageSize);
+
+				// Default `pageSize`
+				if (!params.pageSize)
+					params.pageSize = this.settings.pageSize;
+
+				// Default `page`
+				if (!params.page)
+					params.page = 1;
+
+				// Limit the `pageSize`
+				if (this.settings.maxPageSize > 0 && params.pageSize > this.settings.maxPageSize)
+					params.pageSize = this.settings.maxPageSize;
+
+				// Calculate the limit & offset from page & pageSize
+				params.limit = params.pageSize;
+				params.offset = (params.page - 1) * params.pageSize;
+
+				return this.Promise.all([
+					// Get rows
+					this.find(ctx, params),
+
+					// Get count of all rows
+					this.count(ctx, params)
+				]).then(res => {
+					return {
+						// Rows
+						rows: res[0],
+						// Total rows
+						total: res[1],
+						// Page
+						page: params.page,
+						// Page size
+						pageSize: params.pageSize,
+						// Total pages
+						totalPage: Math.floor((res[1] + params.pageSize - 1) / params.pageSize)
+					};
+				});
+			}			
 		},
 
 		/**
@@ -206,6 +280,11 @@ module.exports = {
 		 * @returns 
 		 */
 		count(ctx, params) {
+			if (params.limit)
+				params.limit = null;
+			if (params.offset)
+				params.offset = null;
+
 			return this.adapter.count(params);
 		},
 
@@ -213,13 +292,27 @@ module.exports = {
 		 * Create a new entity
 		 * 
 		 * @param {Context} ctx 
-		 * @param {Object} entity
+		 * @param {Object} params
 		 * @returns 
 		 */
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
 				.then(entity => this.adapter.insert(entity))
 				.then(doc => this.transformDocuments(ctx, doc))
+				.then(json => this.clearCache().then(() => json));
+		},
+
+		/**
+		 * Create many new entities
+		 * 
+		 * @param {Context} ctx 
+		 * @param {Object} params
+		 * @returns 
+		 */
+		createMany(ctx, params) {
+			return this.validateEntity(params.entities)
+				.then(entities => this.adapter.insertMany(entities))
+				.then(docs => this.transformDocuments(ctx, docs))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -353,11 +446,11 @@ module.exports = {
 		transformDocuments(ctx, docs) {
 			return this.Promise.resolve(docs)
 				.then(json => {
-					if (ctx.params.populate !== false)
+					if (ctx && ctx.params.populate !== false)
 						return this.populateDocs(ctx, json);
 					return json;
 				})
-				.then(docs => this.filterFields(docs, ctx.params.fields));
+				.then(docs => this.filterFields(docs, ctx ? ctx.params.fields : null));
 		},
 
 		/**

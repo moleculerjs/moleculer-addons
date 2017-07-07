@@ -59,6 +59,41 @@ describe("Test DbService actions", () => {
 		}).catch(protectReject);
 	});
 
+	it("should call the 'list' method", () => {
+		service.find = jest.fn();
+		service.count = jest.fn();
+		const p = {};
+
+		return broker.call("store.list", p).then(() => {
+			expect(service.find).toHaveBeenCalledTimes(1);
+			expect(service.count).toHaveBeenCalledTimes(1);
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 10, offset: 0, page: 1, pageSize: 10 });
+			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), { limit: 10, offset: 0, page: 1, pageSize: 10 });
+		}).catch(protectReject);
+	});
+
+	it("should call the 'list' method with page", () => {
+		service.find = jest.fn();
+		service.count = jest.fn();
+		const p = { page: 3, pageSize: 25 };
+
+		return broker.call("store.list", p).then(() => {
+			expect(service.find).toHaveBeenCalledTimes(1);
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 25, offset: 50, page: 3, pageSize: 25 });
+		}).catch(protectReject);
+	});
+
+	it("should call the 'list' method with maxPageSize", () => {
+		service.find = jest.fn();
+		service.count = jest.fn();
+		const p = { pageSize: 999 };
+
+		return broker.call("store.list", p).then(() => {
+			expect(service.find).toHaveBeenCalledTimes(1);
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 100, offset: 0, page: 1, pageSize: 100 });
+		}).catch(protectReject);
+	});
+
 	it("should call the 'count' method", () => {
 		service.count = jest.fn();
 		const p = {};
@@ -250,6 +285,29 @@ describe("Test DbService methods", () => {
 
 			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, doc);
+
+			expect(service.clearCache).toHaveBeenCalledTimes(1);
+		}).catch(protectReject);
+	});
+
+	it("should call 'insertMany' of adapter", () => {
+		const ctx = { params: { entities: [{}, {}] } };
+		service.transformDocuments.mockClear();
+		service.clearCache = jest.fn(() => Promise.resolve());
+		service.settings.entityValidator = jest.fn(entity => entity);
+
+		return service.createMany(ctx, ctx.params).then(res => {
+			expect(res).toBe(docs);
+
+			expect(service.settings.entityValidator).toHaveBeenCalledTimes(2);
+			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entities[0]);
+			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entities[1]);
+
+			expect(adapter.insertMany).toHaveBeenCalledTimes(1);
+			expect(adapter.insertMany).toHaveBeenCalledWith(ctx.params.entities);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, docs);
 
 			expect(service.clearCache).toHaveBeenCalledTimes(1);
 		}).catch(protectReject);
