@@ -149,7 +149,7 @@ module.exports = {
 						// Page size
 						pageSize: params.pageSize,
 						// Total pages
-						totalPage: Math.floor((res[1] + params.pageSize - 1) / params.pageSize)
+						totalPages: Math.floor((res[1] + params.pageSize - 1) / params.pageSize)
 					};
 				});
 			}			

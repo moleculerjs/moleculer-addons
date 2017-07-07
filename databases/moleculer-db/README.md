@@ -75,7 +75,7 @@ broker.start()
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
 | `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
-| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPages`. |
+| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPagess`. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
 | `create` | `entity` | `Object` | Create a new entity. |
 | `get` | `id` | `Object` | Get an entity by ID. |

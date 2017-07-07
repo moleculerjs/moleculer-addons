@@ -139,7 +139,7 @@ module.exports = function(adapter) {
 				expect(res.page).toBe(1);
 				expect(res.pageSize).toBe(10);
 				expect(res.total).toBe(3);
-				expect(res.totalPage).toBe(1);
+				expect(res.totalPages).toBe(1);
 
 				expect(res.rows.length).toBe(3);
 				expect(res.rows[0]).toEqual(posts[1]);
@@ -153,7 +153,7 @@ module.exports = function(adapter) {
 				expect(res.page).toBe(2);
 				expect(res.pageSize).toBe(10);
 				expect(res.total).toBe(2);
-				expect(res.totalPage).toBe(1);
+				expect(res.totalPages).toBe(1);
 
 				expect(res.rows.length).toBe(0);
 			});
@@ -164,7 +164,7 @@ module.exports = function(adapter) {
 				expect(res.page).toBe(1);
 				expect(res.pageSize).toBe(2);
 				expect(res.total).toBe(3);
-				expect(res.totalPage).toBe(2);
+				expect(res.totalPages).toBe(2);
 
 				expect(res.rows.length).toBe(2);
 			});

@@ -31,7 +31,7 @@ The result is similar as
     total: 28,
     page: 2,
     pageSize: 10,
-    totalPage: 3 
+    totalPages: 3 
 }
 ```
 
