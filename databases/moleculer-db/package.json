@@ -1,6 +1,6 @@
 {
   "name": "moleculer-db",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Service mixin to store entities in database",
   "main": "index.js",
   "scripts": {
