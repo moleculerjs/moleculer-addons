@@ -36,7 +36,7 @@ const broker = new ServiceBroker();
 // Create a DB service for `user` entities
 broker.createService({
     name: "users",
-    mixins: DbService,
+    mixins: [DbService],
 
     settings: {
         fields: "_id username name"
@@ -134,7 +134,7 @@ Delete all entitites.
 ```js
 broker.createService({
     name: "posts",
-    mixins: DbService,
+    mixins: [DbService],
     settings: {
         populates: {
             // Shorthand populate rule. Resolve the `voters` values with `users.model` action.
