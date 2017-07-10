@@ -64,17 +64,7 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
-				let params = Object.assign({}, ctx.params);
-				
-				// Convert from string to number
-				if (typeof(params.limit) === "string")
-					params.limit = Number(params.limit);				
-				if (typeof(params.offset) === "string")
-					params.offset = Number(params.offset);
-
-				// Limit the `limit`
-				if (this.settings.maxLimit > 0 && params.limit > this.settings.maxLimit)
-					params.limit = this.settings.maxLimit;
+				let params = this.sanitizeParams(ctx, ctx.params);
 
 				return this.find(ctx, params);
 			}
@@ -95,7 +85,9 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},			
 			handler(ctx) {
-				return this.count(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.count(ctx, params);
 			}
 		},
 
@@ -117,28 +109,7 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
-				let params = Object.assign({}, ctx.params);
-				// Convert from string to number
-				if (typeof(params.page) === "string")
-					params.page = Number(params.page);				
-				if (typeof(params.pageSize) === "string")
-					params.pageSize = Number(params.pageSize);
-
-				// Default `pageSize`
-				if (!params.pageSize)
-					params.pageSize = this.settings.pageSize;
-
-				// Default `page`
-				if (!params.page)
-					params.page = 1;
-
-				// Limit the `pageSize`
-				if (this.settings.maxPageSize > 0 && params.pageSize > this.settings.maxPageSize)
-					params.pageSize = this.settings.maxPageSize;
-
-				// Calculate the limit & offset from page & pageSize
-				params.limit = params.pageSize;
-				params.offset = (params.page - 1) * params.pageSize;
+				let params = this.sanitizeParams(ctx, ctx.params);
 
 				return this.Promise.all([
 					// Get rows
@@ -171,7 +142,9 @@ module.exports = {
 				entity: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.create(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.create(ctx, params);
 			}
 		},
 
@@ -188,7 +161,9 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.get(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.get(ctx, params);
 			}
 		},
 
@@ -204,7 +179,7 @@ module.exports = {
 			params: {
 				id: { type: "any" },
 				populate: { type: "boolean", optional: true },
-				fields: { type: "any", optional: true },
+				fields: { type: "array", optional: true },
 				resultAsObject: { type: "boolean", optional: true }
 			},			
 			handler(ctx) {
@@ -221,7 +196,9 @@ module.exports = {
 				update: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.updateById(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.updateById(ctx, params);
 			}
 		},
 
@@ -233,7 +210,9 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.removeById(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.removeById(ctx, params);
 			}
 		}
 	},
@@ -269,6 +248,55 @@ module.exports = {
 		},
 
 		/**
+		 * Sanitize context parameters at `find` action
+		 * 
+		 * @param {Context} ctx 
+		 * @param {any} origParams 
+		 * @returns 
+		 */
+		sanitizeParams(ctx, params) {
+			let p = Object.assign({}, params);
+
+			// Convert from string to number
+			if (typeof(p.limit) === "string")
+				p.limit = Number(p.limit);				
+			if (typeof(p.offset) === "string")
+				p.offset = Number(p.offset);
+			if (typeof(p.page) === "string")
+				p.page = Number(p.page);				
+			if (typeof(p.pageSize) === "string")
+				p.pageSize = Number(p.pageSize);
+
+			if (typeof(p.sort) === "string")
+				p.sort = p.sort.replace(/,/, " ").split(" ");
+
+			if (ctx.action.name.endsWith(".list")) {
+				// Default `pageSize`
+				if (!p.pageSize)
+					p.pageSize = this.settings.pageSize;
+
+				// Default `page`
+				if (!p.page)
+					p.page = 1;
+
+				// Limit the `pageSize`
+				if (this.settings.maxPageSize > 0 && p.pageSize > this.settings.maxPageSize)
+					p.pageSize = this.settings.maxPageSize;
+
+				// Calculate the limit & offset from page & pageSize
+				p.limit = p.pageSize;
+				p.offset = (p.page - 1) * p.pageSize;
+
+				// Limit the `limit`
+				if (this.settings.maxLimit > 0 && p.limit > this.settings.maxLimit)
+					p.limit = this.settings.maxLimit;
+
+			}
+
+			return p;
+		},
+
+		/**
 		 * Find all entities
 		 * 
 		 * @param {Context} ctx 
@@ -288,6 +316,7 @@ module.exports = {
 		 * @returns 
 		 */
 		count(ctx, params) {
+			// Remove pagination params
 			if (params && params.limit)
 				params.limit = null;
 			if (params && params.offset)
@@ -348,8 +377,10 @@ module.exports = {
 			return this.Promise.resolve(params)
 				.then(({ id }) => {
 					if (_.isArray(id)) {
+						id = id.map(this.decodeID);
 						return this.adapter.findByIds(id);
 					} else {
+						id = this.decodeID(id);
 						return this.adapter.findById(id);
 					}
 				})
@@ -383,7 +414,7 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		updateById(ctx, params) {
-			return this.adapter.updateById(params.id, params.update)
+			return this.adapter.updateById(this.decodeID(params.id), params.update)
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -408,7 +439,7 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		removeById(ctx, params) {
-			return this.adapter.removeById(params.id)
+			return this.adapter.removeById(this.decodeID(params.id))
 				.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
@@ -453,47 +484,66 @@ module.exports = {
 		 */
 		transformDocuments(ctx, docs) {
 			return this.Promise.resolve(docs)
+
+				// Convert entity to JS object
+				.then(docs => {
+					if (_.isArray(docs)) {
+						return docs.map(doc => this.adapter.entityToObject(doc));
+					} else {
+						return this.adapter.entityToObject(docs);
+					}					
+				})
+
+				// Encode IDs
+				.then(docs => {
+					if (_.isArray(docs)) {
+						docs.forEach(doc => doc[this.settings.idField] = this.encodeID(doc[this.settings.idField]));
+					} else {
+						docs[this.settings.idField] = this.encodeID(docs[this.settings.idField]);
+					}		
+					return docs;
+				})
+
+				// Populate
 				.then(json => {
 					if (ctx && ctx.params.populate !== false)
 						return this.populateDocs(ctx, json);
 					return json;
 				})
-				.then(docs => this.filterFields(docs, ctx ? ctx.params.fields : null));
+
+				// Filter fields
+				.then(json => {
+					let fields = ctx && ctx.params.fields ? ctx.params.fields : this.settings.fields;
+
+					// Compatibility with < 0.4
+					/* istanbul ignore next */
+					if (_.isString(fields)) {
+						fields = fields.split(" ");
+					}
+
+					if (_.isArray(json)) {
+						return json.map(item => this.filterFields(item, fields));
+					} else {
+						return this.filterFields(json, fields);
+					}					
+				});
 		},
 
 		/**
 		 * Filter fields in the entity object
 		 * 
-		 * @param {MongoDocument} 	docs	MongoDB document(s)
-		 * @param {String|Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
-		 * @returns	{Object|Array}
+		 * @param {Object} 	doc
+		 * @param {Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
+		 * @returns	{Object}
 		 * 
 		 * @memberOf Service
 		 */
-		filterFields(docs, fields = this.settings.fields) {
-			if (_.isString(fields)) {
-				fields = fields.split(" ");
-			}
-
-			if (_.isArray(docs)) {
-				return docs.map(doc => this.convertToJSON(doc, fields));
-			} else {
-				return this.convertToJSON(docs, fields);
-			}
-		},
-
-		/**
-		 * 
-		 * 
-		 * @param {Object} doc 
-		 * @param {Array} fields 
-		 * @returns 
-		 */
-		convertToJSON(doc, fields) {
+		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
+				let ff = this.intersectionFields(fields);
 				let res = {};
-				fields.forEach(n => {
+				ff.forEach(n => {
 					const v = _.get(doc, n);
 					if (v !== undefined)
 						_.set(res, n, v);
@@ -502,6 +552,20 @@ module.exports = {
 			}
 
 			return doc;
+		},
+
+		/**
+		 * Authorize the required field list. Remove fields which is not exist in `this.settings.fields`
+		 * 
+		 * @param {Array} fields 
+		 * @returns {Array}
+		 */
+		authorizeFields(fields) {
+			/*if (this.settings.fields && this.settings.fields.length > 0) {
+				return _.intersection(fields, this.settings.fields);
+			}*/
+
+			return fields;
 		},
 
 		/**
@@ -588,6 +652,26 @@ module.exports = {
 
 			let entities = Array.isArray(entity) ? entity : [entity];
 			return this.Promise.all(entities.map(entity => this.settings.entityValidator(entity))).then(() => entity);
+		},
+
+		/**
+		 * Encode ID of entity
+		 * 
+		 * @param {any} id 
+		 * @returns 
+		 */
+		encodeID(id) {
+			return id;
+		},
+
+		/**
+		 * Decode ID of entity
+		 * 
+		 * @param {any} id 
+		 * @returns 
+		 */
+		decodeID(id) {
+			return id;
 		}
 	},
 
@@ -595,6 +679,11 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
+		// Compatibility with < 0.4
+		if (_.isString(this.settings.fields)) {
+			this.settings.fields = this.settings.fields.split(" ");
+		}		
+
 		if (!this.schema.adapter)
 			this.adapter = new MemoryAdapter();
 		else
@@ -602,7 +691,7 @@ module.exports = {
 
 		this.adapter.init(this.broker, this);
 
-		// Transform validation schema to checker function
+		// Transform entity validation schema to checker function
 		if (this.broker.validator && _.isObject(this.settings.entityValidator)) {
 			const check = this.broker.validator.compile(this.settings.entityValidator);
 			this.settings.entityValidator = entity => {
@@ -646,9 +735,6 @@ module.exports = {
 	stopped() {
 		if (this.adapter)
 			return this.disconnect();
-
-		/* istanbul ignore next */
-		return this.Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
 	// Export Memory Adapter class

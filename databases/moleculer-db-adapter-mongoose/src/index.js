@@ -8,7 +8,7 @@
 
 const _ 		= require("lodash");
 const Promise	= require("bluebird");
-const mongoose = require("mongoose");
+const mongoose  = require("mongoose");
 //const ObjectId = require("mongoose").Types.ObjectId;
 
 class MongooseStoreAdapter {
@@ -107,7 +107,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	find(filters) {
-		return this.doFiltering(filters).lean().exec();
+		return this.doFiltering(filters).exec();
 	}
 
 	/**
@@ -119,7 +119,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	findById(_id) {
-		return this.model.findById(_id).lean().exec();
+		return this.model.findById(_id).exec();
 	}
 
 	/**
@@ -135,7 +135,7 @@ class MongooseStoreAdapter {
 			_id: {
 				$in: idList
 			}
-		}).lean().exec();
+		}).exec();
 	}
 
 	/**
@@ -177,7 +177,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	insertMany(entities) {
-		return this.model.insertMany(entities);
+		return this.model.create(entities);
 	}
 
 	/**
@@ -190,7 +190,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	updateMany(query, update) {
-		return this.model.update(query, update, { multi: true, "new": true }).then(res => res.map(doc => doc.toJSON()));
+		return this.model.update(query, update, { multi: true, "new": true });
 	}
 
 	/**
@@ -203,7 +203,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	updateById(_id, update) {
-		return this.model.findByIdAndUpdate(_id, update, { "new": true }).then(res => res.toJSON());
+		return this.model.findByIdAndUpdate(_id, update, { "new": true });
 	}
 
 	/**
@@ -239,6 +239,17 @@ class MongooseStoreAdapter {
 	 */
 	clear() {
 		return this.model.remove({}).then(() => null);
+	}
+
+	/**
+	 * Convert DB entity to JSON object
+	 * 
+	 * @param {any} entity 
+	 * @returns {Object}
+	 * @memberof MongooseStoreAdapter
+	 */
+	entityToObject(entity) {
+		return entity.toJSON();
 	}
 
 	/**

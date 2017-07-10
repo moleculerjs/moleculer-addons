@@ -276,12 +276,8 @@ class MemoryDbAdapter {
 
 			// Sort
 			if (params.sort) {
-				let sort = params.sort;
-				if (_.isString(params.sort))
-					sort = params.sort.replace(/,/, " ").split(" ");
-				
 				const sortFields = {};
-				sort.forEach(field => {
+				params.sort.forEach(field => {
 					if (field.startsWith("-"))
 						sortFields[field.slice(1)] = -1;
 					else 

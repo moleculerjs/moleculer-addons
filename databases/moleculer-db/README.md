@@ -2,14 +2,14 @@
 
 # moleculer-db [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db)
 
-Service mixin to store entities in database
+Service mixin to store entities in database.
 
 ## Features
 - CRUD actions
 - pluggable adapters
 - cached queries
 - default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
-- filtering properties in entity
+- fields of entities are filtered
 - pagination support in `list` action
 - populate connections between services
 
@@ -39,7 +39,7 @@ broker.createService({
     mixins: [DbService],
 
     settings: {
-        fields: "_id username name"
+        fields: ["_id", "username", "name"]
     },
 
     afterConnected() {
@@ -61,14 +61,14 @@ broker.start()
 ```
 
 ## Settings
-| Property | Description |
-| -------- | ----------- |
-| `idField` | Name of ID field. Default: `_id` |
-| `fields` | Field list for filtering. It can be an `Array` or a space-separated `String`. If the value is `null` or `undefined` doesn't filter the fields. |
-| `populates` | Populate schema |
-| `pageSize` | Default page size in `list` action. Default: `10` |
-| `maxPageSize` | Maximum page size in `list` action. Default: `100` |
-| `maxLimit` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `idField` | `String` | Name of ID field. Default: `_id` |
+| `fields` | `Array` | Field list for filtering. It is an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
+| `populates` | `Object` | Populate schema |
+| `pageSize` | `Number` | Default page size in `list` action. Default: `10` |
+| `maxPageSize` | `Number` | Maximum page size in `list` action. Default: `100` |
+| `maxLimit` | `Number` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
 
 
 ## Actions
@@ -162,7 +162,7 @@ module.exports = {
     mixins: [DbService],
 
     settings: {
-        fields: "_id title content votes"
+        fields: ["_id", "title", "content", "votes"]
     },
 
     actions: {

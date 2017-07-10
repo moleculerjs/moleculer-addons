@@ -19,13 +19,13 @@ broker.createService(DbService, {
 	name: "posts",
 	adapter: new DbService.MemoryAdapter({ filename: path.join(__dirname, "posts.db") }),
 	settings: {
-		fields: "_id title content votes author",
+		fields: ["_id", "title", "content", "votes", "author"],
 
 		populates: {
 			"author": {
 				action: "users.model",
 				params: {
-					fields: "username fullName"
+					fields: ["username", "fullName"]
 				}
 			}
 		}
@@ -77,7 +77,7 @@ broker.createService(DbService, {
 	name: "users",
 	adapter: new DbService.MemoryAdapter({ filename: path.join(__dirname, "users.db") }),
 	settings: {
-		fields: "_id username fullName email"
+		fields: ["_id", "username", "fullName", "email"]
 	},
 
 	afterConnected() {

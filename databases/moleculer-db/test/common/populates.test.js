@@ -21,7 +21,7 @@ module.exports = function(adapter) {
 		broker.createService(DbService, {
 			name: "posts",
 			settings: {
-				fields: "_id title content author",
+				fields: ["_id", "title", "content", "author"],
 				populates: {
 					author: {
 						action: "users.model",
@@ -35,7 +35,7 @@ module.exports = function(adapter) {
 		broker.createService(DbService, {
 			name: "users",
 			settings: {
-				fields: "_id username name"
+				fields: ["_id", "username", "name"]
 			}
 		});
 
@@ -101,7 +101,7 @@ module.exports = function(adapter) {
 		it("should return with multiple entities as Object", () => {
 			return broker.call("posts.model", { 
 				id: [posts[2]._id, posts[0]._id], 
-				fields: "title votes", 
+				fields: ["title", "votes"], 
 				resultAsObject: true 
 			}).catch(protectReject).then(res => {
 				expect(res[posts[0]._id]).toEqual({"title": "My first post", "votes": 2}); 
