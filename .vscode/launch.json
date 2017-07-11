@@ -8,11 +8,11 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch demo",
+			"name": "Launch dev",
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"stores\\moleculer-db-adapter-mongoose",
+				"databases\\moleculer-db",
 				"populates"
 			]
 		},

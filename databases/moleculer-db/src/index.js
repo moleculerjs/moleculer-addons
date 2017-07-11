@@ -163,7 +163,7 @@ module.exports = {
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
-				return this.get(ctx, params);
+				return this.getById(ctx, params);
 			}
 		},
 
@@ -360,9 +360,10 @@ module.exports = {
 		 * @param {Object} params
 		 * @returns 
 		 */
-		get(ctx, params) {
+		getById(ctx, params) {
 			const populate = params.populate != null ? params.populate : true;
-			return this.model(ctx, { id: params.id, populate });
+			return this.model(ctx, { id: params.id, populate })
+				.then(doc => this.transformDocuments(ctx, doc));
 		},
 
 		/**
@@ -391,14 +392,22 @@ module.exports = {
 					return doc;
 				})
 				.then(doc => {
-					if (params.fields !== false)
-						return this.filterFields(doc, params.fields);
+					if (params.fields !== false) {
+						if (_.isArray(doc)) {
+							return doc.map(item => this.filterFields(item, params.fields));
+						} else {
+							return this.filterFields(doc, params.fields);
+						}					
+					}
 					return doc;
 				})
 				.then(json => {
 					if (_.isArray(json) && params.resultAsObject === true) {
 						let res = {};
-						json.forEach((doc, i) => res[origDoc[i][this.settings.idField]] = doc);
+						json.forEach((doc, i) => {
+							const id = this.encodeID(origDoc[i][this.settings.idField]);
+							res[id] = doc;
+						});
 
 						return res;
 					}
@@ -483,33 +492,30 @@ module.exports = {
 		 * @returns {Array|Object}
 		 */
 		transformDocuments(ctx, docs) {
+			let isDoc = false;
+			if (!Array.isArray(docs)) {
+				if (_.isObject(docs)) {
+					isDoc = true;
+					docs = [docs];
+				} else
+					return this.Promise.resolve(docs);
+			}
+
 			return this.Promise.resolve(docs)
 
 				// Convert entity to JS object
-				.then(docs => {
-					if (_.isArray(docs)) {
-						return docs.map(doc => this.adapter.entityToObject(doc));
-					} else {
-						return this.adapter.entityToObject(docs);
-					}					
-				})
+				.then(docs => docs.map(doc => this.adapter.entityToObject(doc)))
 
 				// Encode IDs
-				.then(docs => {
-					if (_.isArray(docs)) {
-						docs.forEach(doc => doc[this.settings.idField] = this.encodeID(doc[this.settings.idField]));
-					} else {
-						docs[this.settings.idField] = this.encodeID(docs[this.settings.idField]);
-					}		
-					return docs;
-				})
+				.then(docs => docs.map(doc => {
+					doc[this.settings.idField] = this.encodeID(doc[this.settings.idField]);
+					return doc;
+				}))
 
 				// Populate
-				.then(json => {
-					if (ctx && ctx.params.populate !== false)
-						return this.populateDocs(ctx, json);
-					return json;
-				})
+				.then(json => (ctx && ctx.params.populate !== false) ? this.populateDocs(ctx, json) : json)
+
+				// TODO onTransformDocumentsHook
 
 				// Filter fields
 				.then(json => {
@@ -517,16 +523,14 @@ module.exports = {
 
 					// Compatibility with < 0.4
 					/* istanbul ignore next */
-					if (_.isString(fields)) {
+					if (_.isString(fields))
 						fields = fields.split(" ");
-					}
 
-					if (_.isArray(json)) {
-						return json.map(item => this.filterFields(item, fields));
-					} else {
-						return this.filterFields(json, fields);
-					}					
-				});
+					return json.map(item => this.filterFields(item, fields));
+				})
+
+				// Return
+				.then(json => isDoc ? json[0] : json);
 		},
 
 		/**
@@ -541,7 +545,7 @@ module.exports = {
 		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
-				let ff = this.intersectionFields(fields);
+				let ff = this.authorizeFields(fields);
 				let res = {};
 				ff.forEach(n => {
 					const v = _.get(doc, n);

@@ -232,6 +232,17 @@ class MemoryDbAdapter {
 	}
 
 	/**
+	 * Convert DB entity to JSON object
+	 * 
+	 * @param {any} entity 
+	 * @returns {Object}
+	 * @memberof MongooseStoreAdapter
+	 */
+	entityToObject(entity) {
+		return entity;
+	}
+
+	/**
 	 * Add filters to query
 	 * 
 	 * Available filters: 
