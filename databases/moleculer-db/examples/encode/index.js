@@ -4,8 +4,6 @@ let { ServiceBroker } = require("moleculer");
 let DbService = require("../../index");
 let _ = require("lodash");
 let chalk = require("chalk");
-let path = require("path");
-let fakerator = require("fakerator")();
 
 // Create broker
 let broker = new ServiceBroker({

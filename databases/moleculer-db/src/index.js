@@ -176,6 +176,7 @@ module.exports = {
 			cache: {
 				keys: ["id", "populate", "fields", "resultAsObject"]
 			},
+			internal: true, // Doesn't be published by `moleculer-web`
 			params: {
 				id: { type: "any" },
 				populate: { type: "boolean", optional: true },
@@ -376,6 +377,7 @@ module.exports = {
 		model(ctx, params) {
 			let origDoc;
 			return this.Promise.resolve(params)
+
 				.then(({ id }) => {
 					if (_.isArray(id)) {
 						id = id.map(this.decodeID);
@@ -385,12 +387,14 @@ module.exports = {
 						return this.adapter.findById(id);
 					}
 				})
+
 				.then(doc => {
 					origDoc = doc;
 					if (params.populate === true)
 						return this.populateDocs(ctx, doc);
 					return doc;
 				})
+
 				.then(doc => {
 					if (params.fields !== false) {
 						if (_.isArray(doc)) {
@@ -401,6 +405,7 @@ module.exports = {
 					}
 					return doc;
 				})
+
 				.then(json => {
 					if (_.isArray(json) && params.resultAsObject === true) {
 						let res = {};
@@ -600,16 +605,12 @@ module.exports = {
 					}
 					rule.field = field;
 
-					let items = Array.isArray(docs) ? docs : [docs];
-
 					// Collect IDs from field of docs (flatten, compact & unique list) 
-					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
-
+					let idList = _.uniq(_.flattenDeep(_.compact(docs.map(doc => doc[field]))));
 					if (idList.length > 0) {
-
 						// Replace the received models according to IDs in the original docs
 						const resultTransform = (populatedDocs) => {
-							items.forEach(doc => {
+							docs.forEach(doc => {
 								let id = doc[field];
 								if (_.isArray(id)) {
 									let models = _.compact(id.map(id => populatedDocs[id]));

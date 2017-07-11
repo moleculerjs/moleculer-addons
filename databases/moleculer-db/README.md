@@ -6,12 +6,15 @@ Service mixin to store entities in database.
 
 ## Features
 - CRUD actions
-- pluggable adapters
 - cached queries
+- pluggable adapter
 - default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
-- fields of entities are filtered
-- pagination support in `list` action
-- populate connections between services
+- fields filter for entities
+- pagination support
+- populating
+- encode entity IDs
+- entity events for notifications
+- 
 
 ## Install
 
