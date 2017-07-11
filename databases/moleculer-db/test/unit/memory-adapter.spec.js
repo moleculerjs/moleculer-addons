@@ -14,6 +14,13 @@ describe("Test Adapter constructor", () => {
 		const adapter = new Adapter();
 		expect(adapter).toBeDefined();
 	});
+
+	it("should be created with opts", () => {
+		const opts = {};
+		const adapter = new Adapter(opts);
+		expect(adapter).toBeDefined();
+		expect(adapter.opts).toBe(opts);
+	});
 });
 
 describe("Test Adapter methods", () => {
@@ -126,18 +133,9 @@ describe("Test Adapter methods", () => {
 	});
 
 	it("should sort the result", () => {
-		return expect(adapter.find({ sort: "name" })).resolves.toEqual([
+		return expect(adapter.find({ sort: ["name"] })).resolves.toEqual([
 			multipleDocs[2],
 			multipleDocs[1],
-			multipleDocs[0], 
-			savedDoc,
-		]);
-	});
-
-	it("should sort by two fields in string", () => {
-		return expect(adapter.find({ sort: "age -name" })).resolves.toEqual([
-			multipleDocs[1],
-			multipleDocs[2],
 			multipleDocs[0], 
 			savedDoc,
 		]);
