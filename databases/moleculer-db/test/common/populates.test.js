@@ -7,7 +7,8 @@ const DbService = require("../../src");
 module.exports = function(adapter) {
 
 	function protectReject(err) {
-		expect(err).toBe(true);
+		console.error(err.stack);
+		expect().toBe(true);		
 	}
 
 	describe("Test populates feature", () => {

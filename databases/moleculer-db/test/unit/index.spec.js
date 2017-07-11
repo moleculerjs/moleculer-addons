@@ -5,7 +5,8 @@ const DbService = require("../../src");
 //const lolex = require("lolex");
 
 function protectReject(err) {
-	expect(err).toBe(true);
+	console.error(err.stack);
+	expect().toBe(true);
 }
 
 describe("Test DbService actions", () => {
@@ -114,13 +115,13 @@ describe("Test DbService actions", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call the 'get' method", () => {
-		service.get = jest.fn();
+	it("should call the 'getById' method", () => {
+		service.getById = jest.fn();
 		const p = {};
 
 		return broker.call("store.get", p).then(() => {
-			expect(service.get).toHaveBeenCalledTimes(1);
-			expect(service.get).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.getById).toHaveBeenCalledTimes(1);
+			expect(service.getById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
@@ -319,7 +320,7 @@ describe("Test DbService methods", () => {
 		const origModelMethod = service.model;
 		service.model = jest.fn(() => Promise.resolve());
 
-		return service.get(ctx, ctx.params).then(() => {
+		return service.getById(ctx, ctx.params).then(() => {
 			expect(service.model).toHaveBeenCalledTimes(1);
 			expect(service.model).toHaveBeenCalledWith(ctx, { id: 5, populate: true });
 

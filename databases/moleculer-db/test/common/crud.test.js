@@ -7,6 +7,7 @@ const DbService = require("../../src");
 module.exports = function(adapter) {
 
 	function protectReject(err) {
+		console.error(err.stack);
 		expect(err).toBe(true);
 	}
 
