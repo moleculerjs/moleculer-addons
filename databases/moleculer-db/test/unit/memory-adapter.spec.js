@@ -41,32 +41,34 @@ describe("Test Adapter methods", () => {
 
 	it("should insert a document", () => {
 		return adapter.insert(doc)
-		.then(res => {
-			expect(res).toEqual(Object.assign({}, doc, { _id: jasmine.any(String) }));
-			savedDoc = res;
-		}).catch(protectReject);
+			.then(res => {
+				expect(res).toEqual(Object.assign({}, doc, { _id: jasmine.any(String) }));
+				savedDoc = res;
+			})
+			.catch(protectReject);
 	});
 
 	let multipleDocs;
 	it("should insert multiple document", () => {
 		return adapter.insertMany([{ name: "John Doe", c: true, age: 41 }, { name: "Jane Doe", b: "Hello", age: 35 }, { name: "Adam Smith", email: "adam.smith@gmail.com", age: 35 }])
-		.then(res => {
-			expect(res.length).toBe(3);
-			expect(res[0]._id).toBeDefined();
-			expect(res[0].name).toBe("John Doe");
-			expect(res[0].age).toBe(41);
+			.then(res => {
+				expect(res.length).toBe(3);
+				expect(res[0]._id).toBeDefined();
+				expect(res[0].name).toBe("John Doe");
+				expect(res[0].age).toBe(41);
 
-			expect(res[1]._id).toBeDefined();
-			expect(res[1].name).toBe("Jane Doe");
-			expect(res[1].age).toBe(35);
+				expect(res[1]._id).toBeDefined();
+				expect(res[1].name).toBe("Jane Doe");
+				expect(res[1].age).toBe(35);
 
-			expect(res[2]._id).toBeDefined();
-			expect(res[2].name).toBe("Adam Smith");
-			expect(res[2].email).toBe("adam.smith@gmail.com");
-			expect(res[2].age).toBe(35);
+				expect(res[2]._id).toBeDefined();
+				expect(res[2].name).toBe("Adam Smith");
+				expect(res[2].email).toBe("adam.smith@gmail.com");
+				expect(res[2].age).toBe(35);
 
-			multipleDocs = res;
-		}).catch(protectReject);
+				multipleDocs = res;
+			})
+			.catch(protectReject);
 	});
 
 	it("should find by ID", () => {
