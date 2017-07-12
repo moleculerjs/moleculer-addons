@@ -11,7 +11,7 @@ module.exports = function(adapter) {
 		expect().toBe(true);		
 	}
 
-	describe("Test populates feature", () => {
+	describe.only("Test populates feature", () => {
 		// Create broker
 		let broker = new ServiceBroker({
 			logger: console,

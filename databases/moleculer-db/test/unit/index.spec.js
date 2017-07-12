@@ -21,6 +21,21 @@ describe("Test DbService actions", () => {
 		adapter,
 	});
 
+	service.sanitizeParams = jest.fn((ctx, p) => p);
+
+	it("should set default settings", () => {
+		expect(service.adapter).toBe(adapter);
+		expect(service.settings).toEqual({
+			entityValidator: null, 
+			fields: null, 
+			idField: "_id", 
+			maxLimit: -1, 
+			maxPageSize: 100, 
+			pageSize: 10, 
+			populates: null
+		});
+	});
+
 	it("should called the 'init' method of adapter", () => {
 		expect(adapter.init).toHaveBeenCalledTimes(1);
 		expect(adapter.init).toHaveBeenCalledWith(broker, service);
@@ -35,16 +50,21 @@ describe("Test DbService actions", () => {
 	});
 
 	it("should call the 'find' method", () => {
+		service.sanitizeParams.mockClear();
 		service.find = jest.fn();
 		const p = {};
 
 		return broker.call("store.find", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.find).toHaveBeenCalledTimes(1);
 			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'find' method with params", () => {
+		service.sanitizeParams.mockClear();
 		service.find = jest.fn();
 		const p = {
 			limit: 5,
@@ -52,104 +72,115 @@ describe("Test DbService actions", () => {
 		};
 
 		return broker.call("store.find", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), {
+				limit: 5,
+				offset: "3"
+			});
+
 			expect(service.find).toHaveBeenCalledTimes(1);
 			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), {
 				limit: 5,
-				offset: 3
+				offset: "3"
 			});
 		}).catch(protectReject);
 	});
 
 	it("should call the 'list' method", () => {
+		service.sanitizeParams.mockClear();
 		service.find = jest.fn();
 		service.count = jest.fn();
 		const p = {};
 
 		return broker.call("store.list", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.find).toHaveBeenCalledTimes(1);
 			expect(service.count).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 10, offset: 0, page: 1, pageSize: 10 });
-			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), { limit: 10, offset: 0, page: 1, pageSize: 10 });
-		}).catch(protectReject);
-	});
-
-	it("should call the 'list' method with page", () => {
-		service.find = jest.fn();
-		service.count = jest.fn();
-		const p = { page: 3, pageSize: 25 };
-
-		return broker.call("store.list", p).then(() => {
-			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 25, offset: 50, page: 3, pageSize: 25 });
-		}).catch(protectReject);
-	});
-
-	it("should call the 'list' method with maxPageSize", () => {
-		service.find = jest.fn();
-		service.count = jest.fn();
-		const p = { pageSize: 999 };
-
-		return broker.call("store.list", p).then(() => {
-			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), { limit: 100, offset: 0, page: 1, pageSize: 100 });
+			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'count' method", () => {
+		service.sanitizeParams.mockClear();
 		service.count = jest.fn();
 		const p = {};
 
 		return broker.call("store.count", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.count).toHaveBeenCalledTimes(1);
 			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'create' method", () => {
+		service.sanitizeParams.mockClear();
 		service.create = jest.fn();
 		const p = {};
 
 		return broker.call("store.create", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.create).toHaveBeenCalledTimes(1);
 			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'getById' method", () => {
+		service.sanitizeParams.mockClear();
 		service.getById = jest.fn();
 		const p = {};
 
 		return broker.call("store.get", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.getById).toHaveBeenCalledTimes(1);
 			expect(service.getById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'model' method", () => {
+		service.sanitizeParams.mockClear();
 		service.model = jest.fn();
 		const p = {};
 
 		return broker.call("store.model", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(0);
+
 			expect(service.model).toHaveBeenCalledTimes(1);
 			expect(service.model).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'update' method", () => {
+		service.sanitizeParams.mockClear();
 		service.updateById = jest.fn();
 		const p = {};
 
 		return broker.call("store.update", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.updateById).toHaveBeenCalledTimes(1);
 			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'remove' method", () => {
+		service.sanitizeParams.mockClear();
 		service.removeById = jest.fn();
 		const p = {};
 
 		return broker.call("store.remove", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
 			expect(service.removeById).toHaveBeenCalledTimes(1);
 			expect(service.removeById).toHaveBeenCalledWith(jasmine.any(Context), p);
 		}).catch(protectReject);
@@ -215,7 +246,8 @@ describe("Test DbService methods", () => {
 		updateById: jest.fn(() => Promise.resolve(doc)),
 		removeMany: jest.fn(() => Promise.resolve(5)),
 		removeById: jest.fn(() => Promise.resolve(3)),
-		clear: jest.fn(() => Promise.resolve(3))
+		clear: jest.fn(() => Promise.resolve(3)),
+		entityToObject: jest.fn(obj => obj)
 	};
 
 	const afterConnected = jest.fn();
@@ -269,17 +301,29 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
+	it("should call 'count' of adapter but remove pagination params", () => {
+		adapter.count.mockClear();
+		const ctx = { params: { limit: 5, offset: 3 } };
+
+		return service.count(ctx, ctx.params).then(res => {
+			expect(res).toBe(3);
+			
+			expect(adapter.count).toHaveBeenCalledTimes(1);
+			expect(adapter.count).toHaveBeenCalledWith({ limit: null, offset: null });
+		}).catch(protectReject);
+	});
+
 	it("should call 'insert' of adapter", () => {
 		const ctx = { params: { entity: {} } };
 		service.transformDocuments.mockClear();
 		service.clearCache = jest.fn(() => Promise.resolve());
-		service.settings.entityValidator = jest.fn(entity => entity);
+		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
 		return service.create(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
-			expect(service.settings.entityValidator).toHaveBeenCalledTimes(1);
-			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entity);
+			expect(service.validateEntity).toHaveBeenCalledTimes(1);
+			expect(service.validateEntity).toHaveBeenCalledWith(ctx.params.entity);
 
 			expect(adapter.insert).toHaveBeenCalledTimes(1);
 			expect(adapter.insert).toHaveBeenCalledWith(ctx.params.entity);
@@ -295,14 +339,13 @@ describe("Test DbService methods", () => {
 		const ctx = { params: { entities: [{}, {}] } };
 		service.transformDocuments.mockClear();
 		service.clearCache = jest.fn(() => Promise.resolve());
-		service.settings.entityValidator = jest.fn(entity => entity);
+		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
 		return service.createMany(ctx, ctx.params).then(res => {
 			expect(res).toBe(docs);
 
-			expect(service.settings.entityValidator).toHaveBeenCalledTimes(2);
-			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entities[0]);
-			expect(service.settings.entityValidator).toHaveBeenCalledWith(ctx.params.entities[1]);
+			expect(service.validateEntity).toHaveBeenCalledTimes(1);
+			expect(service.validateEntity).toHaveBeenCalledWith(ctx.params.entities);
 
 			expect(adapter.insertMany).toHaveBeenCalledTimes(1);
 			expect(adapter.insertMany).toHaveBeenCalledWith(ctx.params.entities);
@@ -328,8 +371,24 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
+	it("should call 'this.model' without populate", () => {
+		const ctx = { params: { id: 5, populate: false } };
+
+		const origModelMethod = service.model;
+		service.model = jest.fn(() => Promise.resolve());
+
+		return service.getById(ctx, ctx.params).then(() => {
+			expect(service.model).toHaveBeenCalledTimes(1);
+			expect(service.model).toHaveBeenCalledWith(ctx, { id: 5, populate: false });
+
+			service.model = origModelMethod;
+		}).catch(protectReject);
+	});
+
 	
 	describe("Test `this.model` method", () => {
+		service.encodeID = jest.fn(id => id);
+		service.decodeID = jest.fn(id => id);
 		service.filterFields = jest.fn(doc => Promise.resolve(doc));
 		service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
 
@@ -340,8 +399,11 @@ describe("Test DbService methods", () => {
 			return service.model(ctx, ctx.params).then(res => {
 				expect(res).toBe(doc);
 
+				expect(service.decodeID).toHaveBeenCalledTimes(1);
+				expect(service.decodeID).toHaveBeenCalledWith(5);
+
 				expect(adapter.findById).toHaveBeenCalledTimes(1);
-				expect(adapter.findById).toHaveBeenCalledWith(ctx.params.id);
+				expect(adapter.findById).toHaveBeenCalledWith(5);
 
 				expect(service.filterFields).toHaveBeenCalledTimes(1);
 				expect(service.filterFields).toHaveBeenCalledWith(doc, undefined);
@@ -353,12 +415,19 @@ describe("Test DbService methods", () => {
 		});
 
 		it("call with multi IDs", () => {
+			service.encodeID.mockClear();
+			service.decodeID.mockClear();
 			adapter.findByIds.mockClear();
 			service.filterFields.mockClear();
 			const ctx = { params: { id: [5, 3, 8], fields: false, populate: true } };
 
 			return service.model(ctx, ctx.params).then(res => {
 				expect(res).toBe(docs);
+
+				expect(service.decodeID).toHaveBeenCalledTimes(3);
+				expect(service.decodeID).toHaveBeenCalledWith(5);
+				expect(service.decodeID).toHaveBeenCalledWith(3);
+				expect(service.decodeID).toHaveBeenCalledWith(8);
 
 				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
 				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
@@ -372,6 +441,8 @@ describe("Test DbService methods", () => {
 		});
 
 		it("call with multi IDs, and should convert the result to object", () => {
+			service.encodeID.mockClear();
+			service.decodeID.mockClear();
 			adapter.findByIds.mockClear();
 			service.filterFields.mockClear();
 			service.populateDocs.mockClear();
@@ -399,11 +470,21 @@ describe("Test DbService methods", () => {
 					}
 				});
 
+				expect(service.decodeID).toHaveBeenCalledTimes(3);
+				expect(service.decodeID).toHaveBeenCalledWith(5);
+				expect(service.decodeID).toHaveBeenCalledWith(3);
+				expect(service.decodeID).toHaveBeenCalledWith(8);
+
 				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
 				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
 
 				expect(service.filterFields).toHaveBeenCalledTimes(0);
 				expect(service.populateDocs).toHaveBeenCalledTimes(0);
+
+				expect(service.encodeID).toHaveBeenCalledTimes(3);
+				expect(service.encodeID).toHaveBeenCalledWith(5);
+				expect(service.encodeID).toHaveBeenCalledWith(3);
+				expect(service.encodeID).toHaveBeenCalledWith(8);
 
 			}).catch(protectReject);
 		});
@@ -415,9 +496,13 @@ describe("Test DbService methods", () => {
 		const ctx = { params: { id: 5, update: {} } };
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
+		service.decodeID = jest.fn(id => id);
 
 		return service.updateById(ctx, ctx.params).then(res => {
 			expect(res).toBe(doc);
+
+			expect(service.decodeID).toHaveBeenCalledTimes(1);
+			expect(service.decodeID).toHaveBeenCalledWith(5);
 
 			expect(adapter.updateById).toHaveBeenCalledTimes(1);
 			expect(adapter.updateById).toHaveBeenCalledWith(ctx.params.id, ctx.params.update);
@@ -449,11 +534,15 @@ describe("Test DbService methods", () => {
 
 	it("should call 'removeById' of adapter", () => {
 		const ctx = { params: { id: 5 } };
+		service.decodeID = jest.fn(id => id);
 		service.transformDocuments.mockClear();
 		service.clearCache.mockClear();
 
 		return service.removeById(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
+
+			expect(service.decodeID).toHaveBeenCalledTimes(1);
+			expect(service.decodeID).toHaveBeenCalledWith(5);
 
 			expect(adapter.removeById).toHaveBeenCalledTimes(1);
 			expect(adapter.removeById).toHaveBeenCalledWith(ctx.params.id);
@@ -502,51 +591,204 @@ describe("Test DbService methods", () => {
 	});	
 });
 
-const mockAdapter = {
-	init: jest.fn(() => Promise.resolve()),
-	connect: jest.fn(() => Promise.resolve()),
-	disconnect: jest.fn(() => Promise.resolve())
-};
 
-describe("Test transformDocuments method", () => {
-	const doc = { id : 1 };
-
+describe("Test sanitizeParams method", () => {
 	const broker = new ServiceBroker({ validation: false });
 	const service = broker.createService(DbService, {
 		name: "store",
-		adapter: mockAdapter
+		settings: {
+			maxPageSize: 50,
+			maxLimit: 200,
+			pageSize: 25
+		}
 	});
 
-	service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
-	service.filterFields = jest.fn(docs => Promise.resolve(docs));
+	let ctx = {
+		action: {
+			name: "greeter.hello"
+		}
+	};
 
-	it("should call 'populateDocs' & filterFields methods", () => {
-		const ctx = { params: {} };
-		return service.transformDocuments(ctx, doc).then(() => {
-			expect(service.populateDocs).toHaveBeenCalledTimes(1);
-			expect(service.populateDocs).toHaveBeenCalledWith(ctx, doc);
+	let ctxList = {
+		action: {
+			name: "greeter.list"
+		}
+	};
 
-			expect(service.filterFields).toHaveBeenCalledTimes(1);
-			expect(service.filterFields).toHaveBeenCalledWith(doc, undefined);
-		}).catch(protectReject);
+	it("should not touch the params", () => {
+		const res = service.sanitizeParams(ctx, {});
+		expect(res).toEqual({});
 	});
 
-	it("should not call 'populateDocs' but filterFields methods", () => {
-		service.populateDocs.mockClear();
-		service.filterFields.mockClear();
-		
-		const ctx = { params: { populate: false, fields: "name" } };
-		return service.transformDocuments(ctx, doc).then(() => {
-			expect(service.populateDocs).toHaveBeenCalledTimes(0);
+	it("should convert limit & offset to number", () => {
+		const res = service.sanitizeParams(ctx, { limit: "5", offset: "10" });
+		expect(res).toEqual({ limit: 5, offset: 10 });
+	});
 
-			expect(service.filterFields).toHaveBeenCalledTimes(1);
-			expect(service.filterFields).toHaveBeenCalledWith(doc, "name");
-		}).catch(protectReject);
+	it("should convert page & pageSize to number", () => {
+		const res = service.sanitizeParams(ctx, { page: "5", pageSize: "10" });
+		expect(res).toEqual({ page: 5, pageSize: 10 });
+	});
+
+	it("should convert sort to array", () => {
+		const res = service.sanitizeParams(ctx, { sort: "name,createdAt votes" });
+		expect(res).toEqual({ sort: ["name", "createdAt", "votes"] });
+	});
+
+	it("should fill pagination fields", () => {
+		const res = service.sanitizeParams(ctxList, {});
+		expect(res).toEqual({ limit: 25, offset: 0, page: 1, pageSize: 25});
+	});
+
+	it("should calc limit & offset from pagination fields", () => {
+		const res = service.sanitizeParams(ctxList, { page: 3, pageSize: 20 });
+		expect(res).toEqual({ limit: 20, offset: 40, page: 3, pageSize: 20});
+	});
+
+	it("should limit the pageSize", () => {
+		const res = service.sanitizeParams(ctxList, { page: 1, pageSize: 100 });
+		expect(res).toEqual({ limit: 50, offset: 0, page: 1, pageSize: 50});
+	});
+
+	/*it("should limit the limit", () => {
+		const res = service.sanitizeParams(ctxList, { limit: 400 });
+		expect(res).toEqual({ limit: 200 });
+	});*/
+
+
+});
+
+const mockAdapter = {
+	init: jest.fn(() => Promise.resolve()),
+	connect: jest.fn(() => Promise.resolve()),
+	disconnect: jest.fn(() => Promise.resolve()),
+	entityToObject: jest.fn(obj => obj)
+};
+
+describe("Test transformDocuments method", () => {
+
+	describe("Test with object", () => {
+		const doc = { _id : 1 };
+
+		const broker = new ServiceBroker({ validation: false });
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter
+		});
+
+		service.encodeID = jest.fn(id => id);
+		service.decodeID = jest.fn(id => id);
+		service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
+		service.filterFields = jest.fn(docs => Promise.resolve(docs));
+
+		it("should not call anything if the docs is null", () => {
+			const ctx = { params: {} };
+			return service.transformDocuments(ctx, null).then(res => {
+				expect(res).toBe(null);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledTimes(0);
+				expect(service.populateDocs).toHaveBeenCalledTimes(0);
+				expect(service.filterFields).toHaveBeenCalledTimes(0);
+			}).catch(protectReject);
+		});
+
+		it("should not call anything if the docs is a Number", () => {
+			const ctx = { params: {} };
+			return service.transformDocuments(ctx, 100).then(res => {
+				expect(res).toBe(100);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledTimes(0);
+				expect(service.populateDocs).toHaveBeenCalledTimes(0);
+				expect(service.filterFields).toHaveBeenCalledTimes(0);
+			}).catch(protectReject);
+		});
+
+		it("should call 'populateDocs' & filterFields methods", () => {
+			mockAdapter.entityToObject.mockClear();
+			const ctx = { params: {} };
+			return service.transformDocuments(ctx, doc).then(res => {
+				expect(res).toBe(doc);
+
+				expect(mockAdapter.entityToObject).toHaveBeenCalledTimes(1);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledWith(doc);
+
+				expect(service.encodeID).toHaveBeenCalledTimes(1);
+				expect(service.encodeID).toHaveBeenCalledWith(doc._id);
+
+				expect(service.populateDocs).toHaveBeenCalledTimes(1);
+				expect(service.populateDocs).toHaveBeenCalledWith(ctx, [doc]);
+
+				expect(service.filterFields).toHaveBeenCalledTimes(1);
+				expect(service.filterFields).toHaveBeenCalledWith(doc, service.settings.fields);
+			}).catch(protectReject);
+		});
+
+		it("should not call 'populateDocs' but filterFields methods", () => {
+			service.populateDocs.mockClear();
+			service.filterFields.mockClear();
+			service.encodeID.mockClear();
+			mockAdapter.entityToObject.mockClear();
+			
+			const ctx = { params: { populate: false, fields: ["name"] } };
+			return service.transformDocuments(ctx, doc).then(res => {
+				expect(res).toBe(doc);
+
+				expect(mockAdapter.entityToObject).toHaveBeenCalledTimes(1);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledWith(doc);
+
+				expect(service.encodeID).toHaveBeenCalledTimes(1);
+				expect(service.encodeID).toHaveBeenCalledWith(doc._id);
+
+				expect(service.populateDocs).toHaveBeenCalledTimes(0);
+
+				expect(service.filterFields).toHaveBeenCalledTimes(1);
+				expect(service.filterFields).toHaveBeenCalledWith(doc, ["name"]);
+			}).catch(protectReject);
+		});
+	});
+
+	describe("Test with array of object", () => {
+		const docs = [
+			{ _id : 2 },
+			{ _id : 5 }
+		];
+
+		const broker = new ServiceBroker({ validation: false });
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter
+		});
+
+		service.encodeID = jest.fn(id => id);
+		service.decodeID = jest.fn(id => id);
+		service.populateDocs = jest.fn((ctx, docs) => Promise.resolve(docs));
+		service.filterFields = jest.fn(docs => docs);
+
+		it("should call 'populateDocs' & filterFields methods", () => {
+			mockAdapter.entityToObject.mockClear();
+			const ctx = { params: {} };
+			return service.transformDocuments(ctx, docs).then(res => {
+				expect(res).toEqual(docs);
+
+				expect(mockAdapter.entityToObject).toHaveBeenCalledTimes(2);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledWith(docs[0]);
+				expect(mockAdapter.entityToObject).toHaveBeenCalledWith(docs[1]);
+
+				expect(service.encodeID).toHaveBeenCalledTimes(2);
+				expect(service.encodeID).toHaveBeenCalledWith(docs[0]._id);
+				expect(service.encodeID).toHaveBeenCalledWith(docs[1]._id);
+
+				expect(service.populateDocs).toHaveBeenCalledTimes(1);
+				expect(service.populateDocs).toHaveBeenCalledWith(ctx, docs);
+
+				expect(service.filterFields).toHaveBeenCalledTimes(2);
+				expect(service.filterFields).toHaveBeenCalledWith(docs[0], service.settings.fields);
+				expect(service.filterFields).toHaveBeenCalledWith(docs[1], service.settings.fields);
+			}).catch(protectReject);
+		});
 	});
 
 });
 
-describe("Test convertToJSON method", () => {
+describe("Test filterFields method", () => {
 	const doc = { 
 		id : 1,
 		name: "Walter",
@@ -560,16 +802,19 @@ describe("Test convertToJSON method", () => {
 	const broker = new ServiceBroker({ validation: false });
 	const service = broker.createService(DbService, {
 		name: "store",
-		adapter: mockAdapter
+		adapter: mockAdapter,
+		settings: {
+			fields: "id name address"
+		}
 	});
 
 	it("should not touch the doc", () => {
-		const res = service.convertToJSON(doc);
+		const res = service.filterFields(doc);
 		expect(res).toBe(doc);
 	});
 
 	it("should filter the fields", () => {
-		const res = service.convertToJSON(doc, ["name", "address"]);
+		const res = service.filterFields(doc, ["name", "address"]);
 		expect(res).toEqual({
 			name: "Walter",
 			address: doc.address
@@ -577,7 +822,7 @@ describe("Test convertToJSON method", () => {
 	});
 
 	it("should filter with nested fields", () => {
-		const res = service.convertToJSON(doc, ["name", "address.city", "address.zip"]);
+		const res = service.filterFields(doc, ["name", "address.city", "address.zip"]);
 		expect(res).toEqual({
 			name: "Walter",
 			address: {
@@ -588,40 +833,6 @@ describe("Test convertToJSON method", () => {
 	});
 
 });
-
-describe("Test filterFields method", () => {
-	const docs = [{ id: 1 }, { id: 2 }, { id: 3 }];
-	const doc = { id : 1 };
-
-	const broker = new ServiceBroker({ validation: false });
-	const service = broker.createService(DbService, {
-		name: "store",
-		adapter: mockAdapter,
-		settings: {
-			fields: "id name status"
-		}
-	});
-
-	service.convertToJSON = jest.fn(docs => docs);
-
-	it("should call 'convertToJSON' with object", () => {
-		service.filterFields(doc);
-		expect(service.convertToJSON).toHaveBeenCalledTimes(1);
-		expect(service.convertToJSON).toHaveBeenCalledWith(doc, ["id", "name", "status"]);
-	});
-
-	it("should call 'convertToJSON' with array", () => {
-		service.convertToJSON.mockClear();
-
-		service.filterFields(docs, ["name", "email"]);
-		expect(service.convertToJSON).toHaveBeenCalledTimes(3);
-		expect(service.convertToJSON).toHaveBeenCalledWith(docs[0], ["name", "email"]);
-		expect(service.convertToJSON).toHaveBeenCalledWith(docs[1], ["name", "email"]);
-		expect(service.convertToJSON).toHaveBeenCalledWith(docs[2], ["name", "email"]);
-	});
-
-});
-
 
 describe("Test populateDocs method", () => {
 	const docs = [{ id: 1, author: 3 }, { id: 2, author: 5, comments: [8, 3, 8] }, { id: 3, author: 8 }];
@@ -715,35 +926,6 @@ describe("Test populateDocs method", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call 'populateDocs' with one doc & custom rules & rule handler", () => {
-		const ctx = { params: {} };
-		const doc = {
-			id: 1,
-			author: 8
-		};
-
-		const rules = {
-			author: jest.fn(() => {
-				return { 
-					"8": { name: "Adams" } 
-				};
-			})
-		};
-
-		return service.populateDocs(ctx, doc, rules).then(res => {
-			expect(rules.author).toHaveBeenCalledTimes(1);
-			expect(rules.author).toHaveBeenCalledWith([8], { field: "author", handler: jasmine.any(Function) }, ctx);
-
-			expect(res).toEqual({
-				id: 1,
-				author: {
-					name: "Adams"
-				}
-			});
-
-		}).catch(protectReject);
-	});
-
 	it("should call 'populateDocs' with multiple doc & custom rules & rule handler", () => {
 		const ctx = { params: {} };
 		const docs = [
@@ -788,7 +970,6 @@ describe("Test populateDocs method", () => {
 	});
 
 });
-
 
 describe("Test validateEntity method", () => {
 
@@ -859,3 +1040,22 @@ describe("Test validateEntity method", () => {
 
 });
 
+
+describe("Test encodeID/decodeID method", () => {
+
+	const broker = new ServiceBroker({ validation: false });
+	const service = broker.createService(DbService, {
+		name: "store",
+		adapter: mockAdapter,
+		settings: {}
+	});
+
+	it("should return with the same ID", () => {
+		expect(service.encodeID(5)).toBe(5);
+	});
+
+	it("should return with the same ID", () => {
+		expect(service.decodeID(5)).toBe(5);
+	});
+
+});

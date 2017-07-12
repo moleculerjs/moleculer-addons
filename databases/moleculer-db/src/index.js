@@ -363,8 +363,8 @@ module.exports = {
 		 */
 		getById(ctx, params) {
 			const populate = params.populate != null ? params.populate : true;
-			return this.model(ctx, { id: params.id, populate })
-				.then(doc => this.transformDocuments(ctx, doc));
+			return this.model(ctx, { id: params.id, populate, fields: this.settings.fields });
+				//.then(doc => this.transformDocuments(ctx, doc));
 		},
 
 		/**
@@ -380,7 +380,7 @@ module.exports = {
 
 				.then(({ id }) => {
 					if (_.isArray(id)) {
-						id = id.map(this.decodeID);
+						id = id.map(id => this.decodeID(id));
 						return this.adapter.findByIds(id);
 					} else {
 						id = this.decodeID(id);
@@ -580,8 +580,8 @@ module.exports = {
 		/**
 		 * Populate documents
 		 * 
-		 * @param {Context} ctx				Context
-		 * @param {Array} 	docs			Models
+		 * @param {Context} 		ctx		Context
+		 * @param {Array|Object} 	docs	Models
 		 * @param {Object?}	populateRules	schema for population
 		 * @returns	{Promise}
 		 */
@@ -605,12 +605,13 @@ module.exports = {
 					}
 					rule.field = field;
 
+					let arr = Array.isArray(docs) ? docs : [docs];
 					// Collect IDs from field of docs (flatten, compact & unique list) 
-					let idList = _.uniq(_.flattenDeep(_.compact(docs.map(doc => doc[field]))));
+					let idList = _.uniq(_.flattenDeep(_.compact(arr.map(doc => doc[field]))));
 					if (idList.length > 0) {
 						// Replace the received models according to IDs in the original docs
 						const resultTransform = (populatedDocs) => {
-							docs.forEach(doc => {
+							arr.forEach(doc => {
 								let id = doc[field];
 								if (_.isArray(id)) {
 									let models = _.compact(id.map(id => populatedDocs[id]));
@@ -629,7 +630,7 @@ module.exports = {
 								id: idList,
 								resultAsObject: true,
 								populate: !!rule.populate
-							}, rule.params || []);
+							}, rule.params || {});
 
 							promises.push(ctx.call(rule.action, params).then(resultTransform));
 						}
