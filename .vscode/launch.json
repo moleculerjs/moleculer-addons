@@ -12,8 +12,8 @@
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"databases\\moleculer-db",
-				"populates"
+				"databases\\moleculer-db-adapter-mongoose",
+				"simple"
 			]
 		},
 

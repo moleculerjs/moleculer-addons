@@ -9,7 +9,10 @@ function protectReject(err) {
 }
 
 const doc = {
-	toJSON: jest.fn()
+	toJSON: jest.fn(() => ({})),
+	_id: {
+		toHexString: jest.fn()
+	}
 };
 const docs = [doc];
 
@@ -17,12 +20,12 @@ const execCB = jest.fn(() => Promise.resolve());
 const saveCB = jest.fn(() => Promise.resolve());
 const leanCB = jest.fn(() => ({ exec: execCB }));
 const countCB = jest.fn(() => ({ exec: execCB }));
-const query = jest.fn(() => ({ lean: leanCB, count: countCB }));
+const query = jest.fn(() => ({ lean: leanCB, exec: execCB, count: countCB }));
 
 const fakeModel = Object.assign(jest.fn(() => ({ save: saveCB })), {
 	find: jest.fn(() => query()),
 	findById: jest.fn(() => query()),
-	insertMany: jest.fn(() => Promise.resolve()),
+	create: jest.fn(() => Promise.resolve()),
 	update: jest.fn(() => Promise.resolve(docs)),
 	findByIdAndUpdate: jest.fn(() => Promise.resolve(doc)),
 	remove: jest.fn(() => Promise.resolve()),
@@ -122,6 +125,7 @@ describe("Test MongooseStoreAdapter", () => {
 				skip: jest.fn(),
 				limit: jest.fn(),
 				lean: leanCB, 
+				exec: execCB,
 				count: countCB
 			}));
 		});
@@ -199,7 +203,6 @@ describe("Test MongooseStoreAdapter", () => {
 			expect(adapter.doFiltering).toHaveBeenCalledTimes(1);
 			expect(adapter.doFiltering).toHaveBeenCalledWith(params);
 
-			expect(leanCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -212,7 +215,6 @@ describe("Test MongooseStoreAdapter", () => {
 			expect(adapter.model.findById).toHaveBeenCalledTimes(1);
 			expect(adapter.model.findById).toHaveBeenCalledWith(5);
 
-			expect(leanCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -226,7 +228,6 @@ describe("Test MongooseStoreAdapter", () => {
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith({"_id": {"$in": 5}});
 
-			expect(leanCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);
 		});
 	});
@@ -257,11 +258,11 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 
-	it("call insertMany", () => {
+	it("call create", () => {
 		let entities = [];
 		return adapter.insertMany(entities).catch(protectReject).then(() => {
-			expect(adapter.model.insertMany).toHaveBeenCalledTimes(1);
-			expect(adapter.model.insertMany).toHaveBeenCalledWith(entities);
+			expect(adapter.model.create).toHaveBeenCalledTimes(1);
+			expect(adapter.model.create).toHaveBeenCalledWith(entities);
 		});
 	});
 
@@ -272,8 +273,6 @@ describe("Test MongooseStoreAdapter", () => {
 		return adapter.updateMany(query, update).catch(protectReject).then(() => {
 			expect(adapter.model.update).toHaveBeenCalledTimes(1);
 			expect(adapter.model.update).toHaveBeenCalledWith(query, update, { multi: true, "new": true });
-
-			expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		});
 	});
 
@@ -284,8 +283,6 @@ describe("Test MongooseStoreAdapter", () => {
 		return adapter.updateById(5, update).catch(protectReject).then(() => {
 			expect(adapter.model.findByIdAndUpdate).toHaveBeenCalledTimes(1);
 			expect(adapter.model.findByIdAndUpdate).toHaveBeenCalledWith(5, update, { "new": true });
-
-			expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		});
 	});
 
@@ -311,6 +308,14 @@ describe("Test MongooseStoreAdapter", () => {
 			expect(adapter.model.remove).toHaveBeenCalledTimes(1);
 			expect(adapter.model.remove).toHaveBeenCalledWith({});
 		});
+	});	
+
+	it("call doc.toJSON", () => {
+		doc.toJSON.mockClear();
+		doc._id.toHexString.mockClear();
+		adapter.entityToObject(doc);
+		expect(doc.toJSON).toHaveBeenCalledTimes(1);
+		expect(doc._id.toHexString).toHaveBeenCalledTimes(1);
 	});	
 });
 

@@ -23,13 +23,13 @@ broker.createService(StoreService, {
 	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	model: Post,
 	settings: {
-		fields: "_id title content votes author",
+		fields: ["_id", "title", "content", "votes", "author"],
 
 		populates: {
 			"author": {
-				action: "users.model",
+				action: "users.get",
 				params: {
-					fields: "username fullName"
+					fields: ["username", "fullName"]
 				}
 			}
 		}
@@ -80,7 +80,7 @@ broker.createService(StoreService, {
 	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
 	model: User,
 	settings: {
-		fields: "_id username fullName email"
+		fields: ["_id", "username", "fullName", "email"]
 	},
 
 	afterConnected() {
@@ -104,16 +104,24 @@ broker.createService(StoreService, {
 	}
 });
 
+let postID;
 // Start server
 broker.start().delay(3000).then(() => {
 	Promise.resolve()
 		// List posts
 		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (search: 'ipsam') ---")))
-		.then(() => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "ipsam", populate: true, fields: ["title", "votes", "author"] }).then(console.log))
+		.then(() => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "ipsam", populate: ["author"], fields: ["_id", "title", "votes", "author"] }).then(posts => {
+			postID = posts[0]._id;
+			console.log(posts);
+		}))
 		.then(() => console.log(chalk.yellow.bold("\n--- COUNT POSTS (search: 'ipsam') ---")))
 		.then(() => broker.call("posts.count", { search: "ipsam" }).then(console.log))
-		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (limit: 3, offset: 2, sort: title) ---")))
+		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (limit: 3, offset: 2, sort: title, no author) ---")))
 		.then(() => broker.call("posts.find", { limit: 3, offset: 2, sort: "title", fields: ["title", "votes"] }).then(console.log))
+		.then(() => console.log(chalk.yellow.bold("\n--- GET POST (page: 2, pageSize: 5, sort: -votes) ---")))
+		.then(() => broker.call("posts.get", { id: postID, populate: ["author"], fields: ["title", "author"] }).then(console.log))
+		.then(() => console.log(chalk.yellow.bold("\n--- LIST POSTS (page: 2, pageSize: 5, sort: -votes) ---")))
+		.then(() => broker.call("posts.list", { page: 2, pageSize: 5, sort: "-votes", populate: ["author"], fields: ["_id", "title", "votes", "author"] }).then(console.log))
 
 		// Error handling
 		.catch(console.error)

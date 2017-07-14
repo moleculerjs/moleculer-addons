@@ -249,7 +249,10 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	entityToObject(entity) {
-		return entity.toJSON();
+		let json = entity.toJSON();
+		if (entity._id)
+			json._id = entity._id.toHexString();
+		return json;
 	}
 
 	/**
