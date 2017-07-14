@@ -620,6 +620,7 @@ module.exports = {
 				return this.Promise.all(promises).then(() => docs);
 			}
 
+			/* istanbul ignore next */
 			return this.Promise.resolve(docs);
 		},
 
