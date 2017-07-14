@@ -83,9 +83,9 @@ broker.start().delay(500).then(() => {
 		.then(() => console.log(chalk.yellow.bold("\n--- GET ---")))
 		.then(() => broker.call("posts.get", { id }).then(console.log))
 
-		// Get a model
-		.then(() => console.log(chalk.yellow.bold("\n--- MODEL ---")))
-		.then(() => broker.call("posts.model", { id }).then(console.log))
+		// Get posts
+		.then(() => console.log(chalk.yellow.bold("\n--- GET[] mapping ---")))
+		.then(() => broker.call("posts.get", { id: [id], mapping: true }).then(console.log))
 
 		// Unvote a post
 		.then(() => console.log(chalk.yellow.bold("\n--- UNVOTE ---")))

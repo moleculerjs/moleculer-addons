@@ -26,7 +26,7 @@ module.exports = {
 		// Fields filter for result entities
 		fields: null,
 
-		// Auto populates schema
+		// Population schema
 		populates: null,
 
 		// Validator schema or a function to validate the incoming entity in "users.create" action
@@ -53,9 +53,11 @@ module.exports = {
 		 */
 		find: {
 			cache: {
-				keys: ["limit", "offset", "sort", "search", "searchFields", "query"]
+				keys: ["populate", "fields", "limit", "offset", "sort", "search", "searchFields", "query"]
 			},
 			params: {
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
 				limit: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				offset: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
@@ -98,9 +100,11 @@ module.exports = {
 		 */
 		list: {
 			cache: {
-				keys: ["page", "pageSize", "sort", "search", "searchFields", "query"]
+				keys: ["populate", "fields", "page", "pageSize", "sort", "search", "searchFields", "query"]
 			},
 			params: {
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
 				page: { type: "number", integer: true, min: 1, optional: true, convert: true },
 				pageSize: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
@@ -155,36 +159,22 @@ module.exports = {
 		 */
 		get: {
 			cache: {
-				keys: ["id"]
+				keys: ["id", "populate", "fields", "mapping"]
 			},
 			params: {
-				id: { type: "any" }
-			},			
+				id: [
+					{ type: "string" },
+					{ type: "number" },
+					{ type: "array" }
+				],
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
+				mapping: { type: "boolean", optional: true }
+			},				
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
 				return this.getById(ctx, params);
-			}
-		},
-
-		/**
-		 * Get entity by ID or IDs. For internal use only!
-		 * 
-		 * @cache true
-		 */
-		model: {
-			cache: {
-				keys: ["id", "populate", "fields", "resultAsObject"]
-			},
-			internal: true, // Doesn't be published by `moleculer-web`
-			params: {
-				id: { type: "any" },
-				populate: { type: "boolean", optional: true },
-				fields: { type: "array", optional: true },
-				resultAsObject: { type: "boolean", optional: true }
-			},			
-			handler(ctx) {
-				return this.model(ctx, ctx.params);
 			}
 		},
 
@@ -271,6 +261,12 @@ module.exports = {
 			if (typeof(p.sort) === "string")
 				p.sort = p.sort.replace(/,/, " ").split(" ");
 
+			if (typeof(p.fields) === "string")
+				p.fields = p.fields.replace(/,/, " ").split(" ");
+
+			if (typeof(p.populate) === "string")
+				p.populate = p.populate.replace(/,/, " ").split(" ");
+
 			if (ctx.action.name.endsWith(".list")) {
 				// Default `pageSize`
 				if (!p.pageSize)
@@ -306,7 +302,7 @@ module.exports = {
 		 */
 		find(ctx, params) {
 			return this.adapter.find(params)
-				.then(docs => this.transformDocuments(ctx, docs));
+				.then(docs => this.transformDocuments(ctx, ctx.params, docs));
 		},
 
 		/**
@@ -336,7 +332,7 @@ module.exports = {
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
 				.then(entity => this.adapter.insert(entity))
-				.then(doc => this.transformDocuments(ctx, doc))
+				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -350,31 +346,18 @@ module.exports = {
 		createMany(ctx, params) {
 			return this.validateEntity(params.entities)
 				.then(entities => this.adapter.insertMany(entities))
-				.then(docs => this.transformDocuments(ctx, docs))
+				.then(docs => this.transformDocuments(ctx, ctx.params, docs))
 				.then(json => this.clearCache().then(() => json));
 		},
 
 		/**
-		 * Get an entity by ID
+		 * Get entity/entities by ID(s)
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
 		 * @returns 
 		 */
 		getById(ctx, params) {
-			const populate = params.populate != null ? params.populate : true;
-			return this.model(ctx, { id: params.id, populate, fields: this.settings.fields });
-				//.then(doc => this.transformDocuments(ctx, doc));
-		},
-
-		/**
-		 * Get entities by IDs. For internal use!
-		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns 
-		 */
-		model(ctx, params) {
 			let origDoc;
 			return this.Promise.resolve(params)
 
@@ -390,27 +373,14 @@ module.exports = {
 
 				.then(doc => {
 					origDoc = doc;
-					if (params.populate === true)
-						return this.populateDocs(ctx, doc);
-					return doc;
-				})
-
-				.then(doc => {
-					if (params.fields !== false) {
-						if (_.isArray(doc)) {
-							return doc.map(item => this.filterFields(item, params.fields));
-						} else {
-							return this.filterFields(doc, params.fields);
-						}					
-					}
-					return doc;
+					return this.transformDocuments(ctx, ctx.params, doc);
 				})
 
 				.then(json => {
-					if (_.isArray(json) && params.resultAsObject === true) {
+					if (_.isArray(json) && params.mapping === true) {
 						let res = {};
 						json.forEach((doc, i) => {
-							const id = this.encodeID(origDoc[i][this.settings.idField]);
+							const id = origDoc[i][this.settings.idField];
 							res[id] = doc;
 						});
 
@@ -429,7 +399,7 @@ module.exports = {
 		 */
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
-				.then(doc => this.transformDocuments(ctx, doc))
+				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -442,7 +412,7 @@ module.exports = {
 		 */
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
-				.then(doc => this.transformDocuments(ctx, doc))
+				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -454,7 +424,7 @@ module.exports = {
 		 */
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
-				.then(doc => this.transformDocuments(ctx, doc))
+				//.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -466,7 +436,7 @@ module.exports = {
 		 */
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
-				.then(doc => this.transformDocuments(ctx, doc))
+				//.then(doc => this.transformDocuments(ctx, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -493,10 +463,11 @@ module.exports = {
 		/**
 		 * Transform the fetched documents
 		 * 
-		 * @param {Array|Object} docs 
+		 * @param {Array|Object} 	docs 
+		 * @param {Object} 			Params
 		 * @returns {Array|Object}
 		 */
-		transformDocuments(ctx, docs) {
+		transformDocuments(ctx, params, docs) {
 			let isDoc = false;
 			if (!Array.isArray(docs)) {
 				if (_.isObject(docs)) {
@@ -518,13 +489,13 @@ module.exports = {
 				}))
 
 				// Populate
-				.then(json => (ctx && ctx.params.populate !== false) ? this.populateDocs(ctx, json) : json)
+				.then(json => (ctx && params.populate) ? this.populateDocs(ctx, json, params.populate) : json)
 
 				// TODO onTransformDocumentsHook
 
 				// Filter fields
 				.then(json => {
-					let fields = ctx && ctx.params.fields ? ctx.params.fields : this.settings.fields;
+					let fields = ctx && params.fields ? params.fields : this.settings.fields;
 
 					// Compatibility with < 0.4
 					/* istanbul ignore next */
@@ -580,69 +551,75 @@ module.exports = {
 		/**
 		 * Populate documents
 		 * 
-		 * @param {Context} 		ctx		Context
-		 * @param {Array|Object} 	docs	Models
-		 * @param {Object?}	populateRules	schema for population
+		 * @param {Context} 		ctx
+		 * @param {Array|Object} 	docs
+		 * @param {Array}			populateFields
 		 * @returns	{Promise}
 		 */
-		populateDocs(ctx, docs, populateRules = this.settings.populates) {
-			if (docs != null && populateRules && (_.isObject(docs) || Array.isArray(docs))) {
-				let promises = [];
-				_.forIn(populateRules, (rule, field) => {
+		populateDocs(ctx, docs, populateFields) {
+			if (!this.settings.populates || !Array.isArray(populateFields) || populateFields.length == 0)
+				return this.Promise.resolve(docs);
 
-					// if the rule is a function, save as a custom handler
-					if (_.isFunction(rule)) {
-						rule = {
-							handler: this.Promise.method(rule)
-						};
-					}
+			if (docs == null || !_.isObject(docs) || !Array.isArray(docs))
+				return this.Promise.resolve(docs);
 
-					// If string, convert to object
-					if (_.isString(rule)) {
-						rule = {
-							action: rule
-						};
-					}
-					rule.field = field;
+			let promises = [];
+			_.forIn(this.settings.populates, (rule, field) => {
 
-					let arr = Array.isArray(docs) ? docs : [docs];
-					// Collect IDs from field of docs (flatten, compact & unique list) 
-					let idList = _.uniq(_.flattenDeep(_.compact(arr.map(doc => doc[field]))));
-					if (idList.length > 0) {
-						// Replace the received models according to IDs in the original docs
-						const resultTransform = (populatedDocs) => {
-							arr.forEach(doc => {
-								let id = doc[field];
-								if (_.isArray(id)) {
-									let models = _.compact(id.map(id => populatedDocs[id]));
-									doc[field] = models;
-								} else {
-									doc[field] = populatedDocs[id];
-								}
-							});
-						};
+				if (populateFields.indexOf(field) === -1)
+					return; // skip
 
-						if (rule.handler) {
-							promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
-						} else {
-							// Call the target action & collect the promises
-							const params = Object.assign({
-								id: idList,
-								resultAsObject: true,
-								populate: !!rule.populate
-							}, rule.params || {});
-
-							promises.push(ctx.call(rule.action, params).then(resultTransform));
-						}
-					}
-				});
-
-				if (promises.length > 0) {
-					return this.Promise.all(promises).then(() => docs);
+				// if the rule is a function, save as a custom handler
+				if (_.isFunction(rule)) {
+					rule = {
+						handler: this.Promise.method(rule)
+					};
 				}
+
+				// If string, convert to object
+				if (_.isString(rule)) {
+					rule = {
+						action: rule
+					};
+				}
+				rule.field = field;
+
+				let arr = Array.isArray(docs) ? docs : [docs];
+				// Collect IDs from field of docs (flatten, compact & unique list) 
+				let idList = _.uniq(_.flattenDeep(_.compact(arr.map(doc => doc[field]))));
+				if (idList.length > 0) {
+					// Replace the received models according to IDs in the original docs
+					const resultTransform = (populatedDocs) => {
+						arr.forEach(doc => {
+							let id = doc[field];
+							if (_.isArray(id)) {
+								let models = _.compact(id.map(id => populatedDocs[id]));
+								doc[field] = models;
+							} else {
+								doc[field] = populatedDocs[id];
+							}
+						});
+					};
+
+					if (rule.handler) {
+						promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
+					} else {
+						// Call the target action & collect the promises
+						const params = Object.assign({
+							id: idList,
+							mapping: true,
+							populate: rule.populate
+						}, rule.params || {});
+
+						promises.push(ctx.call(rule.action, params).then(resultTransform));
+					}
+				}
+			});
+
+			if (promises.length > 0) {
+				return this.Promise.all(promises).then(() => docs);
 			}
 
-			// Fallback, if no populate defined
 			return this.Promise.resolve(docs);
 		},
 
