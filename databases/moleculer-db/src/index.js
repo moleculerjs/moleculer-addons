@@ -332,7 +332,7 @@ module.exports = {
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
 				.then(entity => this.adapter.insert(entity))
-				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
+				.then(doc => this.transformDocuments(ctx, params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -346,7 +346,7 @@ module.exports = {
 		createMany(ctx, params) {
 			return this.validateEntity(params.entities)
 				.then(entities => this.adapter.insertMany(entities))
-				.then(docs => this.transformDocuments(ctx, ctx.params, docs))
+				.then(docs => this.transformDocuments(ctx, params, docs))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -399,7 +399,7 @@ module.exports = {
 		 */
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
-				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
+				.then(doc => this.transformDocuments(ctx, params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 
@@ -412,7 +412,7 @@ module.exports = {
 		 */
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
-				.then(doc => this.transformDocuments(ctx, ctx.params, doc))
+				.then(doc => this.transformDocuments(ctx, params, doc))
 				.then(json => this.clearCache().then(() => json));
 		},
 

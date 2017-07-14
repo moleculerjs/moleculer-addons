@@ -79,9 +79,9 @@ broker.start().delay(1000).then(() => {
 			} 
 		}).then(console.log))
 
-		// Get a model
-		.then(() => console.log(chalk.yellow.bold("\n--- MODEL ---")))
-		.then(() => broker.call("products.model", { id }).then(console.log))
+		// Get by encoded ID
+		.then(() => console.log(chalk.yellow.bold("\n--- GET BY ID w/ mapping ---")))
+		.then(() => broker.call("products.get", { id: [id], mapping: true }).then(console.log))
 
 		// Remove by ID
 		.then(() => console.log(chalk.yellow.bold("\n--- REMOVE BY ID ---")))
