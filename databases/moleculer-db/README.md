@@ -81,8 +81,7 @@ broker.start()
 | `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPagess`. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
 | `create` | `entity` | `Object` | Create a new entity. |
-| `get` | `id` | `Object` | Get an entity by ID. |
-| `model` | `id`, `populate`, `fields`, `resultAsObject` | `Object` | Get entities by ID/IDs. **For internal use only!** |
+| `get` | `id` | `Object|Array` | Get an entity or entities by ID/IDs. |
 | `update` | `id`, `update` | `Object` | Update an entity by ID. |
 | `remove` | `id` | `` | Remove an entity by ID. |
 | `clear` | - | `` | Clear all entities. |
@@ -102,10 +101,7 @@ Create a new entity. The `params.entity` will be passed to the adapter.
 Create many new entities. The `params.entities` will be passed to the adapter.
 
 ### `this.get(ctx, params)`
-Get an entities by ID. The `params.id` will be passed to the adapter.
-
-### `this.model(ctx, params)`
-Get entities by IDs. For internal use only!
+Get an entity or entities by ID/IDs.
 
 ### `this.updateById(ctx, params)`
 Update entity by ID. The `params.id` & `params.update` will be passed to the adapter.
@@ -153,6 +149,9 @@ broker.createService({
         }
     }
 });
+
+// List posts with populated authors
+broker.call("posts.find", { populate: ["author"]}).then(console.log);
 ```
 
 ## Extend with custom actions

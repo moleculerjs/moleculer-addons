@@ -5,6 +5,7 @@ const MongooseStoreAdapter = require("../../src");
 const mongoose = require("mongoose");
 
 function protectReject(err) {
+	console.error(err.stack);
 	expect(err).toBe(true);
 }
 
