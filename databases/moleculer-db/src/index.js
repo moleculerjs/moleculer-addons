@@ -331,7 +331,7 @@ module.exports = {
 			return this.validateEntity(params.entity)
 				.then(entity => this.adapter.insert(entity))
 				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this._entityChanged("created", json, ctx).then(() => json));
+				.then(json => this.entityChanged("created", json, ctx).then(() => json));
 		},
 
 		/**
@@ -345,7 +345,7 @@ module.exports = {
 			return this.validateEntity(params.entities)
 				.then(entities => this.adapter.insertMany(entities))
 				.then(docs => this.transformDocuments(ctx, params, docs))
-				.then(json => this._entityChanged("created", json, ctx).then(() => json));
+				.then(json => this.entityChanged("created", json, ctx).then(() => json));
 		},
 
 		/**
@@ -398,7 +398,7 @@ module.exports = {
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
 				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this._entityChanged("updated", json, ctx).then(() => json));
+				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
 		},
 
 		/**
@@ -411,7 +411,7 @@ module.exports = {
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
 				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this._entityChanged("updated", null, ctx).then(() => json));
+				.then(json => this.entityChanged("updated", null, ctx).then(() => json));
 		},
 
 		/**
@@ -423,7 +423,7 @@ module.exports = {
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
 				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this._entityChanged("removed", null, ctx).then(() => json));
+				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
 		},
 
 		/**
@@ -435,7 +435,7 @@ module.exports = {
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
 				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this._entityChanged("removed", null, ctx).then(() => json));
+				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
 		},
 
 		/**
@@ -446,7 +446,7 @@ module.exports = {
 		 */
 		clear(ctx) {
 			return this.adapter.clear()
-				.then(count => this._entityChanged("removed", null, ctx).then(() => count));
+				.then(count => this.entityChanged("removed", null, ctx).then(() => count));
 		},
 
 		/**
@@ -457,7 +457,7 @@ module.exports = {
 		 * @param {Context} ctx 
 		 * @returns {Promise}
 		 */
-		_entityChanged(type, json, ctx) {
+		entityChanged(type, json, ctx) {
 			return this.clearCache().then(() => {
 				const eventName = `entity${_.capitalize(type)}`;
 				if (this.schema[eventName] != null) {
