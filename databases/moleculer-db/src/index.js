@@ -26,7 +26,7 @@ module.exports = {
 		// Fields filter for result entities
 		fields: null,
 
-		// Auto populates schema
+		// Population schema
 		populates: null,
 
 		// Validator schema or a function to validate the incoming entity in "users.create" action
@@ -53,9 +53,11 @@ module.exports = {
 		 */
 		find: {
 			cache: {
-				keys: ["limit", "offset", "sort", "search", "searchFields", "query"]
+				keys: ["populate", "fields", "limit", "offset", "sort", "search", "searchFields", "query"]
 			},
 			params: {
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
 				limit: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				offset: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
@@ -64,17 +66,7 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
-				let params = Object.assign({}, ctx.params);
-				
-				// Convert from string to number
-				if (typeof(params.limit) === "string")
-					params.limit = Number(params.limit);				
-				if (typeof(params.offset) === "string")
-					params.offset = Number(params.offset);
-
-				// Limit the `limit`
-				if (this.settings.maxLimit > 0 && params.limit > this.settings.maxLimit)
-					params.limit = this.settings.maxLimit;
+				let params = this.sanitizeParams(ctx, ctx.params);
 
 				return this.find(ctx, params);
 			}
@@ -95,7 +87,9 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},			
 			handler(ctx) {
-				return this.count(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.count(ctx, params);
 			}
 		},
 
@@ -106,9 +100,11 @@ module.exports = {
 		 */
 		list: {
 			cache: {
-				keys: ["page", "pageSize", "sort", "search", "searchFields", "query"]
+				keys: ["populate", "fields", "page", "pageSize", "sort", "search", "searchFields", "query"]
 			},
 			params: {
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
 				page: { type: "number", integer: true, min: 1, optional: true, convert: true },
 				pageSize: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				sort: { type: "string", optional: true },
@@ -117,28 +113,7 @@ module.exports = {
 				query: { type: "object", optional: true }
 			},
 			handler(ctx) {
-				let params = Object.assign({}, ctx.params);
-				// Convert from string to number
-				if (typeof(params.page) === "string")
-					params.page = Number(params.page);				
-				if (typeof(params.pageSize) === "string")
-					params.pageSize = Number(params.pageSize);
-
-				// Default `pageSize`
-				if (!params.pageSize)
-					params.pageSize = this.settings.pageSize;
-
-				// Default `page`
-				if (!params.page)
-					params.page = 1;
-
-				// Limit the `pageSize`
-				if (this.settings.maxPageSize > 0 && params.pageSize > this.settings.maxPageSize)
-					params.pageSize = this.settings.maxPageSize;
-
-				// Calculate the limit & offset from page & pageSize
-				params.limit = params.pageSize;
-				params.offset = (params.page - 1) * params.pageSize;
+				let params = this.sanitizeParams(ctx, ctx.params);
 
 				return this.Promise.all([
 					// Get rows
@@ -171,7 +146,9 @@ module.exports = {
 				entity: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.create(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.create(ctx, params);
 			}
 		},
 
@@ -182,33 +159,22 @@ module.exports = {
 		 */
 		get: {
 			cache: {
-				keys: ["id"]
+				keys: ["id", "populate", "fields", "mapping"]
 			},
 			params: {
-				id: { type: "any" }
-			},			
+				id: [
+					{ type: "string" },
+					{ type: "number" },
+					{ type: "array" }
+				],
+				populate: { type: "array", optional: true, items: "string" },
+				fields: { type: "array", optional: true, items: "string" },
+				mapping: { type: "boolean", optional: true }
+			},				
 			handler(ctx) {
-				return this.get(ctx, ctx.params);
-			}
-		},
+				let params = this.sanitizeParams(ctx, ctx.params);
 
-		/**
-		 * Get entity by ID or IDs. For internal use only!
-		 * 
-		 * @cache true
-		 */
-		model: {
-			cache: {
-				keys: ["id", "populate", "fields", "resultAsObject"]
-			},
-			params: {
-				id: { type: "any" },
-				populate: { type: "boolean", optional: true },
-				fields: { type: "any", optional: true },
-				resultAsObject: { type: "boolean", optional: true }
-			},			
-			handler(ctx) {
-				return this.model(ctx, ctx.params);
+				return this.getById(ctx, params);
 			}
 		},
 
@@ -221,7 +187,9 @@ module.exports = {
 				update: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.updateById(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.updateById(ctx, params);
 			}
 		},
 
@@ -233,7 +201,9 @@ module.exports = {
 				id: { type: "any" }
 			},			
 			handler(ctx) {
-				return this.removeById(ctx, ctx.params);
+				let params = this.sanitizeParams(ctx, ctx.params);
+
+				return this.removeById(ctx, params);
 			}
 		}
 	},
@@ -269,6 +239,59 @@ module.exports = {
 		},
 
 		/**
+		 * Sanitize context parameters at `find` action
+		 * 
+		 * @param {Context} ctx 
+		 * @param {any} origParams 
+		 * @returns 
+		 */
+		sanitizeParams(ctx, params) {
+			let p = Object.assign({}, params);
+
+			// Convert from string to number
+			if (typeof(p.limit) === "string")
+				p.limit = Number(p.limit);				
+			if (typeof(p.offset) === "string")
+				p.offset = Number(p.offset);
+			if (typeof(p.page) === "string")
+				p.page = Number(p.page);				
+			if (typeof(p.pageSize) === "string")
+				p.pageSize = Number(p.pageSize);
+
+			if (typeof(p.sort) === "string")
+				p.sort = p.sort.replace(/,/, " ").split(" ");
+
+			if (typeof(p.fields) === "string")
+				p.fields = p.fields.replace(/,/, " ").split(" ");
+
+			if (typeof(p.populate) === "string")
+				p.populate = p.populate.replace(/,/, " ").split(" ");
+
+			if (ctx.action.name.endsWith(".list")) {
+				// Default `pageSize`
+				if (!p.pageSize)
+					p.pageSize = this.settings.pageSize;
+
+				// Default `page`
+				if (!p.page)
+					p.page = 1;
+
+				// Limit the `pageSize`
+				if (this.settings.maxPageSize > 0 && p.pageSize > this.settings.maxPageSize)
+					p.pageSize = this.settings.maxPageSize;
+
+				// Calculate the limit & offset from page & pageSize
+				p.limit = p.pageSize;
+				p.offset = (p.page - 1) * p.pageSize;
+			}
+			// Limit the `limit`
+			if (this.settings.maxLimit > 0 && p.limit > this.settings.maxLimit)
+				p.limit = this.settings.maxLimit;
+
+			return p;
+		},
+
+		/**
 		 * Find all entities
 		 * 
 		 * @param {Context} ctx 
@@ -277,7 +300,7 @@ module.exports = {
 		 */
 		find(ctx, params) {
 			return this.adapter.find(params)
-				.then(docs => this.transformDocuments(ctx, docs));
+				.then(docs => this.transformDocuments(ctx, ctx.params, docs));
 		},
 
 		/**
@@ -288,6 +311,7 @@ module.exports = {
 		 * @returns 
 		 */
 		count(ctx, params) {
+			// Remove pagination params
 			if (params && params.limit)
 				params.limit = null;
 			if (params && params.offset)
@@ -306,8 +330,8 @@ module.exports = {
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
 				.then(entity => this.adapter.insert(entity))
-				.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.clearCache().then(() => json));
+				.then(doc => this.transformDocuments(ctx, params, doc))
+				.then(json => this.entityChanged("created", json, ctx).then(() => json));
 		},
 
 		/**
@@ -320,54 +344,43 @@ module.exports = {
 		createMany(ctx, params) {
 			return this.validateEntity(params.entities)
 				.then(entities => this.adapter.insertMany(entities))
-				.then(docs => this.transformDocuments(ctx, docs))
-				.then(json => this.clearCache().then(() => json));
+				.then(docs => this.transformDocuments(ctx, params, docs))
+				.then(json => this.entityChanged("created", json, ctx).then(() => json));
 		},
 
 		/**
-		 * Get an entity by ID
+		 * Get entity/entities by ID(s)
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
 		 * @returns 
 		 */
-		get(ctx, params) {
-			const populate = params.populate != null ? params.populate : true;
-			return this.model(ctx, { id: params.id, populate });
-		},
-
-		/**
-		 * Get entities by IDs. For internal use!
-		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns 
-		 */
-		model(ctx, params) {
+		getById(ctx, params) {
 			let origDoc;
 			return this.Promise.resolve(params)
+
 				.then(({ id }) => {
 					if (_.isArray(id)) {
+						id = id.map(id => this.decodeID(id));
 						return this.adapter.findByIds(id);
 					} else {
+						id = this.decodeID(id);
 						return this.adapter.findById(id);
 					}
 				})
+
 				.then(doc => {
 					origDoc = doc;
-					if (params.populate === true)
-						return this.populateDocs(ctx, doc);
-					return doc;
+					return this.transformDocuments(ctx, ctx.params, doc);
 				})
-				.then(doc => {
-					if (params.fields !== false)
-						return this.filterFields(doc, params.fields);
-					return doc;
-				})
+
 				.then(json => {
-					if (_.isArray(json) && params.resultAsObject === true) {
+					if (_.isArray(json) && params.mapping === true) {
 						let res = {};
-						json.forEach((doc, i) => res[origDoc[i][this.settings.idField]] = doc);
+						json.forEach((doc, i) => {
+							const id = origDoc[i][this.settings.idField];
+							res[id] = doc;
+						});
 
 						return res;
 					}
@@ -383,9 +396,9 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		updateById(ctx, params) {
-			return this.adapter.updateById(params.id, params.update)
-				.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.clearCache().then(() => json));
+			return this.adapter.updateById(this.decodeID(params.id), params.update)
+				.then(doc => this.transformDocuments(ctx, params, doc))
+				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
 		},
 
 		/**
@@ -397,8 +410,8 @@ module.exports = {
 		 */
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
-				.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.clearCache().then(() => json));
+				.then(doc => this.transformDocuments(ctx, params, doc))
+				.then(json => this.entityChanged("updated", null, ctx).then(() => json));
 		},
 
 		/**
@@ -408,9 +421,9 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		removeById(ctx, params) {
-			return this.adapter.removeById(params.id)
-				.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.clearCache().then(() => json));
+			return this.adapter.removeById(this.decodeID(params.id))
+				//.then(doc => this.transformDocuments(ctx, doc))
+				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
 		},
 
 		/**
@@ -421,22 +434,40 @@ module.exports = {
 		 */
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
-				.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.clearCache().then(() => json));
+				//.then(doc => this.transformDocuments(ctx, doc))
+				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
 		},
 
 		/**
 		 * Delete all entities
 		 * 
+		 * @param {any} ctx 
 		 * @returns {Promise}
 		 */
-		clear() {
+		clear(ctx) {
 			return this.adapter.clear()
-				.then(count => this.clearCache().then(() => count));
+				.then(count => this.entityChanged("removed", null, ctx).then(() => count));
 		},
 
 		/**
-		 * Clear cache entities
+		 * Clear the cache & call entity lifecycle events
+		 * 
+		 * @param {String} type 
+		 * @param {Object|Array} json 
+		 * @param {Context} ctx 
+		 * @returns {Promise}
+		 */
+		entityChanged(type, json, ctx) {
+			return this.clearCache().then(() => {
+				const eventName = `entity${_.capitalize(type)}`;
+				if (this.schema[eventName] != null) {
+					return this.schema[eventName].call(this, json, ctx);
+				}
+			});
+		},
+
+		/**
+		 * Clear cached entities
 		 * 
 		 * @returns {Promise}
 		 */
@@ -448,48 +479,65 @@ module.exports = {
 		/**
 		 * Transform the fetched documents
 		 * 
-		 * @param {Array|Object} docs 
+		 * @param {Array|Object} 	docs 
+		 * @param {Object} 			Params
 		 * @returns {Array|Object}
 		 */
-		transformDocuments(ctx, docs) {
+		transformDocuments(ctx, params, docs) {
+			let isDoc = false;
+			if (!Array.isArray(docs)) {
+				if (_.isObject(docs)) {
+					isDoc = true;
+					docs = [docs];
+				} else
+					return this.Promise.resolve(docs);
+			}
+
 			return this.Promise.resolve(docs)
+
+				// Convert entity to JS object
+				.then(docs => docs.map(doc => this.adapter.entityToObject(doc)))
+
+				// Encode IDs
+				.then(docs => docs.map(doc => {
+					doc[this.settings.idField] = this.encodeID(doc[this.settings.idField]);
+					return doc;
+				}))
+
+				// Populate
+				.then(json => (ctx && params.populate) ? this.populateDocs(ctx, json, params.populate) : json)
+
+				// TODO onTransformHook
+
+				// Filter fields
 				.then(json => {
-					if (ctx && ctx.params.populate !== false)
-						return this.populateDocs(ctx, json);
-					return json;
+					let fields = ctx && params.fields ? params.fields : this.settings.fields;
+
+					// Compatibility with < 0.4
+					/* istanbul ignore next */
+					if (_.isString(fields))
+						fields = fields.split(" ");
+
+					// Authorize the requested fields
+					const authFields = this.authorizeFields(fields);
+
+					return json.map(item => this.filterFields(item, authFields));
 				})
-				.then(docs => this.filterFields(docs, ctx ? ctx.params.fields : null));
+
+				// Return
+				.then(json => isDoc ? json[0] : json);
 		},
 
 		/**
 		 * Filter fields in the entity object
 		 * 
-		 * @param {MongoDocument} 	docs	MongoDB document(s)
-		 * @param {String|Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
-		 * @returns	{Object|Array}
+		 * @param {Object} 	doc
+		 * @param {Array} 	fields	Filter properties of model.
+		 * @returns	{Object}
 		 * 
 		 * @memberOf Service
 		 */
-		filterFields(docs, fields = this.settings.fields) {
-			if (_.isString(fields)) {
-				fields = fields.split(" ");
-			}
-
-			if (_.isArray(docs)) {
-				return docs.map(doc => this.convertToJSON(doc, fields));
-			} else {
-				return this.convertToJSON(docs, fields);
-			}
-		},
-
-		/**
-		 * 
-		 * 
-		 * @param {Object} doc 
-		 * @param {Array} fields 
-		 * @returns 
-		 */
-		convertToJSON(doc, fields) {
+		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
 				let res = {};
@@ -505,75 +553,114 @@ module.exports = {
 		},
 
 		/**
-		 * Populate documents
+		 * Authorize the required field list. Remove fields which is not exist in the `this.settings.fields`
 		 * 
-		 * @param {Context} ctx				Context
-		 * @param {Array} 	docs			Models
-		 * @param {Object?}	populateRules	schema for population
-		 * @returns	{Promise}
+		 * @param {Array} f 
+		 * @returns {Array}
 		 */
-		populateDocs(ctx, docs, populateRules = this.settings.populates) {
-			if (docs != null && populateRules && (_.isObject(docs) || Array.isArray(docs))) {
-				let promises = [];
-				_.forIn(populateRules, (rule, field) => {
-
-					// if the rule is a function, save as a custom handler
-					if (_.isFunction(rule)) {
-						rule = {
-							handler: this.Promise.method(rule)
-						};
-					}
-
-					// If string, convert to object
-					if (_.isString(rule)) {
-						rule = {
-							action: rule
-						};
-					}
-					rule.field = field;
-
-					let items = Array.isArray(docs) ? docs : [docs];
-
-					// Collect IDs from field of docs (flatten, compact & unique list) 
-					let idList = _.uniq(_.flattenDeep(_.compact(items.map(doc => doc[field]))));
-
-					if (idList.length > 0) {
-
-						// Replace the received models according to IDs in the original docs
-						const resultTransform = (populatedDocs) => {
-							items.forEach(doc => {
-								let id = doc[field];
-								if (_.isArray(id)) {
-									let models = _.compact(id.map(id => populatedDocs[id]));
-									doc[field] = models;
-								} else {
-									doc[field] = populatedDocs[id];
-								}
-							});
-						};
-
-						if (rule.handler) {
-							promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
-						} else {
-							// Call the target action & collect the promises
-							const params = Object.assign({
-								id: idList,
-								resultAsObject: true,
-								populate: !!rule.populate
-							}, rule.params || []);
-
-							promises.push(ctx.call(rule.action, params).then(resultTransform));
+		authorizeFields(fields) {
+			if (this.settings.fields && this.settings.fields.length > 0) {
+				let res = [];
+				if (Array.isArray(fields) && fields.length > 0) {
+					fields.forEach(f => {
+						if (this.settings.fields.indexOf(f) !== -1) {
+							res.push(f);
+							return;
 						}
-					}
-				});
 
-				if (promises.length > 0) {
-					return this.Promise.all(promises).then(() => docs);
+						if (f.indexOf(".") !== -1) {
+							let parts = f.split(".");
+							while (parts.length > 1) {
+								parts.pop();
+								if (this.settings.fields.indexOf(parts.join(".")) !== -1) {
+									res.push(f);
+									break;
+								}
+							}
+						}
+
+						let nestedFields = this.settings.fields.filter(prop => prop.indexOf(f + ".") !== -1);
+						if (nestedFields.length > 0) {
+							res = res.concat(nestedFields);
+						}
+					});
+					//return _.intersection(f, this.settings.fields);
 				}
+				return res;
 			}
 
-			// Fallback, if no populate defined
-			return this.Promise.resolve(docs);
+			return fields;
+		},
+
+		/**
+		 * Populate documents
+		 * 
+		 * @param {Context} 		ctx
+		 * @param {Array|Object} 	docs
+		 * @param {Array}			populateFields
+		 * @returns	{Promise}
+		 */
+		populateDocs(ctx, docs, populateFields) {
+			if (!this.settings.populates || !Array.isArray(populateFields) || populateFields.length == 0)
+				return this.Promise.resolve(docs);
+
+			if (docs == null || !_.isObject(docs) || !Array.isArray(docs))
+				return this.Promise.resolve(docs);
+
+			let promises = [];
+			_.forIn(this.settings.populates, (rule, field) => {
+
+				if (populateFields.indexOf(field) === -1)
+					return; // skip
+
+				// if the rule is a function, save as a custom handler
+				if (_.isFunction(rule)) {
+					rule = {
+						handler: this.Promise.method(rule)
+					};
+				}
+
+				// If string, convert to object
+				if (_.isString(rule)) {
+					rule = {
+						action: rule
+					};
+				}
+				rule.field = field;
+
+				let arr = Array.isArray(docs) ? docs : [docs];
+				// Collect IDs from field of docs (flatten, compact & unique list) 
+				let idList = _.uniq(_.flattenDeep(_.compact(arr.map(doc => doc[field]))));
+				if (idList.length > 0) {
+					// Replace the received models according to IDs in the original docs
+					const resultTransform = (populatedDocs) => {
+						arr.forEach(doc => {
+							let id = doc[field];
+							if (_.isArray(id)) {
+								let models = _.compact(id.map(id => populatedDocs[id]));
+								doc[field] = models;
+							} else {
+								doc[field] = populatedDocs[id];
+							}
+						});
+					};
+
+					if (rule.handler) {
+						promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
+					} else {
+						// Call the target action & collect the promises
+						const params = Object.assign({
+							id: idList,
+							mapping: true,
+							populate: rule.populate
+						}, rule.params || {});
+
+						promises.push(ctx.call(rule.action, params).then(resultTransform));
+					}
+				}
+			});
+
+			return this.Promise.all(promises).then(() => docs);
 		},
 
 		/**
@@ -588,6 +675,26 @@ module.exports = {
 
 			let entities = Array.isArray(entity) ? entity : [entity];
 			return this.Promise.all(entities.map(entity => this.settings.entityValidator(entity))).then(() => entity);
+		},
+
+		/**
+		 * Encode ID of entity
+		 * 
+		 * @param {any} id 
+		 * @returns 
+		 */
+		encodeID(id) {
+			return id;
+		},
+
+		/**
+		 * Decode ID of entity
+		 * 
+		 * @param {any} id 
+		 * @returns 
+		 */
+		decodeID(id) {
+			return id;
 		}
 	},
 
@@ -595,6 +702,11 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
+		// Compatibility with < 0.4
+		if (_.isString(this.settings.fields)) {
+			this.settings.fields = this.settings.fields.split(" ");
+		}		
+
 		if (!this.schema.adapter)
 			this.adapter = new MemoryAdapter();
 		else
@@ -602,7 +714,7 @@ module.exports = {
 
 		this.adapter.init(this.broker, this);
 
-		// Transform validation schema to checker function
+		// Transform entity validation schema to checker function
 		if (this.broker.validator && _.isObject(this.settings.entityValidator)) {
 			const check = this.broker.validator.compile(this.settings.entityValidator);
 			this.settings.entityValidator = entity => {
@@ -646,9 +758,6 @@ module.exports = {
 	stopped() {
 		if (this.adapter)
 			return this.disconnect();
-
-		/* istanbul ignore next */
-		return this.Promise.reject(new Error("Please set the store adapter in schema!"));
 	},
 
 	// Export Memory Adapter class

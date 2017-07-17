@@ -2,16 +2,17 @@
 
 # moleculer-db [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db)
 
-Service mixin to store entities in database
+Service mixin to store entities in database.
 
 ## Features
-- CRUD actions
-- pluggable adapters
+- default CRUD actions
 - cached queries
-- default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
-- filtering properties in entity
-- pagination support in `list` action
-- populate connections between services
+- pagination support
+- pluggable adapter (default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping)
+- fields filtering
+- populating
+- encode/decod IDs
+- entity lifecycle events for notifications
 
 ## Install
 
@@ -39,7 +40,7 @@ broker.createService({
     mixins: [DbService],
 
     settings: {
-        fields: "_id username name"
+        fields: ["_id", "username", "name"]
     },
 
     afterConnected() {
@@ -61,28 +62,26 @@ broker.start()
 ```
 
 ## Settings
-| Property | Description |
-| -------- | ----------- |
-| `idField` | Name of ID field. Default: `_id` |
-| `fields` | Field list for filtering. It can be an `Array` or a space-separated `String`. If the value is `null` or `undefined` doesn't filter the fields. |
-| `populates` | Populate schema |
-| `pageSize` | Default page size in `list` action. Default: `10` |
-| `maxPageSize` | Maximum page size in `list` action. Default: `100` |
-| `maxLimit` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `idField` | `String` | Name of ID field. Default: `_id` |
+| `fields` | `Array` | Field list for filtering. It is an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
+| `populates` | `Object` | Schema for population. [Read more](#populating) |
+| `pageSize` | `Number` | Default page size in `list` action. Default: `10` |
+| `maxPageSize` | `Number` | Maximum page size in `list` action. Default: `100` |
+| `maxLimit` | `Number` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
 
 
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
-| `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
-| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPagess`. |
+| `find` | `limit`, `offset`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Array` | Find matched entities. |
+| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPages` properties. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
 | `create` | `entity` | `Object` | Create a new entity. |
-| `get` | `id` | `Object` | Get an entity by ID. |
-| `model` | `id`, `populate`, `fields`, `resultAsObject` | `Object` | Get entities by ID/IDs. **For internal use only!** |
+| `get` | `id`, `populate`, `fields`, `mapping` | `Object|Array` | Get an entity or entities by ID/IDs. |
 | `update` | `id`, `update` | `Object` | Update an entity by ID. |
 | `remove` | `id` | `` | Remove an entity by ID. |
-| `clear` | - | `` | Clear all entities. |
 
 ## Methods
 
@@ -99,10 +98,7 @@ Create a new entity. The `params.entity` will be passed to the adapter.
 Create many new entities. The `params.entities` will be passed to the adapter.
 
 ### `this.get(ctx, params)`
-Get an entities by ID. The `params.id` will be passed to the adapter.
-
-### `this.model(ctx, params)`
-Get entities by IDs. For internal use only!
+Get an entity or entities by ID/IDs.
 
 ### `this.updateById(ctx, params)`
 Update entity by ID. The `params.id` & `params.update` will be passed to the adapter.
@@ -129,6 +125,16 @@ Delete all entitites.
 
 > After operation the cache will be cleared!
 
+### `this.clearCache()`
+Clear cached entitites. 
+
+### `this.encodeID()`
+Encode ID of entity
+
+### `this.decodeID()`
+Decode ID of entity 
+
+
 ## Populating
 
 ```js
@@ -137,20 +143,60 @@ broker.createService({
     mixins: [DbService],
     settings: {
         populates: {
-            // Shorthand populate rule. Resolve the `voters` values with `users.model` action.
-            "voters": "users.model",
+            // Shorthand populate rule. Resolve the `voters` values with `users.get` action.
+            "voters": "users.get",
 
             // Define the params of action call. It will receive only with username & full name of author.
             "author": {
-                action: "users.model",
+                action: "users.get",
                 params: {
                     fields: "username fullName"
                 }
+            },
+
+            // Custom populator handler function
+            "rate"(ids, rule, ctx) {
+                return Promise.resolve(...);
             }
         }
     }
 });
+
+// List posts with populated authors
+broker.call("posts.find", { populate: ["author"]}).then(console.log);
 ```
+
+The `populate` parameter can be use in `find`, `list` and `get` actions.
+
+## Lifecycle entity events
+There are 3 entity lifecycle events which are called when entities are manipulated.
+
+```js
+broker.createService({
+    name: "posts",
+    mixins: [DbService],
+    settings: {},
+
+	afterConnected() {
+		this.logger.info("Connected successfully");
+	},
+
+	entityCreated(json, ctx) {
+		this.logger.info("New entity created!");
+	},
+
+	entityUpdated(json, ctx) {
+        // You can also access to Context
+		this.logger.info(`Entity updated by '${ctx.meta.user.name}' user!`);
+	},
+
+	entityRemoved(json, ctx) {
+		this.logger.info("Entity removed", json);
+	},    
+});
+```
+
+> Please note! If you manipulate multiple entities, the `json` parameter will be `null` (currently)!
 
 ## Extend with custom actions
 
@@ -162,7 +208,7 @@ module.exports = {
     mixins: [DbService],
 
     settings: {
-        fields: "_id title content votes"
+        fields: ["_id", "title", "content", "votes"]
     },
 
     actions: {

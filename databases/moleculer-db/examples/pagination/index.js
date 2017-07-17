@@ -15,7 +15,7 @@ let broker = new ServiceBroker({
 broker.createService(DbService, {
 	name: "posts",
 	settings: {
-		fields: "title"
+		fields: ["title"]
 	},
 
 	methods: {

@@ -7,7 +7,9 @@ const DbService = require("../../src");
 module.exports = function(adapter) {
 
 	function protectReject(err) {
-		expect(err).toBe(true);
+		console.error(err);
+		console.error(err.stack);
+		expect().toBe(true);		
 	}
 
 	describe("Test populates feature", () => {
@@ -21,11 +23,10 @@ module.exports = function(adapter) {
 		broker.createService(DbService, {
 			name: "posts",
 			settings: {
-				fields: "_id title content author",
+				fields: ["_id", "title", "content", "author"],
 				populates: {
 					author: {
-						action: "users.model",
-						populate: false
+						action: "users.get"
 					}
 				}
 			}
@@ -35,7 +36,7 @@ module.exports = function(adapter) {
 		broker.createService(DbService, {
 			name: "users",
 			settings: {
-				fields: "_id username name"
+				fields: ["_id", "username", "name"]
 			}
 		});
 
@@ -75,7 +76,7 @@ module.exports = function(adapter) {
 		});
 
 		it("should return with the entity and populate the author", () => {
-			return broker.call("posts.get", { id: posts[0]._id }).catch(protectReject).then(res => {
+			return broker.call("posts.get", { id: posts[0]._id, populate: ["author"] }).catch(protectReject).then(res => {
 				expect(res).toEqual({
 					"_id": posts[0]._id, 
 					"author": {"_id": users[2]._id, "name": "Walter", "username": "walter"}, 
@@ -86,9 +87,9 @@ module.exports = function(adapter) {
 		});
 
 		it("should return with multiple entities by IDs", () => {
-			return broker.call("posts.model", { 
+			return broker.call("posts.get", { 
 				id: [posts[2]._id, posts[0]._id], 
-				populate: true, 
+				populate: ["author"], 
 				fields: ["title", "author.name"] 
 			}).catch(protectReject).then(res => {
 				expect(res).toEqual([
@@ -99,13 +100,13 @@ module.exports = function(adapter) {
 		});
 
 		it("should return with multiple entities as Object", () => {
-			return broker.call("posts.model", { 
+			return broker.call("posts.get", { 
 				id: [posts[2]._id, posts[0]._id], 
-				fields: "title votes", 
-				resultAsObject: true 
+				fields: ["title", "votes"], 
+				mapping: true 
 			}).catch(protectReject).then(res => {
-				expect(res[posts[0]._id]).toEqual({"title": "My first post", "votes": 2}); 
-				expect(res[posts[2]._id]).toEqual({"title": "My last post", "votes": 5}); 
+				expect(res[posts[0]._id]).toEqual({"title": "My first post"}); 
+				expect(res[posts[2]._id]).toEqual({"title": "My last post"}); 
 			});
 		});
 

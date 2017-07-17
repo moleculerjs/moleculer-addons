@@ -7,6 +7,7 @@ const DbService = require("../../src");
 module.exports = function(adapter) {
 
 	function protectReject(err) {
+		console.error(err.stack);
 		expect(err).toBe(true);
 	}
 
@@ -72,7 +73,7 @@ module.exports = function(adapter) {
 		});
 
 		it("should return with multiple entity by IDs", () => {
-			return broker.call("posts.model", { id: [posts[2]._id, posts[0]._id] }).catch(protectReject).then(res => {
+			return broker.call("posts.get", { id: [posts[2]._id, posts[0]._id] }).catch(protectReject).then(res => {
 				expect(res.length).toBe(2);
 				expect(res[0]).toEqual(posts[2]);
 				expect(res[1]).toEqual(posts[0]);
