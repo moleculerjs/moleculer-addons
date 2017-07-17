@@ -243,7 +243,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {any} origParams 
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		sanitizeParams(ctx, params) {
 			let p = Object.assign({}, params);
@@ -296,7 +296,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		find(ctx, params) {
 			return this.adapter.find(params)
@@ -308,7 +308,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		count(ctx, params) {
 			// Remove pagination params
@@ -325,7 +325,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
@@ -339,7 +339,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		createMany(ctx, params) {
 			return this.validateEntity(params.entities)
@@ -353,7 +353,7 @@ module.exports = {
 		 * 
 		 * @param {Context} ctx 
 		 * @param {Object} params
-		 * @returns 
+		 * @returns {Promise}
 		 */
 		getById(ctx, params) {
 			let origDoc;
@@ -681,7 +681,7 @@ module.exports = {
 		 * Encode ID of entity
 		 * 
 		 * @param {any} id 
-		 * @returns 
+		 * @returns {any}
 		 */
 		encodeID(id) {
 			return id;
@@ -691,7 +691,7 @@ module.exports = {
 		 * Decode ID of entity
 		 * 
 		 * @param {any} id 
-		 * @returns 
+		 * @returns {any}
 		 */
 		decodeID(id) {
 			return id;
