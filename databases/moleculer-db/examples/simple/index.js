@@ -30,7 +30,19 @@ broker.createService(DbService, {
 	afterConnected() {
 		this.logger.info(chalk.green.bold("Connected successfully"));
 		this.clear();
-	}
+	},
+
+	entityCreated(json) {
+		this.logger.info(chalk.cyan.bold("Entity lifecycle event: CREATED")/*, json*/);
+	},
+
+	entityUpdated(json) {
+		this.logger.info(chalk.cyan.bold("Entity lifecycle event: UPDATED")/*, json*/);
+	},
+
+	entityRemoved(json) {
+		this.logger.info(chalk.cyan.bold("Entity lifecycle event: REMOVED")/*, json*/);
+	},
 });
 
 // Start server
