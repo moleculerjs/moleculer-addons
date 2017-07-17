@@ -105,8 +105,8 @@ module.exports = function(adapter) {
 				fields: ["title", "votes"], 
 				mapping: true 
 			}).catch(protectReject).then(res => {
-				expect(res[posts[0]._id]).toEqual({"title": "My first post", "votes": 2}); 
-				expect(res[posts[2]._id]).toEqual({"title": "My last post", "votes": 5}); 
+				expect(res[posts[0]._id]).toEqual({"title": "My first post"}); 
+				expect(res[posts[2]._id]).toEqual({"title": "My last post"}); 
 			});
 		});
 

@@ -518,7 +518,10 @@ module.exports = {
 					if (_.isString(fields))
 						fields = fields.split(" ");
 
-					return json.map(item => this.filterFields(item, fields));
+					// Authorize the requested fields
+					const authFields = this.authorizeFields(fields);
+
+					return json.map(item => this.filterFields(item, authFields));
 				})
 
 				// Return
@@ -529,7 +532,7 @@ module.exports = {
 		 * Filter fields in the entity object
 		 * 
 		 * @param {Object} 	doc
-		 * @param {Array} 	fields	Filter properties of model. It is a space-separated `String` or an `Array`
+		 * @param {Array} 	fields	Filter properties of model.
 		 * @returns	{Object}
 		 * 
 		 * @memberOf Service
@@ -537,9 +540,8 @@ module.exports = {
 		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
 			if (Array.isArray(fields)) {
-				let ff = this.authorizeFields(fields);
 				let res = {};
-				ff.forEach(n => {
+				fields.forEach(n => {
 					const v = _.get(doc, n);
 					if (v !== undefined)
 						_.set(res, n, v);
@@ -551,15 +553,41 @@ module.exports = {
 		},
 
 		/**
-		 * Authorize the required field list. Remove fields which is not exist in `this.settings.fields`
+		 * Authorize the required field list. Remove fields which is not exist in the `this.settings.fields`
 		 * 
-		 * @param {Array} fields 
+		 * @param {Array} f 
 		 * @returns {Array}
 		 */
 		authorizeFields(fields) {
-			/*if (this.settings.fields && this.settings.fields.length > 0) {
-				return _.intersection(fields, this.settings.fields);
-			}*/
+			if (this.settings.fields && this.settings.fields.length > 0) {
+				let res = [];
+				if (Array.isArray(fields) && fields.length > 0) {
+					fields.forEach(f => {
+						if (this.settings.fields.indexOf(f) !== -1) {
+							res.push(f);
+							return;
+						}
+
+						if (f.indexOf(".") !== -1) {
+							let parts = f.split(".");
+							while (parts.length > 1) {
+								parts.pop();
+								if (this.settings.fields.indexOf(parts.join(".")) !== -1) {
+									res.push(f);
+									break;
+								}
+							}
+						}
+
+						let nestedFields = this.settings.fields.filter(prop => prop.indexOf(f + ".") !== -1);
+						if (nestedFields.length > 0) {
+							res = res.concat(nestedFields);
+						}
+					});
+					//return _.intersection(f, this.settings.fields);
+				}
+				return res;
+			}
 
 			return fields;
 		},

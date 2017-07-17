@@ -800,6 +800,69 @@ describe("Test transformDocuments method", () => {
 
 });
 
+describe("Test authorizeFields method", () => {
+	/*const doc = { 
+		id : 1,
+		name: "Walter",
+		address: {
+			street: "3828 Piermont Dr",
+			city: "Albuquerque",
+			state: "NM",			
+			zip: "87112",
+			country: "USA"
+		},
+		email: "walter.white@heisenberg.com",
+		password: "H3153n83rg"
+	};*/
+
+	describe("Test with nested fields", () => {
+		const broker = new ServiceBroker();
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter,
+			settings: {
+				fields: ["id", "name", "address", "bio.body"]
+			}
+		});
+
+		it("should remove the email & password", () => {
+			const res = service.authorizeFields(["id", "name", "address", "email", "password", "otherProp"]);
+			expect(res).toEqual(["id", "name", "address"]);
+		});
+
+		it("should remove the email", () => {
+			const res = service.authorizeFields(["id", "name", "address.city", "address.state", "email"]);
+			expect(res).toEqual(["id", "name", "address.city", "address.state"]);
+		});
+
+		it("should remove the disabled bio fields", () => {
+			const res = service.authorizeFields(["id", "name", "bio.body.height", "bio.male", "bio.dob.year", "bio.body.hair.color"]);
+			expect(res).toEqual(["id", "name", "bio.body.height", "bio.body.hair.color"]);
+		});
+	});
+
+	describe("Test with enabled nested fields", () => {
+		const broker = new ServiceBroker();
+		const service = broker.createService(DbService, {
+			name: "store",
+			adapter: mockAdapter,
+			settings: {
+				fields: ["id", "name", "address.city", "address.state", "address.country", "bio.body.height", "bio.male", "bio.body.hair.color"]
+			}
+		});
+
+		it("should fill the nested enabled fields", () => {
+			let res = service.authorizeFields(["id", "name", "address"]);
+			expect(res).toEqual(["id", "name", "address.city", "address.state", "address.country"]);
+
+			res = service.authorizeFields(["id", "name", "bio.male", "bio.body"]);
+			expect(res).toEqual(["id", "name", "bio.male", "bio.body.height", "bio.body.hair.color"]);
+		});
+
+	});
+
+});
+
 describe("Test filterFields method", () => {
 	const doc = { 
 		id : 1,
