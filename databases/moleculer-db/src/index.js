@@ -507,7 +507,7 @@ module.exports = {
 				// Populate
 				.then(json => (ctx && params.populate) ? this.populateDocs(ctx, json, params.populate) : json)
 
-				// TODO onTransformDocumentsHook
+				// TODO onTransformHook
 
 				// Filter fields
 				.then(json => {
