@@ -34,7 +34,7 @@
     "lolex": "2.0.0",
     "moleculer": "0.8.2",
     "nodemon": "1.11.0",
-    "npm-check": "5.4.4"
+    "npm-check": "5.4.5"
   },
   "jest": {
     "testEnvironment": "node",
@@ -49,6 +49,6 @@
   "dependencies": {
     "bluebird": "3.5.0",
     "lodash": "4.17.4",
-    "mongoose": "4.11.2"
+    "mongoose": "4.11.3"
   }
 }
