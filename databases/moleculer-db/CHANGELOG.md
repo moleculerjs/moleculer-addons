@@ -4,23 +4,23 @@
 ## New
 ### Encoding & decoding IDs
 There are two new `encodeID` and `decodeID` methods. You can use them if you want to encode & decode database ID (for example with [hashids](https://github.com/ivanakimov/hashids.js))
-    ```js
-    const Hashids = require("hashids");
-    const hashids = new Hashids("secret salt");
+```js
+const Hashids = require("hashids");
+const hashids = new Hashids("secret salt");
 
-    broker.createService({
-        name: "posts",
-        mixins: [DbService],
-        methods: {
-            encodeID(id) {
-                return hashids.encodeHex(id);
-            },
-            decodeID(id) {
-                return hashids.decodeHex(id);
-            }
+broker.createService({
+    name: "posts",
+    mixins: [DbService],
+    methods: {
+        encodeID(id) {
+            return hashids.encodeHex(id);
+        },
+        decodeID(id) {
+            return hashids.decodeHex(id);
         }
-    });
-    ```
+    }
+});
+```
 
 ### Entity lifecycle events
 There are 3 entity lifecycle events which are called when entities are manipulated.
