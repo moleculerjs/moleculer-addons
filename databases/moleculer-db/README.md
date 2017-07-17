@@ -5,16 +5,14 @@
 Service mixin to store entities in database.
 
 ## Features
-- CRUD actions
+- default CRUD actions
 - cached queries
-- pluggable adapter
-- default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping
-- fields filter for entities
 - pagination support
+- pluggable adapter (default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping)
+- fields filtering
 - populating
-- encode entity IDs
-- entity events for notifications
-- 
+- encode/decod IDs
+- entity lifecycle events for notifications
 
 ## Install
 
@@ -68,7 +66,7 @@ broker.start()
 | -------- | ---- | ----------- |
 | `idField` | `String` | Name of ID field. Default: `_id` |
 | `fields` | `Array` | Field list for filtering. It is an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
-| `populates` | `Object` | Populate schema |
+| `populates` | `Object` | Schema for population. [Read more](#populating) |
 | `pageSize` | `Number` | Default page size in `list` action. Default: `10` |
 | `maxPageSize` | `Number` | Maximum page size in `list` action. Default: `100` |
 | `maxLimit` | `Number` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
@@ -77,14 +75,13 @@ broker.start()
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
-| `find` | `limit`, `offset`, `sort`, `search`, `searchFields` | `Array` | Find matched entities. |
-| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPagess`. |
+| `find` | `limit`, `offset`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Array` | Find matched entities. |
+| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPages` properties. |
 | `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
 | `create` | `entity` | `Object` | Create a new entity. |
-| `get` | `id` | `Object|Array` | Get an entity or entities by ID/IDs. |
+| `get` | `id`, `populate`, `fields`, `mapping` | `Object|Array` | Get an entity or entities by ID/IDs. |
 | `update` | `id`, `update` | `Object` | Update an entity by ID. |
 | `remove` | `id` | `` | Remove an entity by ID. |
-| `clear` | - | `` | Clear all entities. |
 
 ## Methods
 
@@ -128,6 +125,16 @@ Delete all entitites.
 
 > After operation the cache will be cleared!
 
+### `this.clearCache()`
+Clear cached entitites. 
+
+### `this.encodeID()`
+Encode ID of entity
+
+### `this.decodeID()`
+Decode ID of entity 
+
+
 ## Populating
 
 ```js
@@ -136,15 +143,20 @@ broker.createService({
     mixins: [DbService],
     settings: {
         populates: {
-            // Shorthand populate rule. Resolve the `voters` values with `users.model` action.
-            "voters": "users.model",
+            // Shorthand populate rule. Resolve the `voters` values with `users.get` action.
+            "voters": "users.get",
 
             // Define the params of action call. It will receive only with username & full name of author.
             "author": {
-                action: "users.model",
+                action: "users.get",
                 params: {
                     fields: "username fullName"
                 }
+            },
+
+            // Custom populator handler function
+            "rate"(ids, rule, ctx) {
+                return Promise.resolve(...);
             }
         }
     }
@@ -153,6 +165,38 @@ broker.createService({
 // List posts with populated authors
 broker.call("posts.find", { populate: ["author"]}).then(console.log);
 ```
+
+The `populate` parameter can be use in `find`, `list` and `get` actions.
+
+## Lifecycle entity events
+There are 3 entity lifecycle events which are called when entities are manipulated.
+
+```js
+broker.createService({
+    name: "posts",
+    mixins: [DbService],
+    settings: {},
+
+	afterConnected() {
+		this.logger.info("Connected successfully");
+	},
+
+	entityCreated(json, ctx) {
+		this.logger.info("New entity created!");
+	},
+
+	entityUpdated(json, ctx) {
+        // You can also access to Context
+		this.logger.info(`Entity updated by '${ctx.meta.user.name}' user!`);
+	},
+
+	entityRemoved(json, ctx) {
+		this.logger.info("Entity removed", json);
+	},    
+});
+```
+
+> Please note! If you manipulate multiple entities, the `json` parameter will be `null` (currently)!
 
 ## Extend with custom actions
 

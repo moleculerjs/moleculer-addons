@@ -467,7 +467,7 @@ module.exports = {
 		},
 
 		/**
-		 * Clear cache entities
+		 * Clear cached entities
 		 * 
 		 * @returns {Promise}
 		 */
