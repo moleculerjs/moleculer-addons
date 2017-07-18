@@ -4,7 +4,7 @@
 
 Service mixin to store entities in database.
 
-## Features
+# Features
 - default CRUD actions
 - cached queries
 - pagination support
@@ -14,7 +14,7 @@ Service mixin to store entities in database.
 - encode/decod IDs
 - entity lifecycle events for notifications
 
-## Install
+# Install
 
 ```bash
 $ npm install moleculer-db --save
@@ -24,7 +24,7 @@ or
 $ yarn add moleculer-db
 ```
 
-## Usage
+# Usage
 
 ```js
 "use strict";
@@ -61,10 +61,9 @@ broker.start()
 
 ```
 
-## Settings
+# Settings
 
-<!-- AUTO-CONTENT-START:SETTINGS -->
-| Property | Type | Default | Description |
+<!-- AUTO-CONTENT-START:SETTINGS -->| Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `idField` | `String` | **required** | Name of ID field. |
 | `fields` | `Array.<String>` | `null` | Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
@@ -88,14 +87,13 @@ broker.start()
 
 -->
 
-## Actions
+# Actions
 
-<!-- AUTO-CONTENT-START:ACTIONS -->
-### `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+<!-- AUTO-CONTENT-START:ACTIONS -->## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 Find entities by query.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `populate` | `Array.<String>` | - | Field list for populate. |
@@ -107,36 +105,36 @@ Find entities by query.
 | `searchFields` | `String` | **required** | Fields list for searching. |
 | `query` | `Object` | **required** | Query object. Passes to adapter. |
 
-#### Results
+### Results
 **Type:** `Array.<Object>`
 
 List of found entities.
 
-#### Examples
+### Examples
 
-### `count` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+## `count` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 Get count of entities by query.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `search` | `String` | **required** | Search text. |
 | `searchFields` | `String` | **required** | Fields list for searching. |
 | `query` | `Object` | **required** | Query object. Passes to adapter. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of found entities.
 
-#### Examples
+### Examples
 
-### `list` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+## `list` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 List entities by filters and pagination results.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `populate` | `Array.<String>` | - | Field list for populate. |
@@ -148,34 +146,34 @@ List entities by filters and pagination results.
 | `searchFields` | `String` | **required** | Fields list for searching. |
 | `query` | `Object` | **required** | Query object. Passes to adapter. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 List of found entities and count .
 
-#### Examples
+### Examples
 
-### `create` 
+## `create` 
 
 Create a new entity.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `entity` | `Object` | **required** | Entity to save. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 Saved entity.
 
-#### Examples
+### Examples
 
-### `get` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+## `get` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 Get entity by ID.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `id` | `any`, `Array.<any>` | **required** | ID(s) of entity. |
@@ -183,58 +181,58 @@ Get entity by ID.
 | `fields` | `Array.<String>` | - | Fields filter. |
 | `mapping` | `Boolean` | - | Convert the returned `Array` to `Object` where the key is the value of `id`. |
 
-#### Results
+### Results
 **Type:** `Object`, `Array.<Object>`
 
 Found entity(ies).
 
-#### Examples
+### Examples
 
-### `update` 
+## `update` 
 
 Update an entity by ID.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `id` | `any` | **required** | ID of entity. |
 | `update` | `Object` | **required** | Fields for update. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 Updated entity.
 
-#### Examples
+### Examples
 
-### `remove` 
+## `remove` 
 
 Remove an entity by ID.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `id` | `any` | **required** | ID of entity. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of removed entities.
 
-#### Examples
+### Examples
 
 <!-- AUTO-CONTENT-END:ACTIONS -->
 
 <!-- AUTO-CONTENT-TEMPLATE:ACTIONS
 {{#each this}}
-### `{{name}}` {{#each badges}}{{this}} {{/each}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
 {{#since}}
 _<sup>Since: {{this}}</sup>_
 {{/since}}
 
 {{description}}
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 {{#each params}}
@@ -245,13 +243,13 @@ _<sup>Since: {{this}}</sup>_
 {{/params}}
 
 {{#returns}}
-#### Results
+### Results
 **Type:** {{type}}
 
 {{description}}
 {{/returns}}
 
-#### Examples
+### Examples
 {{#each examples}}
 {{this}}
 {{/each}}
@@ -259,241 +257,235 @@ _<sup>Since: {{this}}</sup>_
 {{/each}}
 -->
 
-## Methods
+# Methods
 
-<!-- AUTO-CONTENT-START:METHODS -->
-### `find` 
+<!-- AUTO-CONTENT-START:METHODS -->## `find` 
 
 Find entities by query. `params` contains the query fields.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Array.<Object>`
 
 List of found entities.
 
-#### Examples
+### Examples
 
-### `count` 
+## `count` 
 
 Get count of entities by query.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of found entities.
 
-#### Examples
+### Examples
 
-### `create` 
+## `create` 
 
 Create a new entity.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 Saved entity.
 
-#### Examples
+### Examples
 
-### `createMany` 
+## `createMany` 
 
 Create many new entities.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Array.<Object>`
 
 Saved entities.
 
-#### Examples
+### Examples
 
-### `getById` 
+## `getById` 
 
 Get entity(ies) by ID(s).
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Object`, `Array.<Object>`
 
 Found entity(ies).
 
-#### Examples
+### Examples
 
-### `updateById` 
+## `updateById` 
 
-Update an entity by ID.
-> After update, clear the cache & call lifecycle events.
+Update an entity by ID.> After update, clear the cache & call lifecycle events.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 Updated entity.
 
-#### Examples
+### Examples
 
-### `updateMany` 
+## `updateMany` 
 
-Update multiple entities by query.
-> After update, clear the cache & call lifecycle events.
+Update multiple entities by query.> After update, clear the cache & call lifecycle events.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 | `params` | `Object` | **required** | Params of request. |
 
-#### Results
+### Results
 **Type:** `Object`
 
 Updated entities.
 
-#### Examples
+### Examples
 
-### `removeById` 
+## `removeById` 
 
-Remove an entity by ID.
-> After remove, clear the cache & call lifecycle events.
+Remove an entity by ID.> After remove, clear the cache & call lifecycle events.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of removed entities.
 
-#### Examples
+### Examples
 
-### `removeMany` 
+## `removeMany` 
 
-Remove multiple entities by query.
-> After remove, clear the cache & call lifecycle events.
+Remove multiple entities by query.> After remove, clear the cache & call lifecycle events.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of removed entities.
 
-#### Examples
+### Examples
 
-### `clear` 
+## `clear` 
 
-Delete all entities. 
-> After delete, clear the cache & call lifecycle events.
+Delete all entities. > After delete, clear the cache & call lifecycle events.
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
 
-#### Results
+### Results
 **Type:** `Number`
 
 Count of removed entities.
 
-#### Examples
+### Examples
 
-### `clearCache` 
+## `clearCache` 
 
 Clear cached entities
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 *No input parameters.*
 
-#### Results
+### Results
 **Type:** `Promise`
 
 
 
-#### Examples
+### Examples
 
-### `encodeID` 
+## `encodeID` 
 
 Encode ID of entity
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `id` | `any` | **required** |  |
 
-#### Results
+### Results
 **Type:** `any`
 
 
 
-#### Examples
+### Examples
 
-### `decodeID` 
+## `decodeID` 
 
 Decode ID of entity
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `id` | `any` | **required** |  |
 
-#### Results
+### Results
 **Type:** `any`
 
 
 
-#### Examples
+### Examples
 
 <!-- AUTO-CONTENT-END:METHODS -->
 
 <!-- AUTO-CONTENT-TEMPLATE:METHODS
 {{#each this}}
-### `{{name}}` {{#each badges}}{{this}} {{/each}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
 {{#since}}
 _<sup>Since: {{this}}</sup>_
 {{/since}}
 
 {{description}}
 
-#### Parameters
+### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 {{#each params}}
@@ -504,13 +496,13 @@ _<sup>Since: {{this}}</sup>_
 {{/params}}
 
 {{#returns}}
-#### Results
+### Results
 **Type:** {{type}}
 
 {{description}}
 {{/returns}}
 
-#### Examples
+### Examples
 {{#each examples}}
 {{this}}
 {{/each}}
