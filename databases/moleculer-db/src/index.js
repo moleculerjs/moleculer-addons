@@ -9,6 +9,12 @@
 const _ = require("lodash");
 const MemoryAdapter = require("./memory-adapter");
 
+/**
+ * Service mixin to access database entities
+ * 
+ * @name moleculer-db
+ * @module Service
+ */
 module.exports = {
 	// Must overwrite it
 	name: "",
@@ -20,26 +26,26 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-		// Name of "_id" field
+		/** @type {String} Name of ID field. */
 		idField: "_id",
 		
-		// Fields filter for result entities
+		/** @type {Array<String>?} Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. */
 		fields: null,
 
-		// Population schema
+		/** @type {Array?} Schema for population. [Read more](#populating) */
 		populates: null,
 
-		// Validator schema or a function to validate the incoming entity in "users.create" action
-		entityValidator: null,
-
-		// Default page size
+		/** @type {Number} Default page size in `list` action. */
 		pageSize: 10,
 
-		// Maximum page size
+		/** @type {Number} Maximum page size in `list` action. */
 		maxPageSize: 100,
 
-		// Maximum value of limit in `find` action
-		maxLimit: -1
+		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
+		maxLimit: -1,
+
+		/** @type {Object|Function} Validator schema or a function to validate the incoming  entity in "users.create" action */
+		entityValidator: null
 	},
 
 	/**
@@ -47,9 +53,21 @@ module.exports = {
 	 */
 	actions: {
 		/**
-		 * Find all entities by filters
+		 * Find entities by query.
 		 * 
-		 * @cache true
+		 * @actions
+		 * @cached
+		 * 
+		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} fields - Fields filter.
+		 * @param {Number} limit - Max count of rows.
+		 * @param {Number} offset - Count of skipped rows.
+		 * @param {String} sort - Sorted fields.
+		 * @param {String} search - Search text.
+		 * @param {String} searchFields - Fields list for searching.
+		 * @param {Object} query - Query object. Passes to adapter.
+		 * 
+		 * @returns {Array<Object>} List of found entities.
 		 */
 		find: {
 			cache: {
@@ -73,9 +91,16 @@ module.exports = {
 		},
 
 		/**
-		 * Get count of entities by filters
+		 * Get count of entities by query.
 		 * 
-		 * @cache true
+		 * @actions
+		 * @cached
+		 * 
+		 * @param {String} search - Search text.
+		 * @param {String} searchFields - Fields list for searching.
+		 * @param {Object} query - Query object. Passes to adapter.
+		 * 
+		 * @returns {Number} Count of found entities.
 		 */
 		count: {
 			cache: {
@@ -94,9 +119,21 @@ module.exports = {
 		},
 
 		/**
-		 * List entities by filters and pagination results
+		 * List entities by filters and pagination results.
 		 * 
-		 * @cache true
+		 * @actions
+		 * @cached
+		 * 
+		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} fields - Fields filter.
+		 * @param {Number} page - Page number.
+		 * @param {Number} pageSize - Size of a page.
+		 * @param {String} sort - Sorted fields.
+		 * @param {String} search - Search text.
+		 * @param {String} searchFields - Fields list for searching.
+		 * @param {Object} query - Query object. Passes to adapter.
+		 * 
+		 * @returns {Object} List of found entities and count .
 		 */
 		list: {
 			cache: {
@@ -139,7 +176,13 @@ module.exports = {
 		},
 
 		/**
-		 * Create a new entity
+		 * Create a new entity.
+		 * 
+		 * @actions
+		 * 
+		 * @param {Object} entity - Entity to save.
+		 * 
+		 * @returns {Object} Saved entity.
 		 */
 		create: {
 			params: {
@@ -153,9 +196,17 @@ module.exports = {
 		},
 
 		/**
-		 * Get entity by ID
+		 * Get entity by ID.
 		 * 
-		 * @cache true
+		 * @actions
+		 * @cached
+		 * 
+		 * @param {any|Array<any>} id - ID(s) of entity.
+		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} fields - Fields filter.
+		 * @param {Boolean?} mapping - Convert the returned `Array` to `Object` where the key is the value of `id`.
+		 * 
+		 * @returns {Object|Array<Object>} Found entity(ies).
 		 */
 		get: {
 			cache: {
@@ -179,7 +230,14 @@ module.exports = {
 		},
 
 		/**
-		 * Update an entity by ID
+		 * Update an entity by ID.
+		 * 
+		 * @actions
+		 * 
+		 * @param {any} id - ID of entity.
+		 * @param {Object} update - Fields for update.
+		 * 
+		 * @returns {Object} Updated entity.
 		 */
 		update: {
 			params: {
@@ -194,7 +252,13 @@ module.exports = {
 		},
 
 		/**
-		 * Remove an entity by ID
+		 * Remove an entity by ID.
+		 * 
+		 * @actions
+		 * 
+		 * @param {any} id - ID of entity.
+		 * 
+		 * @returns {Number} Count of removed entities.
 		 */
 		remove: {
 			params: {
@@ -214,7 +278,7 @@ module.exports = {
 	methods: {
 
 		/**
-		 * Connect to database with adapter
+		 * Connect to database.
 		 */
 		connect() {
 			return this.adapter.connect().then(() => {
@@ -231,7 +295,7 @@ module.exports = {
 		},
 
 		/**
-		 * Disconnect from database with adapter
+		 * Disconnect from database.
 		 */
 		disconnect() {
 			if (_.isFunction(this.adapter.disconnect))
@@ -239,7 +303,7 @@ module.exports = {
 		},
 
 		/**
-		 * Sanitize context parameters at `find` action
+		 * Sanitize context parameters at `find` action.
 		 * 
 		 * @param {Context} ctx 
 		 * @param {any} origParams 
@@ -292,11 +356,12 @@ module.exports = {
 		},
 
 		/**
-		 * Find all entities
+		 * Find entities by query. `params` contains the query fields.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Array<Object>} List of found entities.
 		 */
 		find(ctx, params) {
 			return this.adapter.find(params)
@@ -304,11 +369,12 @@ module.exports = {
 		},
 
 		/**
-		 * Get count of entities
+		 * Get count of entities by query.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Number} Count of found entities.
 		 */
 		count(ctx, params) {
 			// Remove pagination params
@@ -321,11 +387,12 @@ module.exports = {
 		},
 
 		/**
-		 * Create a new entity
+		 * Create a new entity.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Object} Saved entity.
 		 */
 		create(ctx, params) {
 			return this.validateEntity(params.entity)
@@ -335,11 +402,12 @@ module.exports = {
 		},
 
 		/**
-		 * Create many new entities
+		 * Create many new entities.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Array<Object>} Saved entities.
 		 */
 		createMany(ctx, params) {
 			return this.validateEntity(params.entities)
@@ -349,11 +417,12 @@ module.exports = {
 		},
 
 		/**
-		 * Get entity/entities by ID(s)
+		 * Get entity(ies) by ID(s).
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Object|Array<Object>} Found entity(ies).
 		 */
 		getById(ctx, params) {
 			let origDoc;
@@ -389,11 +458,13 @@ module.exports = {
 		},
 
 		/**
-		 * Update an entity by ID
+		 * Update an entity by ID.
+		 * > After update, clear the cache & call lifecycle events.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Object} Updated entity.
 		 */
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
@@ -402,11 +473,13 @@ module.exports = {
 		},
 
 		/**
-		 * Update multiple entities
+		 * Update multiple entities by query.
+		 * > After update, clear the cache & call lifecycle events.
 		 * 
-		 * @param {Context} ctx 
-		 * @param {Object} params
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @param {Object} params - Params of request.
+		 * @returns {Object} Updated entities.
 		 */
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
@@ -415,10 +488,12 @@ module.exports = {
 		},
 
 		/**
-		 * Remove an entity by ID
+		 * Remove an entity by ID.
+		 * > After remove, clear the cache & call lifecycle events.
 		 * 
-		 * @param {any} ctx 
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @returns {Number} Count of removed entities.
 		 */
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
@@ -427,10 +502,12 @@ module.exports = {
 		},
 
 		/**
-		 * Remove multiple entities
+		 * Remove multiple entities by query.
+		 * > After remove, clear the cache & call lifecycle events.
 		 * 
-		 * @param {any} ctx 
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @returns {Number} Count of removed entities.
 		 */
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
@@ -439,10 +516,12 @@ module.exports = {
 		},
 
 		/**
-		 * Delete all entities
+		 * Delete all entities. 
+		 * > After delete, clear the cache & call lifecycle events.
 		 * 
-		 * @param {any} ctx 
-		 * @returns {Promise}
+		 * @methods
+		 * @param {Context} ctx - Context of request.
+		 * @returns {Number} Count of removed entities.
 		 */
 		clear(ctx) {
 			return this.adapter.clear()
@@ -469,6 +548,7 @@ module.exports = {
 		/**
 		 * Clear cached entities
 		 * 
+		 * @methods
 		 * @returns {Promise}
 		 */
 		clearCache() {
@@ -680,6 +760,7 @@ module.exports = {
 		/**
 		 * Encode ID of entity
 		 * 
+		 * @methods
 		 * @param {any} id 
 		 * @returns {any}
 		 */
@@ -690,6 +771,7 @@ module.exports = {
 		/**
 		 * Decode ID of entity
 		 * 
+		 * @methods
 		 * @param {any} id 
 		 * @returns {any}
 		 */

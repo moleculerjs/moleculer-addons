@@ -4,7 +4,19 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch readme gen",
+			"program": "${workspaceRoot}/node_modules/moleculer-docgen/index.js",
+			"args": [
+				"-t",
+				"databases\\moleculer-db\\README.test.md",
+				"databases\\moleculer-db\\src\\index.js"
+			],
+			"stopOnEntry": true
 
+		},
 		{
 			"type": "node",
 			"request": "launch",
