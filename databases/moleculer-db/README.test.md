@@ -519,7 +519,10 @@ _<sup>Since: {{this}}</sup>_
 -->
 
 # Populating
+The service supports to populate fields from other services. 
+E.g.: if you have an `author` field in `post` entity, you can populate it with `users` service by ID of author. If the field is an `Array` of IDs, it will populate all entities via only one request.
 
+**Example of populate schema**
 ```js
 broker.createService({
     name: "posts",
@@ -549,10 +552,10 @@ broker.createService({
 broker.call("posts.find", { populate: ["author"]}).then(console.log);
 ```
 
-The `populate` parameter can be use in `find`, `list` and `get` actions.
+> The `populate` parameter is available in `find`, `list` and `get` actions.
 
 # Lifecycle entity events
-There are 3 entity lifecycle events which are called when entities are manipulated.
+There are 3 lifecycle entity events which are called when entities are manipulated.
 
 ```js
 broker.createService({
@@ -582,6 +585,10 @@ broker.createService({
 > Please note! If you manipulate multiple entities, the `json` parameter will be `null` (currently)!
 
 # Extend with custom actions
+Naturally you can extend this service with your custom actions.
+In this case we recommend to use only built-in methods to access or manipulate entities. 
+
+> In the worst case you can call directly the adapter as `this.adapter.findById`.
 
 ```js
 const DbService = require("moleculer-db");
