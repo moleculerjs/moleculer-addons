@@ -11,10 +11,6 @@ Mongoose adapter for Moleculer DB service
 ```bash
 $ npm install moleculer-db moleculer-db-adapter-mongoose --save
 ```
-or
-```bash
-$ yarn add moleculer-db moleculer-db-adapter-mongoose
-```
 
 ## Usage
 
