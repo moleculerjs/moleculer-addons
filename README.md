@@ -43,9 +43,9 @@ $ npm run demo moleculer-fake full
 $ npm test
 ```
 
-## Create a new service
+## Create a new addon
 ```bash
-$ npm run init
+$ npm run init moleculer-<modulename>
 ```
 
 ## Publish new releases
