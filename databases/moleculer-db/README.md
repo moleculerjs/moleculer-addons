@@ -4,17 +4,17 @@
 
 Service mixin to store entities in database.
 
-## Features
+# Features
 - default CRUD actions
 - cached queries
 - pagination support
-- pluggable adapter (default memory adapter with [NeDB](https://github.com/louischatriot/nedb) for testing & prototyping)
+- pluggable adapter ([NeDB](https://github.com/louischatriot/nedb) is the default memory adapter for testing & prototyping)
 - fields filtering
 - populating
 - encode/decod IDs
 - entity lifecycle events for notifications
 
-## Install
+# Install
 
 ```bash
 $ npm install moleculer-db --save
@@ -24,7 +24,7 @@ or
 $ yarn add moleculer-db
 ```
 
-## Usage
+# Usage
 
 ```js
 "use strict";
@@ -61,81 +61,440 @@ broker.start()
 
 ```
 
-## Settings
-| Property | Type | Description |
-| -------- | ---- | ----------- |
-| `idField` | `String` | Name of ID field. Default: `_id` |
-| `fields` | `Array` | Field list for filtering. It is an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
-| `populates` | `Object` | Schema for population. [Read more](#populating) |
-| `pageSize` | `Number` | Default page size in `list` action. Default: `10` |
-| `maxPageSize` | `Number` | Maximum page size in `list` action. Default: `100` |
-| `maxLimit` | `Number` | Maximum value of limit in `find` action. Default: `-1` (no limit) |
+# Settings
+
+<!-- AUTO-CONTENT-START:SETTINGS -->| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `idField` | `String` | **required** | Name of ID field. |
+| `fields` | `Array.<String>` | `null` | Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
+| `populates` | `Array` | `null` | Schema for population. [Read more](#populating) |
+| `pageSize` | `Number` | **required** | Default page size in `list` action. |
+| `maxPageSize` | `Number` | **required** | Maximum page size in `list` action. |
+| `maxLimit` | `Number` | **required** | Maximum value of limit in `find` action. Default: `-1` (no limit) |
+| `entityValidator` | `Object`, `function` | `null` | Validator schema or a function to validate the incoming  entity in "users.create" action |
+
+<!-- AUTO-CONTENT-END:SETTINGS -->
+
+<!-- AUTO-CONTENT-TEMPLATE:SETTINGS
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+{{#each this}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^this}}
+*No settings.*
+{{/this}}
+
+-->
+
+# Actions
+
+<!-- AUTO-CONTENT-START:ACTIONS -->## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+
+Find entities by query.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `populate` | `Array.<String>` | - | Field list for populate. |
+| `fields` | `Array.<String>` | - | Fields filter. |
+| `limit` | `Number` | **required** | Max count of rows. |
+| `offset` | `Number` | **required** | Count of skipped rows. |
+| `sort` | `String` | **required** | Sorted fields. |
+| `search` | `String` | **required** | Search text. |
+| `searchFields` | `String` | **required** | Fields list for searching. |
+| `query` | `Object` | **required** | Query object. Passes to adapter. |
+
+### Results
+**Type:** `Array.<Object>`
+
+List of found entities.
 
 
-## Actions
-| Name | Params | Result | Description |
-| ---- | ------ | ------ | ----------- |
-| `find` | `limit`, `offset`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Array` | Find matched entities. |
-| `list` | `page`, `pageSize`, `sort`, `search`, `searchFields`, `fields`, `populate`, `query` | `Object` | List paginated entities. The result contains `rows`, `total` and `totalPages` properties. |
-| `count` | `search`, `searchFields` | `Number` | Count of  matched entities. |
-| `create` | `entity` | `Object` | Create a new entity. |
-| `get` | `id`, `populate`, `fields`, `mapping` | `Object|Array` | Get an entity or entities by ID/IDs. |
-| `update` | `id`, `update` | `Object` | Update an entity by ID. |
-| `remove` | `id` | `` | Remove an entity by ID. |
+## `count` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
-## Methods
+Get count of entities by query.
 
-### `this.find(ctx, params)`
-Find entities by filters. The `params` will be passed to the adapter.
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `search` | `String` | **required** | Search text. |
+| `searchFields` | `String` | **required** | Fields list for searching. |
+| `query` | `Object` | **required** | Query object. Passes to adapter. |
 
-### `this.count(ctx, params)`
-Get count of find entities by filters. The `params` will be passed to the adapter.
+### Results
+**Type:** `Number`
 
-### `this.create(ctx, params)`
-Create a new entity. The `params.entity` will be passed to the adapter.
+Count of found entities.
 
-### `this.createMany(ctx, params)`
-Create many new entities. The `params.entities` will be passed to the adapter.
 
-### `this.get(ctx, params)`
-Get an entity or entities by ID/IDs.
+## `list` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
-### `this.updateById(ctx, params)`
-Update entity by ID. The `params.id` & `params.update` will be passed to the adapter.
+List entities by filters and pagination results.
 
-> After operation the cache will be cleared!
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `populate` | `Array.<String>` | - | Field list for populate. |
+| `fields` | `Array.<String>` | - | Fields filter. |
+| `page` | `Number` | **required** | Page number. |
+| `pageSize` | `Number` | **required** | Size of a page. |
+| `sort` | `String` | **required** | Sorted fields. |
+| `search` | `String` | **required** | Search text. |
+| `searchFields` | `String` | **required** | Fields list for searching. |
+| `query` | `Object` | **required** | Query object. Passes to adapter. |
 
-### `this.updateMany(ctx, params)`
-Update multiple entities by query. The `params.query` & `params.update` will be passed to the adapter.
+### Results
+**Type:** `Object`
 
-> After operation the cache will be cleared!
+List of found entities and count .
 
-### `this.removeById(ctx, params)`
-Remove entity by ID. The `params.id` will be passed to the adapter.
 
-> After operation the cache will be cleared!
+## `create` 
 
-### `this.removeMany(ctx, params)`
-Remove multiple entitites by query. The `params.query` will be passed to the adapter.
+Create a new entity.
 
-> After operation the cache will be cleared!
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `entity` | `Object` | **required** | Entity to save. |
 
-### `this.clear()`
-Delete all entitites. 
+### Results
+**Type:** `Object`
 
-> After operation the cache will be cleared!
+Saved entity.
 
-### `this.clearCache()`
-Clear cached entitites. 
 
-### `this.encodeID()`
+## `get` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+
+Get entity by ID.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `id` | `any`, `Array.<any>` | **required** | ID(s) of entity. |
+| `populate` | `Array.<String>` | - | Field list for populate. |
+| `fields` | `Array.<String>` | - | Fields filter. |
+| `mapping` | `Boolean` | - | Convert the returned `Array` to `Object` where the key is the value of `id`. |
+
+### Results
+**Type:** `Object`, `Array.<Object>`
+
+Found entity(ies).
+
+
+## `update` 
+
+Update an entity by ID.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `id` | `any` | **required** | ID of entity. |
+| `update` | `Object` | **required** | Fields for update. |
+
+### Results
+**Type:** `Object`
+
+Updated entity.
+
+
+## `remove` 
+
+Remove an entity by ID.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `id` | `any` | **required** | ID of entity. |
+
+### Results
+**Type:** `Number`
+
+Count of removed entities.
+
+
+<!-- AUTO-CONTENT-END:ACTIONS -->
+
+<!-- AUTO-CONTENT-TEMPLATE:ACTIONS
+{{#each this}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
+{{#since}}
+_<sup>Since: {{this}}</sup>_
+{{/since}}
+
+{{description}}
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+{{#each params}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^params}}
+*No input parameters.*
+{{/params}}
+
+{{#returns}}
+### Results
+**Type:** {{type}}
+
+{{description}}
+{{/returns}}
+
+{{#hasExamples}}
+### Examples
+{{#each examples}}
+{{this}}
+{{/each}}
+{{/hasExamples}}
+
+{{/each}}
+-->
+
+# Methods
+
+<!-- AUTO-CONTENT-START:METHODS -->## `find` 
+
+Find entities by query. `params` contains the query fields.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Array.<Object>`
+
+List of found entities.
+
+
+## `count` 
+
+Get count of entities by query.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Number`
+
+Count of found entities.
+
+
+## `create` 
+
+Create a new entity.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Object`
+
+Saved entity.
+
+
+## `createMany` 
+
+Create many new entities.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Array.<Object>`
+
+Saved entities.
+
+
+## `getById` 
+
+Get entity(ies) by ID(s).
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Object`, `Array.<Object>`
+
+Found entity(ies).
+
+
+## `updateById` 
+
+Update an entity by ID.> After update, clear the cache & call lifecycle events.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Object`
+
+Updated entity.
+
+
+## `updateMany` 
+
+Update multiple entities by query.> After update, clear the cache & call lifecycle events.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+| `params` | `Object` | **required** | Params of request. |
+
+### Results
+**Type:** `Object`
+
+Updated entities.
+
+
+## `removeById` 
+
+Remove an entity by ID.> After remove, clear the cache & call lifecycle events.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+
+### Results
+**Type:** `Number`
+
+Count of removed entities.
+
+
+## `removeMany` 
+
+Remove multiple entities by query.> After remove, clear the cache & call lifecycle events.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+
+### Results
+**Type:** `Number`
+
+Count of removed entities.
+
+
+## `clear` 
+
+Delete all entities. > After delete, clear the cache & call lifecycle events.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | **required** | Context of request. |
+
+### Results
+**Type:** `Number`
+
+Count of removed entities.
+
+
+## `clearCache` 
+
+Clear cached entities
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+*No input parameters.*
+
+### Results
+**Type:** `Promise`
+
+
+
+
+## `encodeID` 
+
 Encode ID of entity
 
-### `this.decodeID()`
-Decode ID of entity 
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `id` | `any` | **required** |  |
+
+### Results
+**Type:** `any`
 
 
-## Populating
+
+
+## `decodeID` 
+
+Decode ID of entity
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `id` | `any` | **required** |  |
+
+### Results
+**Type:** `any`
+
+
+
+
+<!-- AUTO-CONTENT-END:METHODS -->
+
+<!-- AUTO-CONTENT-TEMPLATE:METHODS
+{{#each this}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
+{{#since}}
+_<sup>Since: {{this}}</sup>_
+{{/since}}
+
+{{description}}
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+{{#each params}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^params}}
+*No input parameters.*
+{{/params}}
+
+{{#returns}}
+### Results
+**Type:** {{type}}
+
+{{description}}
+{{/returns}}
+
+{{#hasExamples}}
+### Examples
+{{#each examples}}
+{{this}}
+{{/each}}
+{{/hasExamples}}
+
+{{/each}}
+-->
+
+# Populating
 The service supports to populate fields from other services. 
 E.g.: if you have an `author` field in `post` entity, you can populate it with `users` service by ID of author. If the field is an `Array` of IDs, it will populate all entities via only one request.
 
@@ -171,7 +530,7 @@ broker.call("posts.find", { populate: ["author"]}).then(console.log);
 
 > The `populate` parameter is available in `find`, `list` and `get` actions.
 
-## Lifecycle entity events
+# Lifecycle entity events
 There are 3 lifecycle entity events which are called when entities are manipulated.
 
 ```js
@@ -180,28 +539,28 @@ broker.createService({
     mixins: [DbService],
     settings: {},
 
-	afterConnected() {
-		this.logger.info("Connected successfully");
-	},
+    afterConnected() {
+        this.logger.info("Connected successfully");
+    },
 
-	entityCreated(json, ctx) {
-		this.logger.info("New entity created!");
-	},
+    entityCreated(json, ctx) {
+        this.logger.info("New entity created!");
+    },
 
-	entityUpdated(json, ctx) {
+    entityUpdated(json, ctx) {
         // You can also access to Context
-		this.logger.info(`Entity updated by '${ctx.meta.user.name}' user!`);
-	},
+        this.logger.info(`Entity updated by '${ctx.meta.user.name}' user!`);
+    },
 
-	entityRemoved(json, ctx) {
-		this.logger.info("Entity removed", json);
-	},    
+    entityRemoved(json, ctx) {
+        this.logger.info("Entity removed", json);
+    },    
 });
 ```
 
 > Please note! If you manipulate multiple entities, the `json` parameter will be `null` (currently)!
 
-## Extend with custom actions
+# Extend with custom actions
 Naturally you can extend this service with your custom actions.
 In this case we recommend to use only built-in methods to access or manipulate entities. 
 
@@ -237,7 +596,6 @@ module.exports = {
     }
 }
 ```
-
 
 # Test
 ```
