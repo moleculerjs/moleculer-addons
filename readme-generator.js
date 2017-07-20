@@ -24,7 +24,7 @@ markdownMagic(readmePath, {
 				let name = path.basename(folder);
 				let pkg = require(path.resolve(folder, "package.json"));
 
-				let line = `| [${name}](/${opts.folder}/${name}) | [![NPM version](https://img.shields.io/npm/v/${name}.svg)](https://www.npmjs.com/package/${name}) | ${pkg.description} |`;
+				let line = `| [${name}](/${opts.folder}/${name}#readme) | [![NPM version](https://img.shields.io/npm/v/${name}.svg)](https://www.npmjs.com/package/${name}) | ${pkg.description} |`;
 
 				table.push(line);
 			});

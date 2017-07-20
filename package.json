@@ -1,6 +1,6 @@
 {
   "name": "moleculer-addons",
-  "description": ":gift: Official addons (services, stores, transporters...etc) for Moleculer framework",
+  "description": ":gift: Official addons for Moleculer framework",
   "version": "1.0.0",
   "scripts": {
     "setup": "npm install && lerna bootstrap",
@@ -24,7 +24,7 @@
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
     "coveralls": "2.13.1",
-    "eslint": "4.1.1",
+    "eslint": "4.2.0",
     "glob": "7.1.2",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",

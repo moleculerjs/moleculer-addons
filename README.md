@@ -45,7 +45,7 @@ $ npm test
 
 ## Create a new service
 ```bash
-$ npm run init:service
+$ npm run init
 ```
 
 ## Publish new releases
