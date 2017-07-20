@@ -8,38 +8,16 @@
 [![Join the chat at https://gitter.im/ice-services/moleculer](https://badges.gitter.im/ice-services/moleculer.svg)](https://gitter.im/ice-services/moleculer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Official addons for Moleculer framework
-This is a monorepo, contains multiple npm packages.
+This is a monorepo, contains multiple services & addons for Moleculer project.
 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=services&title=Services) -->
-## Services
+<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=packages&title=Generals) -->
+## Generals
 | Name | Version | Description |
 | ---- | ------- | ----------- |
-| [moleculer-fake](/services/moleculer-fake) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by Fakerator |
-| [moleculer-mail](/services/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
-<!-- AUTO-GENERATED-CONTENT:END -->
-
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=databases&title=Database access modules) -->
-## Database access modules
-| Name | Version | Description |
-| ---- | ------- | ----------- |
-| [moleculer-db](/databases/moleculer-db) | [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db) | Service mixin to store entities in database |
-| [moleculer-db-adapter-mongoose](/databases/moleculer-db-adapter-mongoose) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose) | Mongoose adapter for Moleculer DB service |
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=databases&title=Database access modules) -->
-<!-- AUTO-GENERATED-CONTENT:END -->
-
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
- 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=transporters&title=Transporters) -->
-<!-- AUTO-GENERATED-CONTENT:END -->
-
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
- 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=serializers&title=Serializers) -->
-<!-- AUTO-GENERATED-CONTENT:END -->
-
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
- 
-<!-- AUTO-GENERATED-CONTENT:START (RENDERLIST:folder=cachers&title=Cachers) -->
+| [moleculer-db](/packages/moleculer-db) | [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db) | Moleculer service to store entities in database |
+| [moleculer-db-adapter-mongoose](/packages/moleculer-db-adapter-mongoose) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose) | Mongoose adapter for Moleculer DB service |
+| [moleculer-fake](/packages/moleculer-fake) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by Fakerator |
+| [moleculer-mail](/packages/moleculer-mail) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 # Contribution
@@ -50,14 +28,14 @@ $ npm run setup
 ```
 
 ## Development
-**Run `simple` example in `moleculer-mail` service**
+**Run the `simple` example in `moleculer-mail` service with watching**
 ```bash
-$ npm run dev services/moleculer-mail
+$ npm run dev moleculer-mail
 ```
 
-**Run `full` example in `moleculer-fake` service**
+**Run the `full` example in `moleculer-fake` service w/o watching**
 ```bash
-$ npm run dev services/moleculer-fake full
+$ npm run demo moleculer-fake full
 ```
 
 ## Test

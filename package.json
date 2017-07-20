@@ -6,11 +6,11 @@
     "setup": "npm install && lerna bootstrap",
     "clean": "lerna clean",
     "dev": "nodemon dev.js",
+    "demo": "node dev.js",
     "test": "jest --coverage",
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "init:service": "cd services && moleculer init addon",
-    "init:database": "cd databases && moleculer init addon",
+    "init": "cd packages && moleculer init addon",
     "release": "lerna publish",
     "readme": "node readme-generator.js"
   },

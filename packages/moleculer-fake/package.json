@@ -20,6 +20,7 @@
     "type": "git",
     "url": "git@github.com:ice-services/moleculer-addons.git"
   },
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-fake#readme",  
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {

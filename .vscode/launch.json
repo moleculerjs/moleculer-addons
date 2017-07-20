@@ -11,8 +11,8 @@
 			"program": "${workspaceRoot}/node_modules/moleculer-docgen/index.js",
 			"args": [
 				"-t",
-				"databases\\moleculer-db\\README.test.md",
-				"databases\\moleculer-db\\src\\index.js"
+				"packages\\moleculer-db\\README.test.md",
+				"packages\\moleculer-db\\src\\index.js"
 			],
 			"stopOnEntry": true
 
@@ -24,7 +24,7 @@
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"databases\\moleculer-db-adapter-mongoose",
+				"packages\\moleculer-db-adapter-mongoose",
 				"simple"
 			]
 		},
