@@ -2,9 +2,7 @@
 
 # moleculer-twilio [![NPM version](https://img.shields.io/npm/v/moleculer-twilio.svg)](https://www.npmjs.com/package/moleculer-twilio)
 
-Send SMS Message with Twilio.
-
-# Features
+Send SMS using Twilio API.
 
 # Install
 
@@ -14,21 +12,39 @@ $ npm install moleculer-twilio --save
 
 # Usage
 
-<!-- AUTO-CONTENT-START:USAGE --><!-- AUTO-CONTENT-END:USAGE -->
+> Before use please set the `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_PHONE_NUMBER` environment variables.
 
-<!-- AUTO-CONTENT-TEMPLATE:USAGE
-{{#hasExamples}}
-{{#each examples}}
-{{{this}}}
-{{/each}}
-{{/hasExamples}}
--->
+```js
+let { ServiceBroker } 	= require("moleculer");
+let SmsService 			= require("../../index");
 
+// Create broker
+let broker = new ServiceBroker({ logger: console });
 
+// Load my service
+broker.createService({
+	name: "twilio",
+	mixins: [SmsService],
+	settings: {
+		phoneNumber: "+15005550006"
+	}
+});
+
+// Start server
+broker.start().then(() => {
+
+	broker
+		.call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
+		.then(sms => console.log("SMS Sid:", sms.sid))
+		.catch(console.error);
+
+});
+```
 
 # Settings
 
-<!-- AUTO-CONTENT-START:SETTINGS -->| Property | Type | Default | Description |
+<!-- AUTO-CONTENT-START:SETTINGS -->
+| Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `accountSid` | `String` | **required** | Twilio account Sid. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID". |
 | `authToken` | `String` | **required** | Twilio auth token. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN". |
@@ -49,7 +65,8 @@ $ npm install moleculer-twilio --save
 -->
 
 # Actions
-<!-- AUTO-CONTENT-START:ACTIONS -->## `send` 
+<!-- AUTO-CONTENT-START:ACTIONS -->
+## `send` 
 
 Send an SMS
 
@@ -106,7 +123,8 @@ _<sup>Since: {{this}}</sup>_
 
 # Methods
 
-<!-- AUTO-CONTENT-START:METHODS -->## `sendSMS` 
+<!-- AUTO-CONTENT-START:METHODS -->
+## `sendSMS` 
 
 Send an SMS
 
