@@ -14,12 +14,6 @@ const TwilioClient = require("twilio");
  * 
  * https://www.twilio.com
  * 
- * For testing:
- * ------------
- * 
- * Test credentials: https://www.twilio.com/console/voice/dev-tools/test-credentials
- * Test phone numbers: https://www.twilio.com/docs/api/rest/test-credentials#test-sms-messages-example-1
- * 
  * @module Service
  */
 module.exports = {
