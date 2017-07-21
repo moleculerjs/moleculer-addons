@@ -20,7 +20,7 @@ module.exports = {
 	name: "twilio",
 
 	/**
-	 * Default settings
+	 * Settings
 	 */
 	settings: {
 		/** @type {String} Twilio account Sid. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID" here or set `TWILIO_ACCOUNT_SID` env var. */
