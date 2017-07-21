@@ -18,6 +18,7 @@ This is a monorepo, contains multiple services & addons for Moleculer project.
 | [moleculer-db-adapter-mongoose](/packages/moleculer-db-adapter-mongoose#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose) | Mongoose adapter for Moleculer DB service |
 | [moleculer-fake](/packages/moleculer-fake#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by Fakerator |
 | [moleculer-mail](/packages/moleculer-mail#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
+| [moleculer-twilio](/packages/moleculer-twilio#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-twilio.svg)](https://www.npmjs.com/package/moleculer-twilio) | Send SMS Message with Twilio. |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 # Contribution
