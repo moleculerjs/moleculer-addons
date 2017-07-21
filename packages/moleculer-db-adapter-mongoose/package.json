@@ -1,6 +1,6 @@
 {
   "name": "moleculer-db-adapter-mongoose",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Mongoose adapter for Moleculer DB service",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git@github.com:ice-services/moleculer-addons.git"
   },
-  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-db-adapter-mongoose#readme",  
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-db-adapter-mongoose#readme",
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {

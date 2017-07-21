@@ -1,6 +1,6 @@
 {
   "name": "moleculer-mail",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Send emails",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git@github.com:ice-services/moleculer-addons.git"
   },
-  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-mail#readme",  
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-mail#readme",
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {

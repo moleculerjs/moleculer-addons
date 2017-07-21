@@ -1,6 +1,6 @@
 {
   "name": "moleculer-fake",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Fake data generator by Fakerator",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git@github.com:ice-services/moleculer-addons.git"
   },
-  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-fake#readme",  
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-fake#readme",
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {
