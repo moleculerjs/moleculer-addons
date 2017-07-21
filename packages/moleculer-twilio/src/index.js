@@ -6,19 +6,34 @@
 
 "use strict";
 
-const { MoleculerError } = require("moleculer");
+const { MoleculerError } = require("moleculer").Errors;
 const TwilioClient = require("twilio");
 
+/**
+ * Send a message using the Twilio API.
+ * 
+ * https://www.twilio.com
+ * 
+ * For testing:
+ * ------------
+ * 
+ * Test credentials: https://www.twilio.com/console/voice/dev-tools/test-credentials
+ * Test phone numbers: https://www.twilio.com/docs/api/rest/test-credentials#test-sms-messages-example-1
+ * 
+ * @module Service
+ */
 module.exports = {
-
 	name: "twilio",
 
 	/**
 	 * Default settings
 	 */
 	settings: {
+		/** @type {String} Twilio account Sid. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID". */
 		accountSid: process.env.TWILIO_ACCOUNT_SID,
+		/** @type {String} Twilio auth token. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN". */
 		authToken: process.env.TWILIO_AUTH_TOKEN,
+		/** @type {String} This is the 'From' phone number you'd like to use to send the SMS. This phone number is assigned to you by [Twilio](https://www.twilio.com/console/phone-numbers/incoming). */
 		phoneNumber: process.env.TWILIO_PHONE_NUMBER
 	},
 
@@ -30,6 +45,7 @@ module.exports = {
 		/**
 		 * Send an SMS
 		 * 
+		 * @actions
 		 * @param {String} to - Target phone number
 		 * @param {String} message - Message text
 		 * @param {String} [mediaUrl] - Media URL
@@ -55,6 +71,7 @@ module.exports = {
 		/**
 		 * Send an SMS
 		 * 
+		 * @methods
 		 * @param {String} to - Target phone number
 		 * @param {String} [body=""] - Body of SMS
 		 * @param {String} [mediaUrl] - Media URL
@@ -67,12 +84,12 @@ module.exports = {
 				to,
 				body,
 				mediaUrl
-			}).then(data => {
-				this.logger.debug(`The SMS sent to '${to}' successfully!`, data);
-				return data;
+			}).then(sms => {
+				this.logger.debug(`The SMS sent to '${to}' successfully! Sid: ${sms.sid}`);
+				return sms;
 			}).catch(err => {
 				// Possible errors: https://www.twilio.com/docs/api/rest/request#get-responses
-				return new MoleculerError(err.message, 500, "SMS_SEND_ERROR", err.data);
+				return new MoleculerError(err.message + err.detail, 500, "SMS_SEND_ERROR", err.data);
 			});
 		}
 	},

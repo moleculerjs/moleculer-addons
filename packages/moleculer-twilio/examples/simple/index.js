@@ -1,7 +1,7 @@
 "use strict";
 
 let { ServiceBroker } 	= require("moleculer");
-let MyService 			= require("../../index");
+let SmsService 			= require("../../index");
 
 // Create broker
 let broker = new ServiceBroker({
@@ -12,9 +12,11 @@ let broker = new ServiceBroker({
 // Load my service
 broker.createService({
 	name: "twilio",
-	mixins: [MyService],
+	mixins: [SmsService],
 	settings: {
-		
+		//accountSid: "",
+		//authToken: "",
+		phoneNumber: "+15005550006"
 	}
 });
 
@@ -23,8 +25,8 @@ broker.start().then(() => {
 
 	// Call action
 	broker
-		.call("twilio.test", { name: "John Doe" })
-		.then(console.log)
+		.call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
+		.then(sms => console.log("SMS Sid:", sms.sid))
 		.catch(console.error);
 
 });
