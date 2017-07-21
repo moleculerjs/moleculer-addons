@@ -29,9 +29,9 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-		/** @type {String} Twilio account Sid. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID". */
+		/** @type {String} Twilio account Sid. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID" here or set `TWILIO_ACCOUNT_SID` env var. */
 		accountSid: process.env.TWILIO_ACCOUNT_SID,
-		/** @type {String} Twilio auth token. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN". */
+		/** @type {String} Twilio auth token. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN" here or set `TWILIO_AUTH_TOKEN` env var. */
 		authToken: process.env.TWILIO_AUTH_TOKEN,
 		/** @type {String} This is the 'From' phone number you'd like to use to send the SMS. This phone number is assigned to you by [Twilio](https://www.twilio.com/console/phone-numbers/incoming). */
 		phoneNumber: process.env.TWILIO_PHONE_NUMBER

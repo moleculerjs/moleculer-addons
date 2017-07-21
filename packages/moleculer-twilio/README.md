@@ -15,8 +15,8 @@ $ npm install moleculer-twilio --save
 > Before use please set the `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_PHONE_NUMBER` environment variables.
 
 ```js
-let { ServiceBroker } 	= require("moleculer");
-let SmsService 			= require("../../index");
+let { ServiceBroker }     = require("moleculer");
+let SmsService             = require("../../index");
 
 // Create broker
 let broker = new ServiceBroker({ logger: console });
@@ -35,7 +35,7 @@ broker.start().then(() => {
 
     broker
         .call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
-        .then(sms => console.log("SMS Sid:", sms.sid))
+        .then(sms => console.log("SMS sent. Sid:", sms.sid))
         .catch(console.error);
 
 });
@@ -46,8 +46,8 @@ broker.start().then(() => {
 <!-- AUTO-CONTENT-START:SETTINGS -->
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `accountSid` | `String` | **required** | Twilio account Sid. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID". |
-| `authToken` | `String` | **required** | Twilio auth token. Visit your [Twilio dashboard\'s]((https://www.twilio.com/console/voice/dashboard)) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN". |
+| `accountSid` | `String` | **required** | Twilio account Sid. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID" here or set `TWILIO_ACCOUNT_SID` env var. |
+| `authToken` | `String` | **required** | Twilio auth token. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN" here or set `TWILIO_AUTH_TOKEN` env var. |
 | `phoneNumber` | `String` | **required** | This is the 'From' phone number you'd like to use to send the SMS. This phone number is assigned to you by [Twilio](https://www.twilio.com/console/phone-numbers/incoming). |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
