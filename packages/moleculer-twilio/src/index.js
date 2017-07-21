@@ -58,7 +58,7 @@ module.exports = {
 				mediaUrl: { type: "string", optional: true }
 			},
 			handler(ctx) {
-				return this.sendSMS(ctx.params.to, ctx.params.message);
+				return this.sendSMS(ctx.params.to, ctx.params.message, ctx.params.mediaUrl);
 			}
 		}
 	},
@@ -89,7 +89,7 @@ module.exports = {
 				return sms;
 			}).catch(err => {
 				// Possible errors: https://www.twilio.com/docs/api/rest/request#get-responses
-				return new MoleculerError(err.message + err.detail, 500, "SMS_SEND_ERROR", err.data);
+				return this.Promise.reject(new MoleculerError(err.message + " " + err.detail, 500, "SMS_SEND_ERROR"));
 			});
 		}
 	},
@@ -98,10 +98,15 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
+		/* istanbul ignore next */
 		if (this.settings.accountSid == null)
 			this.logger.warn("The `accountSid` is not configured. Please set the 'TWILIO_ACCOUNT_SID' environment variable!");
+		
+		/* istanbul ignore next */
 		if (this.settings.authToken == null)
 			this.logger.warn("The `authToken` is not configured. Please set the 'TWILIO_AUTH_TOKEN' environment variable!");
+		
+		/* istanbul ignore next */
 		if (this.settings.phoneNumber == null)
 			this.logger.warn("The `phoneNumber` is not configured. Please set the 'TWILIO_PHONE_NUMBER' environment variable!");
 
@@ -121,6 +126,7 @@ module.exports = {
 	 * Service stopped lifecycle event handler
 	 */
 	stopped() {
+		/* istanbul ignore next */
 		return this.Promise.resolve();
 	}
 };

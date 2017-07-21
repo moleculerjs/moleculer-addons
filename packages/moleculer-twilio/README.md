@@ -23,20 +23,20 @@ let broker = new ServiceBroker({ logger: console });
 
 // Load my service
 broker.createService({
-	name: "twilio",
-	mixins: [SmsService],
-	settings: {
-		phoneNumber: "+15005550006"
-	}
+    name: "twilio",
+    mixins: [SmsService],
+    settings: {
+        phoneNumber: "+15005550006"
+    }
 });
 
 // Start server
 broker.start().then(() => {
 
-	broker
-		.call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
-		.then(sms => console.log("SMS Sid:", sms.sid))
-		.catch(console.error);
+    broker
+        .call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
+        .then(sms => console.log("SMS Sid:", sms.sid))
+        .catch(console.error);
 
 });
 ```
