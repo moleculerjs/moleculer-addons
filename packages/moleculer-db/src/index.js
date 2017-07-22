@@ -709,34 +709,33 @@ module.exports = {
 				rule.field = field;
 
 				let arr = Array.isArray(docs) ? docs : [docs];
+				
 				// Collect IDs from field of docs (flatten, compact & unique list) 
 				let idList = _.uniq(_.flattenDeep(_.compact(arr.map(doc => doc[field]))));
-				if (idList.length > 0) {
-					// Replace the received models according to IDs in the original docs
-					const resultTransform = (populatedDocs) => {
-						arr.forEach(doc => {
-							let id = doc[field];
-							if (_.isArray(id)) {
-								let models = _.compact(id.map(id => populatedDocs[id]));
-								doc[field] = models;
-							} else {
-								doc[field] = populatedDocs[id];
-							}
-						});
-					};
+				// Replace the received models according to IDs in the original docs
+				const resultTransform = (populatedDocs) => {
+					arr.forEach(doc => {
+						let id = doc[field];
+						if (_.isArray(id)) {
+							let models = _.compact(id.map(id => populatedDocs[id]));
+							doc[field] = models;
+						} else {
+							doc[field] = populatedDocs[id];
+						}
+					});
+				};
 
-					if (rule.handler) {
-						promises.push(rule.handler.call(this, idList, rule, ctx).then(resultTransform));
-					} else {
-						// Call the target action & collect the promises
-						const params = Object.assign({
-							id: idList,
-							mapping: true,
-							populate: rule.populate
-						}, rule.params || {});
+				if (rule.handler) {
+					promises.push(rule.handler.call(this, idList, arr, rule, ctx));
+				} else if (idList.length > 0) {
+					// Call the target action & collect the promises
+					const params = Object.assign({
+						id: idList,
+						mapping: true,
+						populate: rule.populate
+					}, rule.params || {});
 
-						promises.push(ctx.call(rule.action, params).then(resultTransform));
-					}
+					promises.push(ctx.call(rule.action, params).then(resultTransform));
 				}
 			});
 

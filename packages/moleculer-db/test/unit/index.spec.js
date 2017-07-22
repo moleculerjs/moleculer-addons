@@ -910,6 +910,7 @@ describe("Test filterFields method", () => {
 });
 
 describe("Test populateDocs method", () => {
+	const RATES = ["No rate", "Poor", "Acceptable", "Average", "Good", "Excellent"];
 	const docs = [{ id: 1, author: 3, rate: 4 }, { id: 2, author: 5, comments: [8, 3, 8], rate: 0 }, { id: 3, author: 8, rate: 5 }];
 
 	const broker = new ServiceBroker({ validation: false });
@@ -925,8 +926,9 @@ describe("Test populateDocs method", () => {
 						fields: "username fullName"
 					}
 				},
-				"rate": jest.fn(() => {
-					return ["No rate", "Poor", "Acceptable", "Average", "Good", "Excellent"];
+				"rate": jest.fn(function(ids, docs) {
+					docs.forEach(doc => doc.rate = RATES[doc.rate]);
+					return this.Promise.resolve();
 				})
 			}
 		}
@@ -962,7 +964,7 @@ describe("Test populateDocs method", () => {
 			});
 
 			expect(service.settings.populates.rate).toHaveBeenCalledTimes(1);
-			expect(service.settings.populates.rate).toHaveBeenCalledWith([4, 5], {
+			expect(service.settings.populates.rate).toHaveBeenCalledWith([4, 5], docs, {
 				field: "rate",
 				handler: jasmine.any(Function)
 			}, ctx);
