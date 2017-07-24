@@ -27,7 +27,7 @@ $ npm install moleculer-elasticsearch --save
 <!-- AUTO-CONTENT-START:SETTINGS -->
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `elasticsearch` | `Object` | **required** | Elasticsearch constructor options. More options: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html |
+| `elasticsearch` | `Object` | **required** | Elasticsearch constructor options. [More options](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html) |
 | `elasticsearch.host` | `String` | **required** | Host |
 | `elasticsearch.apiVersion` | `String` | **required** | API version |
 
@@ -182,6 +182,24 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 **Type:** `Object`
 
 Found document
+
+
+## `call` 
+
+Call any Elasticsearch API
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `api` | `String` | **required** | The name of the API |
+| `params` | `Object` | **required** | Params of request |
+
+### Results
+**Type:** `Object`
+
+Elasticsearch response
 
 
 <!-- AUTO-CONTENT-END:ACTIONS -->

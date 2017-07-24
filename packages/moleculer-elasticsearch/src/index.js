@@ -27,7 +27,7 @@ module.exports = {
 	 * Default settings
 	 */
 	settings: {
-		/** @type {Object} Elasticsearch constructor options. More options: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html */
+		/** @type {Object} Elasticsearch constructor options. [More options](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html) */
 		elasticsearch: {
 			/** @type {String} Host */
 			host: process.env.ELASTICSEARCH_HOST || "http://localhost:9200",
@@ -230,6 +230,29 @@ module.exports = {
 			},
 			handler(ctx) {
 				return this.client.get(ctx.params);
+			}
+		},
+
+		/**
+		 * Call any Elasticsearch API
+		 * 
+		 * More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} api - The name of the API
+		 * @param {Object} params - Params of request
+		 * 
+		 * @returns {Object} Elasticsearch response
+		 */
+		call: {
+			params: {
+				index: { type: "string" },
+				type: { type: "string" },
+				id: { type: "string" }
+			},
+			handler(ctx) {
+				return this.client[ctx.params.api](ctx.params.params);
 			}
 		}
 	},
