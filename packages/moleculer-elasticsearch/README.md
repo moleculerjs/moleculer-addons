@@ -25,199 +25,201 @@ $ npm install moleculer-elasticsearch --save
 # Settings
 
 <!-- AUTO-CONTENT-START:SETTINGS -->
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `elasticsearch` | `Object` | **required** | Elasticsearch constructor options. More options: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html |
+| `elasticsearch.host` | `String` | **required** | Host |
+| `elasticsearch.apiVersion` | `String` | **required** | API version |
+
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
 <!-- AUTO-CONTENT-TEMPLATE:SETTINGS
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
+{{#each this}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^this}}
+*No settings.*
+{{/this}}
 
 -->
 
 # Actions
 <!-- AUTO-CONTENT-START:ACTIONS -->
+## `bulk` 
+
+Perform many index/delete operations in a single API call.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-bulk
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | - | Default index for items which don’t provide one |
+| `type` | `String` | - | Default document type for items which don’t provide one |
+| `body` | `Array` | **required** | The request body, as either an array of objects or new-line delimited JSON objects |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `create` 
+
+Adds a typed JSON document in a specific index, making it searchable. If a document with the same index, type, and id already exists, an error will occur.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-create
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | **required** | The name of the index |
+| `type` | `String` | **required** | The type of the document |
+| `id` | `String` | **required** | Document ID |
+| `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `update` 
+
+Update (reindex) the document with the specified unique id.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-update
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | **required** | The name of the index |
+| `type` | `String` | **required** | The type of the document |
+| `id` | `String` | **required** | Document ID |
+| `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `delete` 
+
+Delete the document with the specified unique id.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-delete
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | **required** | The name of the index |
+| `type` | `String` | **required** | The type of the document |
+| `id` | `String` | **required** | Document ID |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `search` 
+
+Return documents matching a query, aggregations/facets, highlighted snippets, suggestions, and more.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String`, `Array.<String>` | **required** | A comma-separated list of index names to search; use _all or empty string to perform the operation on all indices |
+| `type` | `String`, `Array.<String>` | **required** | A comma-separated list of document types to search; leave empty to perform the operation on all types |
+| `q` | `String` | - | Query in the Lucene query string syntax. |
+| `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `count` 
+
+Get the number of documents for the cluster, index, type, or a query.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-count
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String`, `Array.<String>` | **required** | A comma-separated list of indices to restrict the results. |
+| `type` | `String`, `Array.<String>` | **required** | A comma-separated list of types to restrict the results. |
+| `q` | `String` | - | Query in the Lucene query string syntax. |
+| `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
+
+### Results
+**Type:** `Array.<Object>`
+
+???
+
+
+## `get` 
+
+Get a typed JSON document from the index based on its id.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-get
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | **required** | The name of the index |
+| `type` | `String` | **required** | The type of the document |
+| `id` | `String` | - | Document ID |
+
+### Results
+**Type:** `Object`
+
+Found document
+
+
 <!-- AUTO-CONTENT-END:ACTIONS -->
 
 <!-- AUTO-CONTENT-TEMPLATE:ACTIONS
-## `` 
+{{#each this}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
+{{#since}}
+_<sup>Since: {{this}}</sup>_
+{{/since}}
 
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
+{{description}}
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
+{{#each params}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^params}}
 *No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
+{{/params}}
+
+{{#returns}}
+### Results
+**Type:** {{type}}
+
+{{description}}
+{{/returns}}
+
+{{#hasExamples}}
+### Examples
+{{#each examples}}
+{{this}}
+{{/each}}
+{{/hasExamples}}
+
+{{/each}}
 -->
 
 # Methods
@@ -226,172 +228,41 @@ $ npm install moleculer-elasticsearch --save
 <!-- AUTO-CONTENT-END:METHODS -->
 
 <!-- AUTO-CONTENT-TEMPLATE:METHODS
-## `` 
+{{#each this}}
+## `{{name}}` {{#each badges}}{{this}} {{/each}}
+{{#since}}
+_<sup>Since: {{this}}</sup>_
+{{/since}}
 
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
+{{description}}
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
+{{#each params}}
+| `{{name}}` | {{type}} | {{defaultValue}} | {{description}} |
+{{/each}}
+{{^params}}
 *No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
+{{/params}}
+
+{{#returns}}
+### Results
+**Type:** {{type}}
+
+{{description}}
+{{/returns}}
+
+{{#hasExamples}}
+### Examples
+{{#each examples}}
+{{this}}
+{{/each}}
+{{/hasExamples}}
+
+{{/each}}
 -->
+
 
 # Test
 ```

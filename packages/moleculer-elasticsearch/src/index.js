@@ -29,7 +29,10 @@ module.exports = {
 	settings: {
 		/** @type {Object} Elasticsearch constructor options. More options: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html */
 		elasticsearch: {
+			/** @type {String} Host */
 			host: process.env.ELASTICSEARCH_HOST || "http://localhost:9200",
+
+			/** @type {String} API version */
 			apiVersion: "5.4"
 		}
 	},
@@ -49,7 +52,7 @@ module.exports = {
 		 * @param {String=} type - Default document type for items which don’t provide one
 		 * @param {Array} body - The request body, as either an array of objects or new-line delimited JSON objects
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		bulk: {
 			params: {
@@ -74,7 +77,7 @@ module.exports = {
 		 * @param {String} id - Document ID
 		 * @param {Object} body - The request body, as either JSON or a JSON serializable object. 
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		create: {
 			params: {
@@ -101,7 +104,7 @@ module.exports = {
 		 * @param {String} id - Document ID
 		 * @param {Object} body - The request body, as either JSON or a JSON serializable object. 
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		update: {
 			params: {
@@ -127,7 +130,7 @@ module.exports = {
 		 * @param {String} type - The type of the document
 		 * @param {String} id - Document ID
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		delete: {
 			params: {
@@ -150,21 +153,21 @@ module.exports = {
 		 * 
 		 * @param {String|Array<String>} index - A comma-separated list of index names to search; use _all or empty string to perform the operation on all indices
 		 * @param {String|Array<String>} type - A comma-separated list of document types to search; leave empty to perform the operation on all types
-		 * @param {String=} q - Query in the Lucene query string syntax. 
+		 * @param {String=} q - Query in the [Lucene query string](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html) syntax. 
 		 * @param {Object=} body - The request body, as either JSON or a JSON serializable object. 
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		search: {
 			params: {
-				index: [
+				/*index: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
 				],
 				type: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
-				],
+				],*/
 				q: { type: "string", optional: true },
 				body: { type: "object", optional: true }
 			},
@@ -185,18 +188,18 @@ module.exports = {
 		 * @param {String=} q - Query in the Lucene query string syntax. 
 		 * @param {Object=} body - The request body, as either JSON or a JSON serializable object. 
 		 * 
-		 * @returns {Array<Object>} ???
+		 * @returns {Object} Elasticsearch response object
 		 */
 		count: {
 			params: {
-				index: [
+				/*index: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
 				],
 				type: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
-				],
+				],*/
 				q: { type: "string", optional: true },
 				body: { type: "object", optional: true }
 			},
