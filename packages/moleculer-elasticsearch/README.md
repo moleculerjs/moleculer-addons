@@ -61,9 +61,9 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | `body` | `Array` | **required** | The request body, as either an array of objects or new-line delimited JSON objects |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `create` 
@@ -81,9 +81,9 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `update` 
@@ -101,9 +101,9 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `delete` 
@@ -120,9 +120,9 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | `id` | `String` | **required** | Document ID |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `search` 
@@ -136,13 +136,13 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | -------- | ---- | ------- | ----------- |
 | `index` | `String`, `Array.<String>` | **required** | A comma-separated list of index names to search; use _all or empty string to perform the operation on all indices |
 | `type` | `String`, `Array.<String>` | **required** | A comma-separated list of document types to search; leave empty to perform the operation on all types |
-| `q` | `String` | - | Query in the Lucene query string syntax. |
+| `q` | `String` | - | Query in the [Lucene query string](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html) syntax. |
 | `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `count` 
@@ -160,9 +160,9 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
 
 ### Results
-**Type:** `Array.<Object>`
+**Type:** `Object`
 
-???
+Elasticsearch response object
 
 
 ## `get` 
