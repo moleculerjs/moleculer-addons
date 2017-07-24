@@ -1,0 +1,54 @@
+{
+  "name": "moleculer-elasticsearch",
+  "version": "0.0.0",
+  "description": "Elasticsearch service for Moleculer.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon examples/index.js",
+    "ci": "jest --watch",
+    "test": "jest --coverage",
+    "lint": "eslint --ext=.js src test",
+    "deps": "npm-check -u",
+    "readme": "node node_modules/moleculer-docgen/index.js -t README.md src/index.js",
+    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  },
+  "keywords": [
+    "microservice",
+    "moleculer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ice-services/moleculer-addons.git"
+  },
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-elasticsearch#readme",
+  "author": "Ice Services",
+  "license": "MIT",
+  "peerDependencies": {
+    "moleculer": "^0.8.0"
+  },
+  "devDependencies": {
+    "benchmarkify": "2.1.0",
+    "coveralls": "2.13.1",
+    "eslint": "4.3.0",
+    "jest": "20.0.4",
+    "jest-cli": "20.0.4",
+    "lolex": "2.1.1",
+    "moleculer": "0.8.4",
+    "moleculer-docgen": "0.2.1",
+    "nodemon": "1.11.0",
+    "npm-check": "5.4.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/services/"
+    ]
+  },
+  "engines": {
+    "node": ">= 6.x.x"
+  },
+  "dependencies": {
+    "elasticsearch": "13.2.0"
+  }
+}
