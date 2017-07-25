@@ -86,6 +86,25 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 Elasticsearch response object
 
 
+## `get` 
+
+Get a typed JSON document from the index based on its id.
+
+More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-get
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `index` | `String` | **required** | The name of the index |
+| `type` | `String` | **required** | The type of the document |
+| `id` | `String` | - | Document ID |
+
+### Results
+**Type:** `Object`
+
+Found document
+
+
 ## `update` 
 
 Update (reindex) the document with the specified unique id.
@@ -163,25 +182,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 **Type:** `Object`
 
 Elasticsearch response object
-
-
-## `get` 
-
-Get a typed JSON document from the index based on its id.
-
-More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-get
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `index` | `String` | **required** | The name of the index |
-| `type` | `String` | **required** | The type of the document |
-| `id` | `String` | - | Document ID |
-
-### Results
-**Type:** `Object`
-
-Found document
 
 
 ## `call` 
