@@ -58,6 +58,8 @@ broker.start()
         } 
     }).then(res => console.log("Hits:", res.hits.hits)));
     
+    // Remove document
+    .then(() => broker.call("elasticsearch.delete", { index: "demo", type: "default", id: "1" }))
 ```
 
 # Settings
