@@ -61,7 +61,7 @@ module.exports = {
 				body: { type: "array" }
 			},
 			handler(ctx) {
-				return this.client.create(ctx.params);
+				return this.client.bulk(ctx.params);
 			}
 		},
 
@@ -91,6 +91,29 @@ module.exports = {
 			}
 		},
 
+		/**
+		 * Get a typed JSON document from the index based on its id.
+		 * 
+		 * More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-get
+		 * 
+		 * @actions
+		 * 
+		 * @param {String} index - The name of the index
+		 * @param {String} type - The type of the document
+		 * @param {String=} id - Document ID
+		 * 
+		 * @returns {Object} Found document
+		 */
+		get: {
+			params: {
+				index: { type: "string" },
+				type: { type: "string" },
+				id: { type: "string" }
+			},
+			handler(ctx) {
+				return this.client.get(ctx.params);
+			}
+		},
 
 		/**
 		 * Update (reindex) the document with the specified unique id.
@@ -208,31 +231,6 @@ module.exports = {
 			}
 		},
 
-
-		/**
-		 * Get a typed JSON document from the index based on its id.
-		 * 
-		 * More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-get
-		 * 
-		 * @actions
-		 * 
-		 * @param {String} index - The name of the index
-		 * @param {String} type - The type of the document
-		 * @param {String=} id - Document ID
-		 * 
-		 * @returns {Object} Found document
-		 */
-		get: {
-			params: {
-				index: { type: "string" },
-				type: { type: "string" },
-				id: { type: "string" }
-			},
-			handler(ctx) {
-				return this.client.get(ctx.params);
-			}
-		},
-
 		/**
 		 * Call any Elasticsearch API
 		 * 
@@ -247,9 +245,8 @@ module.exports = {
 		 */
 		call: {
 			params: {
-				index: { type: "string" },
-				type: { type: "string" },
-				id: { type: "string" }
+				api: { type: "string" },
+				params: { type: "object" }
 			},
 			handler(ctx) {
 				return this.client[ctx.params.api](ctx.params.params);
