@@ -65,5 +65,5 @@ broker.start()
 	.then(() => console.log(chalk.yellow.bold("\n--- DROP ---")))
 	.then(() => broker.call("elasticsearch.delete", { index: "demo", type: "default", id: "1" }).then(console.log))
 	.then(() => broker.call("elasticsearch.delete", { index: "demo", type: "default", id: "2" }).then(console.log))
-
+	
 	.catch(console.error);

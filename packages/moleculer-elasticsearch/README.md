@@ -45,7 +45,14 @@ broker.createService({
 broker.start()
 
     // Create a document
-    .then(() => broker.call("elasticsearch.create", { index: "demo", type: "default", id: "1", body: { name: "John Doe", age: 36 }))
+    .then(() => broker.call("elasticsearch.create", { 
+        index: "demo", 
+        type: "default", 
+        id: "1", 
+        body: { name: "John Doe", age: 36 }
+    }))
+
+    .delay(500)
 
     // Search documents
     .then(() => broker.call("elasticsearch.search", { 
@@ -56,7 +63,7 @@ broker.start()
                 }
             }
         } 
-    }).then(res => console.log("Hits:", res.hits.hits)));
+    }).then(res => console.log("Hits:", res.hits.hits)))
     
     // Remove document
     .then(() => broker.call("elasticsearch.delete", { index: "demo", type: "default", id: "1" }))
