@@ -2,9 +2,11 @@
 
 # moleculer-elasticsearch [![NPM version](https://img.shields.io/npm/v/moleculer-elasticsearch.svg)](https://www.npmjs.com/package/moleculer-elasticsearch)
 
-Elasticsearch service for Moleculer.
+[Elasticsearch](https://www.elastic.co/) service for Moleculer.
 
 # Features
+- support [5.4 API](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html)
+- straightforward actions & params
 
 # Install
 
@@ -14,13 +16,49 @@ $ npm install moleculer-elasticsearch --save
 
 # Usage
 
-<!-- AUTO-CONTENT-START:USAGE -->
-<!-- AUTO-CONTENT-END:USAGE -->
+**Running Elasticsearch server for development**
+```bash
+ $ docker run -p 9200:9200 -e "http.host=0.0.0.0" -e "transport.host=127.0.0.1" docker.elastic.co/elasticsearch/elasticsearch:5.5.0
+```
+[More information about Elasticsearch Docker image.](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run)
 
-<!-- AUTO-CONTENT-TEMPLATE:USAGE
--->
+**Start service**
+```js
+"use strict";
 
+let { ServiceBroker } 	= require("moleculer");
+let ESService 			= require("moleculer-elasticsearch");
 
+// Create broker
+let broker = new ServiceBroker({ logger: console });
+
+// Create service
+broker.createService({
+    mixins: [ESService],
+    settings: {
+        elasticsearch: {
+            host: "http://elastic:changeme@<docker-hostname>:9200"
+        }
+    }
+});
+
+broker.start()
+
+    // Create a document
+    .then(() => broker.call("elasticsearch.create", { index: "demo", type: "default", id: "1", body: { name: "John Doe", age: 36 }))
+
+    // Search documents
+    .then(() => broker.call("elasticsearch.search", { 
+        body: {
+            query: {
+                match: {
+                    name: "john"
+                }
+            }
+        } 
+    }).then(res => console.log("Hits:", res.hits.hits)));
+    
+```
 
 # Settings
 
