@@ -7,7 +7,8 @@ const DbService = require("../../src");
 module.exports = function(adapter) {
 
 	function protectReject(err) {
-		console.error(err.stack);
+		if (err && err.stack)
+			console.error(err.stack);
 		expect(err).toBe(true);
 	}
 
@@ -80,19 +81,17 @@ module.exports = function(adapter) {
 		});
 
 		it("should update an entity", () => {
-			return broker.call("posts.update", { id: posts[1]._id, update: {
-				$set: {
-					content: "Modify my content",
-					votes: 8
-				}
-			} }).catch(protectReject).then(res => {
+			return broker.call("posts.update", { 
+				id: posts[1]._id, 
+				content: "Modify my content",
+				votes: 8
+			}).catch(protectReject).then(res => {
 				expect(res._id).toEqual(posts[1]._id);
 				expect(res.content).toEqual("Modify my content");
 				expect(res.votes).toEqual(8);
 				posts[1] = res;
 			});
 		});
-
 
 		it("should find filtered entities (sort)", () => {
 			return broker.call("posts.find", { sort: "-votes" }).catch(protectReject).then(res => {
@@ -173,6 +172,26 @@ module.exports = function(adapter) {
 		it("should remove entity by ID", () => {
 			return broker.call("posts.remove", { id: posts[2]._id }).catch(protectReject).then(res => {
 				expect(res).toBe(1);
+			});
+		});	
+
+		it("should throw 404 because entity is not exist (remove)", () => {
+			return broker.call("posts.remove", { id: posts[2]._id }).then(protectReject).catch(res => {
+				expect(res).toBeInstanceOf(Error);
+				expect(res.name).toBe("EntityNotFoundError");
+				expect(res.code).toBe(404);
+				expect(res.message).toBe("Entity not found");
+				expect(res.data.id).toBe(posts[2]._id);
+			});
+		});	
+
+		it("should throw 404 because entity is not exist (update)", () => {
+			return broker.call("posts.update", { id: posts[2]._id, name: "Adam" }).then(protectReject).catch(res => {
+				expect(res).toBeInstanceOf(Error);
+				expect(res.name).toBe("EntityNotFoundError");
+				expect(res.code).toBe(404);
+				expect(res.message).toBe("Entity not found");
+				expect(res.data.id).toBe(posts[2]._id);
 			});
 		});	
 

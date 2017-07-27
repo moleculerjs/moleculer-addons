@@ -177,14 +177,15 @@ describe("Test DbService actions", () => {
 	it("should call the 'update' method", () => {
 		service.sanitizeParams.mockClear();
 		service.updateById = jest.fn();
-		const p = {};
+		const p = {
+			_id: 123,
+			name: "John",
+			age: 45
+		};
 
 		return broker.call("store.update", p).then(() => {
-			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
-			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
-
 			expect(service.updateById).toHaveBeenCalledTimes(1);
-			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), { id: 123, update: { "$set": { name: "John", age: 45 }}});
 		}).catch(protectReject);
 	});
 

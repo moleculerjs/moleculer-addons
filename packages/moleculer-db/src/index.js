@@ -8,6 +8,7 @@
 
 const _ = require("lodash");
 const { MoleculerError } = require("moleculer");
+const { EntityNotFoundError } = require("./errors");
 const MemoryAdapter = require("./memory-adapter");
 
 /**
@@ -259,20 +260,22 @@ module.exports = {
 		 * 
 		 * @actions
 		 * 
-		 * @param {any} id - ID of entity.
-		 * @param {Object} update - Fields for update.
-		 * 
 		 * @returns {Object} Updated entity.
 		 */
 		update: {
-			params: {
-				id: { type: "any" },
-				update: { type: "any" }
-			},			
 			handler(ctx) {
-				let params = this.sanitizeParams(ctx, ctx.params);
+				let id;
+				let sets = {};
 
-				return this.updateById(ctx, params);
+				// Convert fields from params to "$set" update object
+				Object.keys(ctx.params).forEach(prop => {
+					if (prop == "id" || prop == this.settings.idField)
+						id = ctx.params[prop];
+					else 
+						sets[prop] = ctx.params[prop];
+				});
+
+				return this.updateById(ctx, { id, update: { "$set": sets }});
 			}
 		},
 
@@ -492,11 +495,18 @@ module.exports = {
 		 * @param {Context} ctx - Context of request.
 		 * @param {Object} params - Params of request.
 		 * @returns {Object} Updated entity.
+		 * 
+		 * @throws {EntityNotFoundError} - 404 Entity not found
 		 */
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
-				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
+				.then(doc => {
+					if (!doc)
+						return Promise.reject(new EntityNotFoundError(params.id));
+
+					return this.transformDocuments(ctx, params, doc)
+						.then(json => this.entityChanged("updated", json, ctx).then(() => json));
+				});
 		},
 
 		/**
@@ -521,11 +531,18 @@ module.exports = {
 		 * @methods
 		 * @param {Context} ctx - Context of request.
 		 * @returns {Number} Count of removed entities.
+		 * 
+		 * @throws {EntityNotFoundError} - 404 Entity not found
 		 */
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
 				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
+				.then(json => {
+					if (!json)
+						return Promise.reject(new EntityNotFoundError(params.id));
+
+					return this.entityChanged("removed", null, ctx).then(() => json);
+				});
 		},
 
 		/**
