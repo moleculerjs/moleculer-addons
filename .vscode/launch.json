@@ -24,7 +24,7 @@
 			"program": "${workspaceRoot}\\dev",
 			"cwd": "${workspaceRoot}",
 			"args": [
-				"moleculer-twilio",
+				"moleculer-db-adapter-mongo",
 				"simple"
 			]
 		},
