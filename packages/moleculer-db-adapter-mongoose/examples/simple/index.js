@@ -49,7 +49,7 @@ broker.start().delay(500).then(() => {
 		
 		// Create new Posts
 		.then(() => console.log(chalk.yellow.bold("\n--- CREATE ---")))
-		.then(() => broker.call("posts.create", { entity: { title: "Hello", content: "Post content", votes: 0, author: null } })
+		.then(() => broker.call("posts.create", { title: "Hello", content: "Post content", votes: 0, author: null })
 			.then(doc => {
 				id = doc._id;
 				console.log("Saved: ", doc);
@@ -74,13 +74,9 @@ broker.start().delay(500).then(() => {
 		.then(() => console.log(chalk.yellow.bold("\n--- UPDATE ---")))
 		.then(() => broker.call("posts.update", { 
 			id, 
-			update: { 
-				$set: { 
-					title: "Hello 2", 
-					content: "Post content 2",
-					updatedAt: new Date()
-				} 
-			} 
+			title: "Hello 2", 
+			content: "Post content 2",
+			updatedAt: new Date()
 		}).then(console.log))
 
 		// Get a post

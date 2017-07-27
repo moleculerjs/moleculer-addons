@@ -227,7 +227,7 @@ class MongooseStoreAdapter {
 	 * @memberof MongooseStoreAdapter
 	 */
 	removeById(_id) {
-		return this.model.findByIdAndRemove(_id);
+		return this.model.findByIdAndRemove(_id).then(doc => doc ? 1 : 0);
 	}
 
 	/**
