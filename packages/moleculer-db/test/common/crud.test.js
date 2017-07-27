@@ -39,16 +39,15 @@ module.exports = function(adapter) {
 		];
 
 		it("should create a new entity", () => {
-			return broker.call("posts.create", { entity: posts[0] }).catch(protectReject).then(res => {
+			return broker.call("posts.create", posts[0]).catch(protectReject).then(res => {
 				posts[0]._id = res._id;
-
 				expect(res).toEqual(posts[0]);
-
 			});
 		});
 
+		
 		it("should create multiple entities", () => {
-			return broker.call("posts.create", { entity: [posts[1], posts[2] ] }).catch(protectReject).then(res => {
+			return broker.call("posts.insert", { entities: [posts[1], posts[2] ] }).catch(protectReject).then(res => {
 				expect(res.length).toBe(2);
 
 				posts[1]._id = res[0]._id;

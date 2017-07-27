@@ -123,11 +123,40 @@ describe("Test DbService actions", () => {
 		const p = {};
 
 		return broker.call("store.create", p).then(() => {
+			expect(service.create).toHaveBeenCalledTimes(1);
+			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p, {});
+		}).catch(protectReject);
+	});
+
+	it("should call the 'create' method", () => {
+		service.sanitizeParams.mockClear();
+		service.create = jest.fn();
+		const p = {
+			entity: {}
+		};
+
+		return broker.call("store.insert", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
 			expect(service.create).toHaveBeenCalledTimes(1);
-			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p.entity, p);
+		}).catch(protectReject);
+	});
+
+	it("should call the 'createMany' method", () => {
+		service.sanitizeParams.mockClear();
+		service.createMany = jest.fn();
+		const p = {
+			entities: []
+		};
+
+		return broker.call("store.insert", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
+			expect(service.createMany).toHaveBeenCalledTimes(1);
+			expect(service.createMany).toHaveBeenCalledWith(jasmine.any(Context), p.entities, p);
 		}).catch(protectReject);
 	});
 
@@ -306,7 +335,7 @@ describe("Test DbService methods", () => {
 		service.entityChanged = jest.fn(() => Promise.resolve());
 		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
-		return service.create(ctx, ctx.params).then(res => {
+		return service.create(ctx, ctx.params.entity, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
 			expect(service.validateEntity).toHaveBeenCalledTimes(1);
@@ -329,7 +358,7 @@ describe("Test DbService methods", () => {
 		service.entityChanged = jest.fn(() => Promise.resolve());
 		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
-		return service.createMany(ctx, ctx.params).then(res => {
+		return service.createMany(ctx, ctx.params.entities, ctx.params).then(res => {
 			expect(res).toBe(docs);
 
 			expect(service.validateEntity).toHaveBeenCalledTimes(1);

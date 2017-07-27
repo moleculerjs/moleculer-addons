@@ -54,14 +54,14 @@ module.exports = function(adapter) {
 
 		beforeAll(() => {
 			return broker.start().then(() => {
-				return broker.call("users.create", { entity: users }).then(res => {
+				return broker.call("users.insert", { entities: users }).then(res => {
 					res.forEach((e, i) => users[i]._id = e._id);
 
 					posts[0].author = res[2]._id;
 					posts[1].author = res[0]._id;
 					posts[2].author = res[1]._id;
 
-					return broker.call("posts.create", { entity: posts }).then(res => {
+					return broker.call("posts.insert", { entities: posts }).then(res => {
 						res.forEach((e, i) => posts[i]._id = e._id);
 					});
 				});

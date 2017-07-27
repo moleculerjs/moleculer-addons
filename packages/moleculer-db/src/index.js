@@ -7,6 +7,7 @@
 "use strict";
 
 const _ = require("lodash");
+const { MoleculerError } = require("moleculer");
 const MemoryAdapter = require("./memory-adapter");
 
 /**
@@ -184,14 +185,38 @@ module.exports = {
 		 * 
 		 * @returns {Object} Saved entity.
 		 */
-		create: {
+		create: {			
+			handler(ctx) {
+				let params = ctx.params;
+
+				return this.create(ctx, params, {});
+			}
+		},
+
+		/**
+		 * Create many new entities.
+		 * 
+		 * @actions
+		 * 
+		 * @param {Array.<Object>?} entity - Entity to save.
+		 * @param {Array.<Object>?} entities - Entities to save.
+		 * 
+		 * @returns {Object|Array.<Object>} Saved entity(ies).
+		 */
+		insert: {
 			params: {
-				entity: { type: "any" }
+				entity: { type: "object", optional: true },
+				entities: { type: "array", optional: true }
 			},			
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
-				return this.create(ctx, params);
+				if (Array.isArray(params.entities))
+					return this.createMany(ctx, params.entities, params);
+				else if (params.entity)
+					return this.create(ctx, params.entity, params);
+				
+				return Promise.reject(new MoleculerError("Invalid request! The 'params' must contain 'entity' or 'entities'!", 400));
 			}
 		},
 
@@ -391,11 +416,12 @@ module.exports = {
 		 * 
 		 * @methods
 		 * @param {Context} ctx - Context of request.
-		 * @param {Object} params - Params of request.
+		 * @param {Object} entity - Entity.
+		 * @param {Object} params - Request params.
 		 * @returns {Object} Saved entity.
 		 */
-		create(ctx, params) {
-			return this.validateEntity(params.entity)
+		create(ctx, entity, params) {
+			return this.validateEntity(entity)
 				.then(entity => this.adapter.insert(entity))
 				.then(doc => this.transformDocuments(ctx, params, doc))
 				.then(json => this.entityChanged("created", json, ctx).then(() => json));
@@ -406,11 +432,12 @@ module.exports = {
 		 * 
 		 * @methods
 		 * @param {Context} ctx - Context of request.
-		 * @param {Object} params - Params of request.
+		 * @param {Array<Object>} entitites - Entities.
+		 * @param {Object} params - Request params.
 		 * @returns {Array<Object>} Saved entities.
 		 */
-		createMany(ctx, params) {
-			return this.validateEntity(params.entities)
+		createMany(ctx, entities, params) {
+			return this.validateEntity(entities)
 				.then(entities => this.adapter.insertMany(entities))
 				.then(docs => this.transformDocuments(ctx, params, docs))
 				.then(json => this.entityChanged("created", json, ctx).then(() => json));
