@@ -28,12 +28,12 @@
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
-    "eslint": "4.2.0",
+    "eslint": "4.3.0",
     "fakerator": "0.3.0",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
-    "lolex": "2.0.0",
-    "moleculer": "0.8.2",
+    "lolex": "2.1.2",
+    "moleculer": "0.8.4",
     "nodemon": "1.11.0",
     "npm-check": "5.4.5"
   },
@@ -50,6 +50,6 @@
   "dependencies": {
     "bluebird": "3.5.0",
     "lodash": "4.17.4",
-    "mongoose": "4.11.3"
+    "mongoose": "4.11.4"
   }
 }
