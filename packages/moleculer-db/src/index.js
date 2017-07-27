@@ -7,7 +7,7 @@
 "use strict";
 
 const _ = require("lodash");
-const { MoleculerError } = require("moleculer");
+const { MoleculerError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("./errors");
 const MemoryAdapter = require("./memory-adapter");
 

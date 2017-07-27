@@ -59,6 +59,17 @@ module.exports = function(adapter) {
 
 			});
 		});
+		
+		it("should throw error is params is empty", () => {
+			return broker.call("posts.insert", { }).then(protectReject).catch(res => {
+				expect(res).toBeInstanceOf(Error);
+				expect(res.name).toBe("MoleculerError");
+				expect(res.code).toBe(400);
+				expect(res.message).toBe("Invalid request! The 'params' must contain 'entity' or 'entities'!");
+				expect(res.data).toBeUndefined();
+
+			});
+		});
 
 		it("should return with count of entities", () => {
 			return broker.call("posts.count").catch(protectReject).then(res => {
