@@ -14,7 +14,7 @@ const { MoleculerError } = require("moleculer").Errors;
  * Entity not found
  * 
  * @class EntityNotFoundError
- * @extends {Error}
+ * @extends {MoleculerError}
  */
 class EntityNotFoundError extends MoleculerError {
 

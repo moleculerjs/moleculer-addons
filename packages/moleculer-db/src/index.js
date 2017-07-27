@@ -31,10 +31,10 @@ module.exports = {
 		/** @type {String} Name of ID field. */
 		idField: "_id",
 		
-		/** @type {Array<String>?} Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. */
+		/** @type {Array<String>?} Field filtering list. It must be an `Array`. If the value is `null` or `undefined` doesn't filter the fields of entities. */
 		fields: null,
 
-		/** @type {Array?} Schema for population. [Read more](#populating) */
+		/** @type {Array?} Schema for population. [Read more](#populating). */
 		populates: null,
 
 		/** @type {Number} Default page size in `list` action. */
@@ -46,7 +46,7 @@ module.exports = {
 		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
 
-		/** @type {Object|Function} Validator schema or a function to validate the incoming  entity in "users.create" action */
+		/** @type {Object|Function} Validator schema or a function to validate the incoming entity in `users.create` action. */
 		entityValidator: null
 	},
 
@@ -658,8 +658,6 @@ module.exports = {
 		 * @param {Object} 	doc
 		 * @param {Array} 	fields	Filter properties of model.
 		 * @returns	{Object}
-		 * 
-		 * @memberOf Service
 		 */
 		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
@@ -679,7 +677,7 @@ module.exports = {
 		/**
 		 * Authorize the required field list. Remove fields which is not exist in the `this.settings.fields`
 		 * 
-		 * @param {Array} f 
+		 * @param {Array} fields
 		 * @returns {Array}
 		 */
 		authorizeFields(fields) {
@@ -717,7 +715,7 @@ module.exports = {
 		},
 
 		/**
-		 * Populate documents
+		 * Populate documents.
 		 * 
 		 * @param {Context} 		ctx
 		 * @param {Array|Object} 	docs
@@ -787,7 +785,7 @@ module.exports = {
 		},
 
 		/**
-		 * Validate an entity by validator
+		 * Validate an entity by validator.
 		 * 
 		 * @param {any} entity 
 		 * @returns {Promise}
@@ -801,7 +799,7 @@ module.exports = {
 		},
 
 		/**
-		 * Encode ID of entity
+		 * Encode ID of entity.
 		 * 
 		 * @methods
 		 * @param {any} id 
@@ -812,7 +810,7 @@ module.exports = {
 		},
 
 		/**
-		 * Decode ID of entity
+		 * Decode ID of entity.
 		 * 
 		 * @methods
 		 * @param {any} id 
