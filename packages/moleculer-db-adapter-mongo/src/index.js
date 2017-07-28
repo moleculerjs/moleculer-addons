@@ -12,14 +12,6 @@ const mongodb 		= require("mongodb");
 const MongoClient 	= mongodb.MongoClient;
 const ObjectID 		= mongodb.ObjectID;
 
-//Promise.promisifyAll(MongoClient);
-//Promise.promisifyAll(mongodb.Collection.prototype);
-//Promise.promisifyAll(mongodb.Cursor.prototype);
-
-function hexToObjectID(id) {
-	return new ObjectID.createFromHexString(id);
-}
-
 class MongoDbAdapter {
 
 	/**
@@ -70,11 +62,9 @@ class MongoDbAdapter {
 			this.db = db;
 			this.collection = db.collection(this.service.schema.collection);
  
-			/* ???
 			this.db.on("disconnected", function mongoDisconnected() {
 				this.service.logger.warn("Disconnected from MongoDB.");
 			}.bind(this));
-			*/
 			
 		});
 	}
@@ -104,65 +94,65 @@ class MongoDbAdapter {
 	 *  - searchFields
 	 *  - query
 	 * 
-	 * @param {any} filters 
-	 * @returns {Promise}
+	 * @param {Object} query 
+	 * @returns {Promise<Array>}
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
-	find(filters) {
-		return this.doFiltering(filters).toArray();
+	find(query) {
+		return this.createCursor(query, false).toArray();
 	}
 
 	/**
-	 * Find an entities by ID
+	 * Find an entities by ID.
 	 * 
-	 * @param {any} _id 
-	 * @returns {Promise}
+	 * @param {String} _id 
+	 * @returns {Promise<Object>} Return with the found document.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	findById(_id) {
-		return this.collection.findOne({ _id: hexToObjectID(_id) });
+		return this.collection.findOne({ _id: this.stringToObjectID(_id) });
 	}
 
 	/**
-	 * Find any entities by IDs
+	 * Find any entities by IDs.
 	 * 
 	 * @param {Array} idList 
-	 * @returns {Promise}
+	 * @returns {Promise<Array>} Return with the found documents in an Array.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	findByIds(idList) {
 		return this.collection.find({
 			_id: {
-				$in: idList
+				$in: idList.map(id => this.stringToObjectID(id))
 			}
 		}).toArray();
 	}
 
 	/**
-	 * Get count of filtered entites
+	 * Get count of filtered entites.
 	 * 
-	 * Available filter props:
+	 * Available query props:
 	 *  - search
 	 *  - searchFields
 	 *  - query
 	 * 
-	 * @param {Object} [filters={}] 
-	 * @returns {Promise}
+	 * @param {Object} [query={}] 
+	 * @returns {Promise<Number>} Return with the count of documents.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
-	count(filters = {}) {
-		//return this.doFiltering(filters).count().toArray().then(docs => docs.length);
+	count(query = {}) {
+		return this.createCursor(query, true);
 	}
 
 	/**
-	 * Insert an entity
+	 * Insert an entity.
 	 * 
 	 * @param {Object} entity 
-	 * @returns {Promise}
+	 * @returns {Promise<Object>} Return with the inserted document.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
@@ -177,7 +167,7 @@ class MongoDbAdapter {
 	 * Insert many entities
 	 * 
 	 * @param {Array} entities 
-	 * @returns {Promise}
+	 * @returns {Promise<Array<Object>>} Return with the inserted documents in an Array.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
@@ -192,49 +182,49 @@ class MongoDbAdapter {
 	 * 
 	 * @param {Object} query 
 	 * @param {Object} update 
-	 * @returns {Promise}
+	 * @returns {Promise<Number>} Return with the count of modified documents.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	updateMany(query, update) {
-		return this.collection.updateMany(query, update);
+		return this.collection.updateMany(query, update).then(res => res.modifiedCount);
 	}
 
 	/**
 	 * Update an entity by ID and `update`
 	 * 
-	 * @param {any} _id 
+	 * @param {String} _id - ObjectID as hexadecimal string.
 	 * @param {Object} update 
-	 * @returns {Promise}
+	 * @returns {Promise<Object>} Return with the updated document.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	updateById(_id, update) {
-		return this.collection.findOneAndUpdate({ _id }, update, { returnOriginal: false });
+		return this.collection.findOneAndUpdate({ _id: this.stringToObjectID(_id) }, update, { returnOriginal : false }).then(res => res.value);
 	}
 
 	/**
 	 * Remove entities which are matched by `query`
 	 * 
 	 * @param {Object} query 
-	 * @returns {Promise}
+	 * @returns {Promise<Number>} Return with the count of deleted documents.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	removeMany(query) {
-		return this.collection.deleteMany(query);
+		return this.collection.deleteMany(query).then(res => res.deletedCount);
 	}
 
 	/**
 	 * Remove an entity by ID
 	 * 
-	 * @param {any} _id 
-	 * @returns {Promise}
+	 * @param {String} _id - ObjectID as hexadecimal string.
+	 * @returns {Promise<Object>} Return with the removed document.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
 	removeById(_id) {
-		return this.collection.findOneAndDelete({ _id }).then(doc => doc ? 1 : 0);
+		return this.collection.findOneAndDelete({ _id: this.stringToObjectID(_id) }).then(res => res.value);
 	}
 
 	/**
@@ -245,13 +235,13 @@ class MongoDbAdapter {
 	 * @memberof MongoDbAdapter
 	 */
 	clear() {
-		return this.collection.deleteMany({}).then(() => null);
+		return this.collection.deleteMany({}).then(res => res.deletedCount);
 	}
 
 	/**
-	 * Convert DB entity to JSON object
+	 * Convert DB entity to JSON object. It converts the `_id` to hexadecimal `String`.
 	 * 
-	 * @param {any} entity 
+	 * @param {Object} entity 
 	 * @returns {Object}
 	 * @memberof MongoDbAdapter
 	 */
@@ -263,7 +253,8 @@ class MongoDbAdapter {
 	}
 
 	/**
-	 * Create a filtered query
+	 * Create a filtered cursor.
+	 * 
 	 * Available filters in `params`: 
 	 *  - search
 	 * 	- sort
@@ -272,24 +263,24 @@ class MongoDbAdapter {
 	 *  - query
 	 * 
  	 * @param {Object} params 
-	 * @returns {MongoQuery}
+ 	 * @param {Boolean} isCounting
+	 * @returns {MongoCursor}
 	 */
-	doFiltering(params) {
+	createCursor(params, isCounting) {
 		if (params) {
-			const q = this.collection.find(params.query);
+			let q;
+			if (isCounting)
+				q = this.collection.count(params.query);
+			else	
+				q = this.collection.find(params.query);
 			// Full-text search
 			// More info: https://docs.mongodb.com/manual/reference/operator/query/text/
 			if (_.isString(params.search) && params.search !== "") {
-				q.find({
+				q = this.collection.find(Object.assign(params.query || {}, {
 					$text: {
 						$search: params.search
 					}
-				});
-				q._fields = {
-					_score: {
-						$meta: "textScore"
-					}
-				};
+				}), { _score: { $meta: "textScore" } });
 				q.sort({
 					_score: {
 						$meta: "textScore"
@@ -297,10 +288,11 @@ class MongoDbAdapter {
 				});
 			} else {
 				// Sort
-				if (_.isString(params.sort))
-					q.sort(params.sort.replace(/,/, " "));
-				else if (Array.isArray(params.sort))
-					q.sort(params.sort.join(" "));					
+				if (params.sort) {
+					let sort = this.transformSort(params.sort);
+					if (sort)
+						q.sort(sort);
+				}
 			}
 
 			// Offset
@@ -313,7 +305,62 @@ class MongoDbAdapter {
 
 			return q;
 		}
-		return this.collection.find();
+
+		// If not params
+		if (isCounting)
+			return this.collection.count({});
+		else
+			return this.collection.find({});
+	}
+
+	/**
+	 * Convert the `sort` param to a `sort` object to Mongo queries.
+	 * 
+	 * @param {String|Array<String>|Object} paramSort 
+	 * @returns {Object} Return with a sort object like `{ "votes": 1, "title": -1 }`
+	 * @memberof MongoDbAdapter
+	 */
+	transformSort(paramSort) {
+		let sort = paramSort;
+		if (_.isString(sort))
+			sort = sort.replace(/,/, " ").split(" ");
+
+		if (Array.isArray(sort)) {
+			let sortObj = {};
+			sort.forEach(s => {
+				if (s.startsWith("-"))
+					sortObj[s.slice(1)] = -1;
+				else
+					sortObj[s] = 1;
+			});
+			return sortObj;
+		}
+
+		return sort;
+	}
+
+	/**
+	 * Convert hex string to ObjectID
+	 * 
+	 * @param {String} id 
+	 * @returns {ObjectID}
+	 * 
+	 * @memberof MongoDbAdapter
+	 */
+	stringToObjectID(id) {
+		return new ObjectID.createFromHexString(id);
+	}
+
+	/**
+	 * Convert ObjectID to Hex string
+	 * 
+	 * @param {ObjectID} id 
+	 * @returns {String}
+	 * 
+	 * @memberof MongoDbAdapter
+	 */
+	ojectIDToString(id) {
+		return id.toHexString();
 	}
 
 }
