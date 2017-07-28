@@ -40,10 +40,10 @@ function start() {
 		.then(() => checker.printTotal());	
 }
 
+// --- TEST CASES ---
+
 let ids =[];
 let date = new Date();
-
-// --- TEST CASES ---
 
 // Count of posts
 checker.add("COUNT", () => adapter.count(), res => {

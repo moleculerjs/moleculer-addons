@@ -62,6 +62,7 @@ class MongoDbAdapter {
 			this.db = db;
 			this.collection = db.collection(this.service.schema.collection);
  
+			/* istanbul ignore next */
 			this.db.on("disconnected", function mongoDisconnected() {
 				this.service.logger.warn("Disconnected from MongoDB.");
 			}.bind(this));

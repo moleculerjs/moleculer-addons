@@ -86,7 +86,7 @@ class MemoryDbAdapter {
 	 */
 	find(filters) {
 		return new Promise((resolve, reject) => {
-			this.doFiltering(filters).exec((err, docs) => {
+			this.createCursor(filters).exec((err, docs) => {
 				/* istanbul ignore next */
 				if (err)
 					return reject(err);
@@ -142,7 +142,7 @@ class MemoryDbAdapter {
 	 */
 	count(filters = {}) {
 		return new Promise((resolve, reject) => {
-			this.doFiltering(filters).exec((err, docs) => {
+			this.createCursor(filters).exec((err, docs) => {
 				/* istanbul ignore next */
 				if (err)
 					return reject(err);
@@ -256,7 +256,7 @@ class MemoryDbAdapter {
 	 * @param {Object} params 
 	 * @returns {Query}
 	 */
-	doFiltering(params) {
+	createCursor(params) {
 		if (params) {
 			let q;
 

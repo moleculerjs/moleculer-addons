@@ -107,7 +107,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	find(filters) {
-		return this.doFiltering(filters).exec();
+		return this.createCursor(filters).exec();
 	}
 
 	/**
@@ -152,7 +152,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	count(filters = {}) {
-		return this.doFiltering(filters).count().exec();
+		return this.createCursor(filters).count().exec();
 	}
 
 	/**
@@ -267,7 +267,7 @@ class MongooseDbAdapter {
  	 * @param {Object} params 
 	 * @returns {MongoQuery}
 	 */
-	doFiltering(params) {
+	createCursor(params) {
 		if (params) {
 			const q = this.model.find(params.query);
 			// Full-text search
