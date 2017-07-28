@@ -184,7 +184,7 @@ class MemoryDbAdapter {
 	 * @memberof MemoryDbAdapter
 	 */
 	updateMany(query, update) {
-		return this.db.update(query, update, { multi: true, returnUpdatedDocs: true }).then(res => res[1]);
+		return this.db.update(query, update, { multi: true }).then(res => res[0]);
 	}
 
 	/**
