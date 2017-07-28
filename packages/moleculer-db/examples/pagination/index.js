@@ -36,7 +36,7 @@ broker.createService(DbService, {
 	}
 });
 
-const checker = new ModuleChecker(15);
+const checker = new ModuleChecker(14);
 
 // Start checks
 function start() {

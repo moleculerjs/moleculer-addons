@@ -35,18 +35,6 @@ broker.createService(StoreService, {
 		}
 	},
 
-	actions: {
-		vote(ctx) {
-			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
-		},
-
-		unvote(ctx) {
-			return this.Promise.resolve(ctx)
-				.then(ctx => this.update(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
-		}
-	},
-
 	afterConnected() {
 		this.logger.info("Connected successfully");
 		return this.clear().delay(1000).then(() => {
@@ -90,7 +78,7 @@ broker.createService(StoreService, {
 	}
 });
 
-const checker = new ModuleChecker(11);
+const checker = new ModuleChecker(13);
 
 // Start checks
 function start() {
@@ -103,8 +91,6 @@ function start() {
 }
 
 // --- TEST CASES ---
-
-let postID;
 
 checker.add("FIND POSTS (search: 'content')", () => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "content", populate: ["author"], fields: ["_id", "title", "author"] }), res => {
 	console.log(res);

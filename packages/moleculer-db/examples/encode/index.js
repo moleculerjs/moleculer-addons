@@ -3,7 +3,8 @@
 let { ServiceBroker } = require("moleculer");
 let DbService = require("../../index");
 let _ = require("lodash");
-let chalk = require("chalk");
+let ModuleChecker = require("../../test/checker");
+let Promise = require("bluebird");
 
 // Create broker
 let broker = new ServiceBroker({
@@ -34,7 +35,7 @@ broker.createService(DbService, {
 	},
 
 	afterConnected() {
-		this.logger.info(chalk.green.bold("Connected successfully"));
+		this.logger.info("Connected successfully");
 		return this.count().delay(500).then(count => {
 			if (count == 0) {
 				this.logger.info("Seed products...");
@@ -43,7 +44,7 @@ broker.createService(DbService, {
 						name: "Product " + i
 					};
 				});
-				return this.createMany(null, { entities: products })
+				return this.createMany(null, products)
 					.then(() => this.adapter.count())
 					.then(count => console.log("Saved products:", count ));
 
@@ -52,48 +53,62 @@ broker.createService(DbService, {
 	}
 });
 
-// Start server
-broker.start().delay(1000).then(() => {
-	let id;
-	Promise.resolve()
+const checker = new ModuleChecker(6);
 
-		// List posts
-		.then(() => console.log(chalk.yellow.bold("\n--- FIND PRODUCTS ---")))
-		.then(() => broker.call("products.find", { limit: 5 }).then(rows => {
-			console.log(rows);
-			id = rows[3]._id;
-		}))
-
-		// Get by encoded ID
-		.then(() => console.log(chalk.yellow.bold("\n--- GET BY ID ---")))
-		.then(() => broker.call("products.get", { id }).then(console.log))
-
-		// Update a product
-		.then(() => console.log(chalk.yellow.bold("\n--- UPDATE ---")))
-		.then(() => broker.call("products.update", { 
-			id, 
-			update: { 
-				$set: { 
-					name: "Modified product"
-				} 
-			} 
-		}).then(console.log))
-
-		// Get by encoded ID
-		.then(() => console.log(chalk.yellow.bold("\n--- GET BY ID w/ mapping ---")))
-		.then(() => broker.call("products.get", { id: [id], mapping: true }).then(console.log))
-
-		// Remove by ID
-		.then(() => console.log(chalk.yellow.bold("\n--- REMOVE BY ID ---")))
-		.then(() => broker.call("products.remove", { id }).then(console.log))
-
-		// Count of products
-		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
-		.then(() => broker.call("products.count").then(console.log))
-
-		// Error handling
+// Start checks
+function start() {
+	return Promise.resolve()
+		.delay(500)
+		.then(() => checker.execute())
 		.catch(console.error)
+		.then(() => broker.stop())
+		.then(() => checker.printTotal());	
+}
 
-		// Stop
-		.then(() => broker.stop());
+// --- TEST CASES ---
+
+let id;
+
+// List posts
+checker.add("FIND PRODUCTS", () => broker.call("products.find", { limit: 5 }), rows => {
+	console.log(rows);
+	id = rows[3]._id;
+
+	return rows.length === 5 && id.startsWith("prod-");
 });
+
+// Get by encoded ID
+checker.add("GET BY ID", () => broker.call("products.get", { id }), res => {
+	console.log(res);
+	return res && res._id === id;
+});
+
+// Update a product
+checker.add("UPDATE", () => broker.call("products.update", { 
+	id, 
+	name: "Modified product"
+}), res => {
+	console.log(res);
+	return res && res.name === "Modified product";
+});
+
+// Get by encoded ID
+checker.add("GET BY ID w/ mapping", () => broker.call("products.get", { id: [id], mapping: true }), res => {
+	console.log(res);
+	return res && res[id] && res[id]._id === id;
+});
+
+// Remove by ID
+checker.add("REMOVE BY ID", () => broker.call("products.remove", { id }), res => {
+	console.log(res);
+	return res === 1;
+});
+
+// Count of products
+checker.add("COUNT", () => broker.call("products.count"), res => {
+	console.log(res);
+	return res === 19;
+});
+
+
+broker.start().then(() => start());

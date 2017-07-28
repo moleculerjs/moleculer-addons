@@ -3,15 +3,18 @@
 let { ServiceBroker } = require("moleculer");
 let DbService = require("../../index");
 let _ = require("lodash");
-let chalk = require("chalk");
 let path = require("path");
-let fakerator = require("fakerator")();
+let ModuleChecker = require("../../test/checker");
+let Promise = require("bluebird");
 
 // Create broker
 let broker = new ServiceBroker({
 	logger: console,
 	logLevel: "debug"
 });
+
+let posts = [];
+let users = [];
 
 // Load my service
 
@@ -44,43 +47,20 @@ broker.createService(DbService, {
 
 	},
 
-	actions: {
-		vote(ctx) {
-			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }});
-		},
-
-		unvote(ctx) {
-			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }});		
-		}
-	},
-
 	afterConnected() {
-		this.logger.info(chalk.green.bold("Connected successfully"));
-		return this.count().delay(500).then(count => {
-			if (count == 0) {
-				this.logger.info("Seed Posts collection...");
-				return broker.call("users.find").then(users => {
-					if (users.length == 0) return;
-					//console.log(users);
-					// Create fake posts
-					let posts = _.times(10, () => {
-						let fakePost = fakerator.entity.post();
-						return {
-							title: fakePost.title,
-							content: fakePost.content,
-							author: fakerator.random.arrayElement(users)._id,
-							votes: fakerator.random.number(10), 
-							createdAt: new Date(), 
-							updatedAt: null
-						};
-					});
-					return this.createMany(null, { entities: posts })
-						.then(() => this.adapter.count())
-						.then(count => console.log("Saved posts:", count ));
+		this.logger.info("Connected successfully");
+		return this.clear().delay(1000).then(() => {
+			if (users.length == 0) return;
 
-				});
-			}
-		});		
+			this.logger.info("Seed Posts collection...");
+			return this.createMany(null, [
+				{ title: "1st post", content: "First post content.", votes: 3, author: users[2]._id },
+				{ title: "2nd post", content: "Labore eum veritatis ut.", votes: 8, author: users[1]._id },
+				{ title: "3rd post", content: "Rerum deleniti repellendus error ea.", votes: 0, author: users[4]._id },
+				{ title: "4th post", content: "Normal post content.", votes: 4, author: users[3]._id },
+				{ title: "5th post", content: "Voluptatum praesentium voluptatibus est nesciunt fugiat.", votes: 6, author: users[1]._id }
+			]).then(docs => posts = docs);
+		});			
 	}
 });
 
@@ -106,52 +86,74 @@ broker.createService(DbService, {
 	},
 
 	afterConnected() {
-		this.logger.info(chalk.green.bold("Connected successfully"));
-		return this.count().then(count => {
-			if (count == 0) {
-				this.logger.info("Seed Users collection...");
-				// Create fake users
-				let users = _.times(10, () => {
-					let fakeUser = fakerator.entity.user();
-					return {
-						username: fakeUser.userName,
-						fullName: fakeUser.firstName + " " + fakeUser.lastName,
-						email: fakeUser.email,
-						createdAt: new Date(), 
-						updatedAt: null
-					};
-				});
-				return this.createMany(null, { entities: users })
-					.then(() => this.adapter.count())
-					.then(count => console.log("Saved users:", count ));
-
-			}
+		this.logger.info("Connected successfully");
+		return this.clear().then(() => {
+			this.logger.info("Seed Users collection...");
+			return this.createMany(null, [
+				{ username: "John", fullName: "John Doe", email: "john.doe@gmail.com", status: 1 },
+				{ username: "Adam", fullName: "Adam Doe", email: "adam.doe@gmail.com", status: 1 },
+				{ username: "Jane", fullName: "Jane Doe", email: "jane.doe@gmail.com", status: 0 },
+				{ username: "Susan", fullName: "Susan Doe", email: "susan.doe@gmail.com", status: 1 },
+				{ username: "Bill", fullName: "Bill Doe", email: "bill.doe@gmail.com", status: 1 }
+			]).then(docs => {
+				users = docs;
+			});
 		});
 	}
 });
 
-let postID;
-// Start server
-broker.start().delay(1000).then(() => {
-	Promise.resolve()
-		// List posts
-		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (search: 'ipsam') ---")))
-		.then(() => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "ipsam", populate: ["author"], fields: ["_id", "title", "votes", "author"] }).then(posts => {
-			postID = posts[0]._id;
-			console.log(posts);
-		}))
-		.then(() => console.log(chalk.yellow.bold("\n--- COUNT POSTS (search: 'ipsam') ---")))
-		.then(() => broker.call("posts.count", { search: "ipsam" }).then(console.log))
-		.then(() => console.log(chalk.yellow.bold("\n--- FIND POSTS (limit: 3, offset: 2, sort: title, no author) ---")))
-		.then(() => broker.call("posts.find", { limit: 3, offset: 2, sort: "title", fields: ["title", "votes"] }).then(console.log))
-		.then(() => console.log(chalk.yellow.bold("\n--- GET POST (page: 2, pageSize: 5, sort: -votes) ---")))
-		.then(() => broker.call("posts.get", { id: postID, populate: ["author"], fields: ["title", "author"] }).then(console.log))
-		.then(() => console.log(chalk.yellow.bold("\n--- LIST POSTS (page: 2, pageSize: 5, sort: -votes) ---")))
-		.then(() => broker.call("posts.list", { page: 2, pageSize: 5, sort: "-votes", populate: ["author"], fields: ["_id", "title", "votes", "author"] }).then(console.log))
+const checker = new ModuleChecker(13);
 
-		// Error handling
+// Start checks
+function start() {
+	return Promise.resolve()
+		.delay(500)
+		.then(() => checker.execute())
 		.catch(console.error)
+		.then(() => broker.stop())
+		.then(() => checker.printTotal());	
+}
 
-		// Stop
-		.then(() => broker.stop());
+// --- TEST CASES ---
+
+checker.add("FIND POSTS (search: 'content')", () => broker.call("posts.find", { limit: 0, offset: 0, sort: "-votes title", search: "content", populate: ["author"], fields: ["_id", "title", "author"] }), res => {
+	console.log(res);
+	return [
+		res.length == 2 && res[0]._id == posts[3]._id && res[1]._id == posts[0]._id,
+		res[0].title && res[0].author && res[0].author.username == "Susan" && res[0].votes == null && res[0].author.email == null,
+		res[1].title && res[1].author && res[1].author.username == "Jane" && res[1].votes == null && res[1].author.email == null
+	];
 });
+
+checker.add("COUNT POSTS (search: 'content')", () => broker.call("posts.count", { search: "content" }), res => {
+	console.log(res);
+	return res == 2;
+});
+
+checker.add("FIND POSTS (limit: 3, offset: 2, sort: title, no author)", () => broker.call("posts.find", { limit: 3, offset: 2, sort: "title", fields: ["title", "votes"] }), res => {
+	console.log(res);
+	return [
+		res.length == 3,
+		res[0].title && res[0].author == null && res[0].votes == 0,
+		res[1].title && res[1].author == null && res[1].votes == 4,
+		res[2].title && res[2].author == null && res[2].votes == 6,
+	];
+});
+
+checker.add("GET POST (page: 2, pageSize: 5, sort: -votes)", () => broker.call("posts.get", { id: posts[2]._id, populate: ["author"], fields: ["title", "author"] }), res => {
+	console.log(res);
+	return res.title === "3rd post" && res.author.username === "Bill" && res.author.fullName === "Bill Doe" && res.author.email == null && res.votes == null;
+});
+
+checker.add("LIST POSTS (page: 2, pageSize: 5, sort: -votes)", () => broker.call("posts.list", { page: 2, pageSize: 2, sort: "-votes", populate: ["author"], fields: ["_id", "title", "votes", "author"] }), res => {
+	console.log(res);
+	let rows = res.rows;
+	return [
+		res.total === 5 && res.page === 2 && res.pageSize === 2 && res.totalPages === 3,
+		rows.length == 2,
+		rows[0]._id == posts[3]._id && rows[0].title && rows[0].author.username == "Susan" && rows[0].votes == 4,
+		rows[1]._id == posts[0]._id && rows[1].title && rows[1].author.username == "Jane" && rows[1].votes == 3
+	];
+});
+
+broker.start().then(() => start());

@@ -1,10 +1,15 @@
-{"username":"kristin80","fullName":"Kristin Blick","email":"kristin.blick@yahoo.com","createdAt":{"$$date":1499779281032},"updatedAt":null,"_id":"1q9HJTN4YhROSDpL"}
-{"username":"marc.pacocha41","fullName":"Marc Pacocha","email":"marc19@gmail.com","createdAt":{"$$date":1499779281024},"updatedAt":null,"_id":"FwHg4myzFyFWf3Si"}
-{"username":"mindy_howe96","fullName":"Mindy Howe","email":"mindy.howe@hotmail.com","createdAt":{"$$date":1499779281020},"updatedAt":null,"_id":"VxYfSKDizYmWRxLW"}
-{"username":"merle.osinski","fullName":"Merle Osinski","email":"merle.osinski30@yahoo.com","createdAt":{"$$date":1499779281016},"updatedAt":null,"_id":"WFPiDATKbnL9hIgh"}
-{"username":"ruben_gottlieb23","fullName":"Ruben Gottlieb","email":"ruben.gottlieb02@hotmail.com","createdAt":{"$$date":1499779281030},"updatedAt":null,"_id":"durNuqKWsIwhXzuo"}
-{"username":"stuart_gorczany37","fullName":"Stuart Gorczany","email":"stuart18@hotmail.com","createdAt":{"$$date":1499779281018},"updatedAt":null,"_id":"p9qMUEiqv1Wh6EfR"}
-{"username":"roger27","fullName":"Roger Mayer","email":"roger.mayer46@yahoo.com","createdAt":{"$$date":1499779281022},"updatedAt":null,"_id":"wJB4uDLgs72Pds4t"}
-{"username":"miranda_little00","fullName":"Miranda Little","email":"miranda.little@yahoo.com","createdAt":{"$$date":1499779281023},"updatedAt":null,"_id":"xIR2eILs9ABmqb9N"}
-{"username":"marcos_hoeger","fullName":"Marcos Hoeger","email":"marcos49@gmail.com","createdAt":{"$$date":1499779281028},"updatedAt":null,"_id":"yDcRSDdtodY2EZUo"}
-{"username":"hugo.lakin09","fullName":"Hugo Lakin","email":"hugo.lakin50@gmail.com","createdAt":{"$$date":1499779281032},"updatedAt":null,"_id":"zRJnucDn30MAqZIm"}
+{"username":"Susan","fullName":"Susan Doe","email":"susan.doe@gmail.com","status":1,"_id":"4e7eYSkUQLFX6KVf"}
+{"username":"Bill","fullName":"Bill Doe","email":"bill.doe@gmail.com","status":1,"_id":"HmKbcWy9aQ6QOQKb"}
+{"username":"Adam","fullName":"Adam Doe","email":"adam.doe@gmail.com","status":1,"_id":"PLgOoRglhsen2UQV"}
+{"username":"John","fullName":"John Doe","email":"john.doe@gmail.com","status":1,"_id":"U06uyzByDtGlSzyp"}
+{"username":"Jane","fullName":"Jane Doe","email":"jane.doe@gmail.com","status":0,"_id":"Yio5js18JVs6aRDJ"}
+{"$$deleted":true,"_id":"4e7eYSkUQLFX6KVf"}
+{"$$deleted":true,"_id":"HmKbcWy9aQ6QOQKb"}
+{"$$deleted":true,"_id":"PLgOoRglhsen2UQV"}
+{"$$deleted":true,"_id":"U06uyzByDtGlSzyp"}
+{"$$deleted":true,"_id":"Yio5js18JVs6aRDJ"}
+{"username":"John","fullName":"John Doe","email":"john.doe@gmail.com","status":1,"_id":"NfpKg7PRf2jlCUJL"}
+{"username":"Adam","fullName":"Adam Doe","email":"adam.doe@gmail.com","status":1,"_id":"vZ9e7Isbtrr2mSJF"}
+{"username":"Jane","fullName":"Jane Doe","email":"jane.doe@gmail.com","status":0,"_id":"6ziMgknK2qkGG6Sl"}
+{"username":"Susan","fullName":"Susan Doe","email":"susan.doe@gmail.com","status":1,"_id":"FGh1yPrOjJQtNtOW"}
+{"username":"Bill","fullName":"Bill Doe","email":"bill.doe@gmail.com","status":1,"_id":"V5amxDzlwNoeff9E"}
