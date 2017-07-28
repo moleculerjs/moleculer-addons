@@ -21,7 +21,6 @@ const doc = {
 		toHexString: jest.fn(() => "123")
 	}
 };
-const docs = [doc];
 
 const toArrayCB = jest.fn(() => Promise.resolve());
 const query = jest.fn(() => ({ toArray: toArrayCB }));

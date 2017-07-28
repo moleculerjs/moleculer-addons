@@ -95,13 +95,13 @@ class MongoDbAdapter {
 	 *  - searchFields
 	 *  - query
 	 * 
-	 * @param {Object} query 
+	 * @param {Object} filters 
 	 * @returns {Promise<Array>}
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
-	find(query) {
-		return this.createCursor(query, false).toArray();
+	find(filters) {
+		return this.createCursor(filters, false).toArray();
 	}
 
 	/**
@@ -140,13 +140,13 @@ class MongoDbAdapter {
 	 *  - searchFields
 	 *  - query
 	 * 
-	 * @param {Object} [query={}] 
+	 * @param {Object} [filters={}] 
 	 * @returns {Promise<Number>} Return with the count of documents.
 	 * 
 	 * @memberof MongoDbAdapter
 	 */
-	count(query = {}) {
-		return this.createCursor(query, true);
+	count(filters = {}) {
+		return this.createCursor(filters, true);
 	}
 
 	/**

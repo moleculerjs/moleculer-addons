@@ -15,7 +15,6 @@ const doc = {
 		toHexString: jest.fn()
 	}
 };
-const docs = [doc];
 
 const execCB = jest.fn(() => Promise.resolve());
 const saveCB = jest.fn(() => Promise.resolve());
@@ -27,9 +26,9 @@ const fakeModel = Object.assign(jest.fn(() => ({ save: saveCB })), {
 	find: jest.fn(() => query()),
 	findById: jest.fn(() => query()),
 	create: jest.fn(() => Promise.resolve()),
-	update: jest.fn(() => Promise.resolve(docs)),
+	update: jest.fn(() => Promise.resolve({ n: 2 })),
 	findByIdAndUpdate: jest.fn(() => Promise.resolve(doc)),
-	remove: jest.fn(() => Promise.resolve()),
+	remove: jest.fn(() => Promise.resolve({ result: { n: 2 }})),
 	findByIdAndRemove: jest.fn(() => Promise.resolve()),
 });
 

@@ -24,7 +24,7 @@ class ModuleChecker {
 			let res = cb(rsp);
 			if (Array.isArray(res))
 				res.map(r => this.checkValid(r));
-			else
+			else if (res != null)
 				this.checkValid(res);
 		}));
 	}

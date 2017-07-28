@@ -9,7 +9,6 @@
 const _ 		= require("lodash");
 const Promise	= require("bluebird");
 const mongoose  = require("mongoose");
-//const ObjectId = require("mongoose").Types.ObjectId;
 
 class MongooseDbAdapter {
 
@@ -190,7 +189,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	updateMany(query, update) {
-		return this.model.update(query, update, { multi: true, "new": true });
+		return this.model.update(query, update, { multi: true, "new": true }).then(res => res.n);
 	}
 
 	/**
@@ -215,7 +214,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	removeMany(query) {
-		return this.model.remove(query);
+		return this.model.remove(query).then(res => res.result.n);
 	}
 
 	/**
@@ -227,7 +226,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	removeById(_id) {
-		return this.model.findByIdAndRemove(_id).then(doc => doc ? 1 : 0);
+		return this.model.findByIdAndRemove(_id);
 	}
 
 	/**
@@ -238,7 +237,7 @@ class MongooseDbAdapter {
 	 * @memberof MongooseDbAdapter
 	 */
 	clear() {
-		return this.model.remove({}).then(() => null);
+		return this.model.remove({}).then(res => res.result.n);
 	}
 
 	/**
