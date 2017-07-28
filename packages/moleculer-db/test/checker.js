@@ -45,16 +45,16 @@ class ModuleChecker {
 
 		if (res) {
 			this.ok++;
-			console.log(chalk.bgGreen.yellow.bold("+++ OK +++"));
+			console.log(chalk.bgGreen.yellow.bold("--- OK ---"));
 		} else {
 			this.fail++;
-			console.log(chalk.bgRed.yellow.bold("--- FAIL ---"));
+			console.log(chalk.bgRed.yellow.bold("!!! FAIL !!!"));
 		}
 	}
 
 	printTotal() {
 		console.log();
-		console.log(chalk.bgGreen.yellow.bold(`+++ OK: ${this.ok} of ${this.okCount} +++`), this.fail > 0 ? " | " + chalk.bgRed.yellow.bold(`--- FAIL: ${this.fail} ---`) : "");
+		console.log(chalk.bgGreen.yellow.bold(`--- OK: ${this.ok} of ${this.okCount} ---`), this.fail > 0 ? " | " + chalk.bgRed.yellow.bold(`!!! FAIL: ${this.fail} !!!`) : "");
 		console.log();
 	}
 }

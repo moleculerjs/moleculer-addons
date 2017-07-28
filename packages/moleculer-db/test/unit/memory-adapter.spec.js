@@ -5,8 +5,11 @@ const Adapter = require("../../src/memory-adapter");
 
 
 function protectReject(err) {
-	//console.error(err.stack);
-	expect().toBe(true);
+	if (err && err.stack) {
+		console.error(err);
+		console.error(err.stack);	
+	}
+	expect(err).toBe(true);
 }
 
 describe("Test Adapter constructor", () => {

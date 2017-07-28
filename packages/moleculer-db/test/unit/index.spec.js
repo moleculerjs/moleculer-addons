@@ -5,8 +5,11 @@ const DbService = require("../../src");
 //const lolex = require("lolex");
 
 function protectReject(err) {
-	console.error(err.stack);
-	expect().toBe(true);
+	if (err && err.stack) {
+		console.error(err);
+		console.error(err.stack);	
+	}
+	expect(err).toBe(true);
 }
 
 describe("Test DbService actions", () => {
