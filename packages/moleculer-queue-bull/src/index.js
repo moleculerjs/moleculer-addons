@@ -9,7 +9,7 @@
 let _ = require("lodash");
 let Queue = require("bull");
 
-module.exports = function createService(connOpts) {
+module.exports = function createService(url, queueOpts) {
 
 	/**
 	 * Task queue service with Bull
@@ -40,7 +40,7 @@ module.exports = function createService(connOpts) {
 			 */
 			getQueue(name) {
 				if (!this._queues[name]) {
-					this._queues[name] = Queue(name, connOpts);
+					this._queues[name] = Queue(name, url, queueOpts);
 				}
 				return this._queues[name];
 			}
