@@ -252,7 +252,7 @@ class MongooseStoreAdapter {
 		let json = entity.toJSON();
 		if (entity._id && entity._id.toHexString) {
 			json._id = entity._id.toHexString();
-		} else if (entity._id && entity._id.toHexString) {
+		} else if (entity._id && entity._id.toString) {
 			json._id = entity._id.toString();
 		}
 		return json;
