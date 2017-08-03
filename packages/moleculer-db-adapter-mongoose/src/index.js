@@ -66,8 +66,8 @@ class MongooseStoreAdapter {
 		}
 
 		const conn = mongoose.connect(uri, opts);
-		return conn.then(() => {
-			this.db = conn.connection;
+		return conn.then(result => {
+			this.db = conn.connection || result.db;
 
 			this.db.on("disconnected", function mongoDisconnected() {
 				/* istanbul ignore next */
