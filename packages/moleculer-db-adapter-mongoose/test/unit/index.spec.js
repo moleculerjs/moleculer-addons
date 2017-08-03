@@ -17,6 +17,13 @@ const doc = {
 };
 const docs = [doc];
 
+const docIdString = {
+	toJSON: jest.fn(() => ({})),
+	_id: {
+		toString: jest.fn()
+	}
+};
+
 const execCB = jest.fn(() => Promise.resolve());
 const saveCB = jest.fn(() => Promise.resolve());
 const leanCB = jest.fn(() => ({ exec: execCB }));
@@ -317,6 +324,14 @@ describe("Test MongooseStoreAdapter", () => {
 		adapter.entityToObject(doc);
 		expect(doc.toJSON).toHaveBeenCalledTimes(1);
 		expect(doc._id.toHexString).toHaveBeenCalledTimes(1);
+	});	
+
+	it("call entityToObject on doc without ObjectID", () => {
+		docIdString.toJSON.mockClear();
+		docIdString._id.toString.mockClear();
+		adapter.entityToObject(docIdString);
+		expect(docIdString.toJSON).toHaveBeenCalledTimes(1);
+		expect(docIdString._id.toString).toHaveBeenCalledTimes(1);
 	});	
 });
 

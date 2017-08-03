@@ -66,8 +66,8 @@ class MongooseStoreAdapter {
 		}
 
 		const conn = mongoose.connect(uri, opts);
-		return conn.then(() => {
-			this.db = conn.connection;
+		return conn.then(result => {
+			this.db = conn.connection || result.db;
 
 			this.db.on("disconnected", function mongoDisconnected() {
 				/* istanbul ignore next */
@@ -250,8 +250,11 @@ class MongooseStoreAdapter {
 	 */
 	entityToObject(entity) {
 		let json = entity.toJSON();
-		if (entity._id)
+		if (entity._id && entity._id.toHexString) {
 			json._id = entity._id.toHexString();
+		} else if (entity._id && entity._id.toString) {
+			json._id = entity._id.toString();
+		}
 		return json;
 	}
 
