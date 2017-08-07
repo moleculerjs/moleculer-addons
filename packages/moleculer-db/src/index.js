@@ -521,7 +521,7 @@ module.exports = {
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
 				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this.entityChanged("updated", null, ctx).then(() => json));
+				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
 		},
 
 		/**
@@ -536,12 +536,12 @@ module.exports = {
 		 */
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
-				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => {
-					if (!json)
+				.then(doc => {
+					if (!doc)
 						return Promise.reject(new EntityNotFoundError(params.id));
 
-					return this.entityChanged("removed", null, ctx).then(() => json);
+					return this.transformDocuments(ctx, params, doc)
+						.then(json => this.entityChanged("removed", json, ctx).then(() => json));
 				});
 		},
 
@@ -556,7 +556,7 @@ module.exports = {
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
 				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
+				.then(json => this.entityChanged("removed", json, ctx).then(() => json));
 		},
 
 		/**
@@ -569,14 +569,14 @@ module.exports = {
 		 */
 		clear(ctx) {
 			return this.adapter.clear()
-				.then(count => this.entityChanged("removed", null, ctx).then(() => count));
+				.then(count => this.entityChanged("removed", count, ctx).then(() => count));
 		},
 
 		/**
 		 * Clear the cache & call entity lifecycle events
 		 * 
 		 * @param {String} type 
-		 * @param {Object|Array} json 
+		 * @param {Object|Array|Number} json 
 		 * @param {Context} ctx 
 		 * @returns {Promise}
 		 */
@@ -613,8 +613,7 @@ module.exports = {
 				if (_.isObject(docs)) {
 					isDoc = true;
 					docs = [docs];
-				} else
-					return this.Promise.resolve(docs);
+				}
 			}
 
 			return this.Promise.resolve(docs)
