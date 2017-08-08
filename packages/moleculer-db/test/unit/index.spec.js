@@ -513,7 +513,7 @@ describe("Test DbService methods", () => {
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("updated", docs, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -536,7 +536,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 3);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -555,7 +555,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 5);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 5, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -568,7 +568,7 @@ describe("Test DbService methods", () => {
 
 			expect(adapter.clear).toHaveBeenCalledTimes(1);
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
 		}).catch(protectReject);
 	});
 

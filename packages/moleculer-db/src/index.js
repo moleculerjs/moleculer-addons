@@ -613,7 +613,9 @@ module.exports = {
 				if (_.isObject(docs)) {
 					isDoc = true;
 					docs = [docs];
-				}
+				} 
+				else
+					return this.Promise.resolve(docs);
 			}
 
 			return this.Promise.resolve(docs)
