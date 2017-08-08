@@ -6,12 +6,13 @@ Moleculer service to store entities in database.
 
 # Features
 - default CRUD actions
-- cached queries
+- cached actions
 - pagination support
 - pluggable adapter ([NeDB](https://github.com/louischatriot/nedb) is the default memory adapter for testing & prototyping)
+- official adapters for MongoDB, PostgreSQL, SQLite, MySQL, MSSQL.
 - fields filtering
 - populating
-- encode/decod IDs
+- encode/decode IDs
 - entity lifecycle events for notifications
 
 # Install
@@ -45,30 +46,42 @@ broker.createService({
 });
 
 broker.start()
+
 // Create a new user
-.then(() => broker.call("users.create", { entity: {
+.then(() => broker.call("users.create", {
     username: "john",
     name: "John Doe",
     status: 1
-}}))
+}))
 
 // Get all users
 .then(() => broker.call("users.find").then(console.log));
+
+// List users with pagination
+.then(() => broker.call("users.list", { page: 2, pageSize: 10 }).then(console.log));
+
+// Get a user
+.then(() => broker.call("users.get", { id: 2 }).then(console.log));
+
+// Update a user
+.then(() => broker.call("users.update", { id: 2, name: "Jane Doe" }).then(console.log));
+
+// Delete a user
+.then(() => broker.call("users.remove", { id: 2 }).then(console.log));
 
 ```
 
 # Settings
 
-<!-- AUTO-CONTENT-START:SETTINGS -->
-| Property | Type | Default | Description |
+<!-- AUTO-CONTENT-START:SETTINGS -->| Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `idField` | `String` | **required** | Name of ID field. |
-| `fields` | `Array.<String>` | `null` | Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. |
-| `populates` | `Array` | `null` | Schema for population. [Read more](#populating) |
+| `fields` | `Array.<String>` | `null` | Field filtering list. It must be an `Array`. If the value is `null` or `undefined` doesn't filter the fields of entities. |
+| `populates` | `Array` | `null` | Schema for population. [Read more](#populating). |
 | `pageSize` | `Number` | **required** | Default page size in `list` action. |
 | `maxPageSize` | `Number` | **required** | Maximum page size in `list` action. |
 | `maxLimit` | `Number` | **required** | Maximum value of limit in `find` action. Default: `-1` (no limit) |
-| `entityValidator` | `Object`, `function` | `null` | Validator schema or a function to validate the incoming  entity in "users.create" action |
+| `entityValidator` | `Object`, `function` | `null` | Validator schema or a function to validate the incoming entity in `users.create` action. |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
@@ -86,21 +99,20 @@ broker.start()
 
 # Actions
 
-<!-- AUTO-CONTENT-START:ACTIONS -->
-## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+<!-- AUTO-CONTENT-START:ACTIONS -->## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 Find entities by query.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `populate` | `Array.<String>` | - | Field list for populate. |
+| `populate` | `Array.<String>` | - | Populated fields. |
 | `fields` | `Array.<String>` | - | Fields filter. |
 | `limit` | `Number` | **required** | Max count of rows. |
 | `offset` | `Number` | **required** | Count of skipped rows. |
 | `sort` | `String` | **required** | Sorted fields. |
 | `search` | `String` | **required** | Search text. |
-| `searchFields` | `String` | **required** | Fields list for searching. |
+| `searchFields` | `String` | **required** | Fields for searching. |
 | `query` | `Object` | **required** | Query object. Passes to adapter. |
 
 ### Results
@@ -133,13 +145,13 @@ List entities by filters and pagination results.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `populate` | `Array.<String>` | - | Field list for populate. |
+| `populate` | `Array.<String>` | - | Populated fields. |
 | `fields` | `Array.<String>` | - | Fields filter. |
 | `page` | `Number` | **required** | Page number. |
 | `pageSize` | `Number` | **required** | Size of a page. |
 | `sort` | `String` | **required** | Sorted fields. |
 | `search` | `String` | **required** | Search text. |
-| `searchFields` | `String` | **required** | Fields list for searching. |
+| `searchFields` | `String` | **required** | Fields for searching. |
 | `query` | `Object` | **required** | Query object. Passes to adapter. |
 
 ### Results
@@ -155,12 +167,28 @@ Create a new entity.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `entity` | `Object` | **required** | Entity to save. |
+*No input parameters.*
 
 ### Results
 **Type:** `Object`
 
 Saved entity.
+
+
+## `insert` 
+
+Create many new entities.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `entity` | `Object` | - | Entity to save. |
+| `entities` | `Array.<Object>` | - | Entities to save. |
+
+### Results
+**Type:** `Object`, `Array.<Object>`
+
+Saved entity(ies).
 
 
 ## `get` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
@@ -188,8 +216,7 @@ Update an entity by ID.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `id` | `any` | **required** | ID of entity. |
-| `update` | `Object` | **required** | Fields for update. |
+*No input parameters.*
 
 ### Results
 **Type:** `Object`
@@ -252,8 +279,7 @@ _<sup>Since: {{this}}</sup>_
 
 # Methods
 
-<!-- AUTO-CONTENT-START:METHODS -->
-## `find` 
+<!-- AUTO-CONTENT-START:METHODS -->## `find` 
 
 Find entities by query. `params` contains the query fields.
 
@@ -293,7 +319,8 @@ Create a new entity.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
+| `entity` | `Object` | **required** | Entity. |
+| `params` | `Object` | **required** | Request params. |
 
 ### Results
 **Type:** `Object`
@@ -309,7 +336,8 @@ Create many new entities.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
+| `entitites` | `Array.<Object>` | **required** | Entities. |
+| `params` | `Object` | **required** | Request params. |
 
 ### Results
 **Type:** `Array.<Object>`
@@ -335,8 +363,7 @@ Found entity(ies).
 
 ## `updateById` 
 
-Update an entity by ID.
-> After update, clear the cache & call lifecycle events.
+Update an entity by ID.> After update, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -352,8 +379,7 @@ Updated entity.
 
 ## `updateMany` 
 
-Update multiple entities by query.
-> After update, clear the cache & call lifecycle events.
+Update multiple entities by query.> After update, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -369,8 +395,7 @@ Updated entities.
 
 ## `removeById` 
 
-Remove an entity by ID.
-> After remove, clear the cache & call lifecycle events.
+Remove an entity by ID.> After remove, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -385,8 +410,7 @@ Count of removed entities.
 
 ## `removeMany` 
 
-Remove multiple entities by query.
-> After remove, clear the cache & call lifecycle events.
+Remove multiple entities by query.> After remove, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -401,8 +425,7 @@ Count of removed entities.
 
 ## `clear` 
 
-Delete all entities. 
-> After delete, clear the cache & call lifecycle events.
+Delete all entities. > After delete, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -432,7 +455,7 @@ Clear cached entities
 
 ## `encodeID` 
 
-Encode ID of entity
+Encode ID of entity.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -447,7 +470,7 @@ Encode ID of entity
 
 ## `decodeID` 
 
-Decode ID of entity
+Decode ID of entity.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -562,7 +585,7 @@ broker.createService({
 });
 ```
 
-> Please note! If you manipulate multiple entities, the `json` parameter will be `null` (currently)!
+> Please note! If you manipulate multiple entities (updateMany, removeMany), the `json` parameter will be a `Number` instead of entities!
 
 # Extend with custom actions
 Naturally you can extend this service with your custom actions.

@@ -7,6 +7,17 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "Launch dev",
+			"program": "${workspaceRoot}\\dev",
+			"cwd": "${workspaceRoot}",
+			"args": [
+				"moleculer-db-adapter-sequelize",
+				"simple"
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "Launch readme gen",
 			"program": "${workspaceRoot}/node_modules/moleculer-docgen/index.js",
 			"args": [
@@ -17,18 +28,6 @@
 			"stopOnEntry": true
 
 		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Launch dev",
-			"program": "${workspaceRoot}\\dev",
-			"cwd": "${workspaceRoot}",
-			"args": [
-				"moleculer-twilio",
-				"simple"
-			]
-		},
-
 		{
 			"type": "node",
 			"request": "launch",

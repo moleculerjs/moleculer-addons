@@ -5,8 +5,11 @@ const Adapter = require("../../src/memory-adapter");
 
 
 function protectReject(err) {
-	//console.error(err.stack);
-	expect().toBe(true);
+	if (err && err.stack) {
+		console.error(err);
+		console.error(err.stack);	
+	}
+	expect(err).toBe(true);
 }
 
 describe("Test Adapter constructor", () => {
@@ -170,12 +173,8 @@ describe("Test Adapter methods", () => {
 	});	
 
 	it("should update many documents", () => {
-		return adapter.updateMany({ age: 35 }, { $set: { gender: "male" } }).then(res => {
-			expect(res.length).toBe(2);
-			expect(res[0].gender).toBe("male");
-			expect(res[1].gender).toBe("male");
-		}).catch(protectReject);		
-	});	
+		return expect(adapter.updateMany({ age: 35 }, { $set: { gender: "male" } })).resolves.toBe(2);
+	});
 
 	it("should remove by ID", () => {
 		return expect(adapter.removeById(multipleDocs[0]._id)).resolves.toBe(1);

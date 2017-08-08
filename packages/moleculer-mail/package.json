@@ -28,15 +28,15 @@
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
-    "eslint": "4.1.1",
+    "eslint": "4.4.1",
     "handlebars": "4.0.10",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
-    "lolex": "1.6.0",
-    "moleculer": "0.8.2",
+    "lolex": "2.1.2",
+    "moleculer": "0.8.5",
     "node-sass": "4.5.3",
     "nodemon": "1.11.0",
-    "npm-check": "5.4.4",
+    "npm-check": "5.4.5",
     "pug": "2.0.0-rc.1"
   },
   "jest": {

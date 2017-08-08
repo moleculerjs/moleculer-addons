@@ -5,7 +5,10 @@ const MongooseStoreAdapter = require("../../src");
 const mongoose = require("mongoose");
 
 function protectReject(err) {
-	console.error(err.stack);
+	if (err && err.stack) {
+		console.error(err);
+		console.error(err.stack);	
+	}
 	expect(err).toBe(true);
 }
 
@@ -15,7 +18,6 @@ const doc = {
 		toHexString: jest.fn()
 	}
 };
-const docs = [doc];
 
 const docIdString = {
 	toJSON: jest.fn(() => ({})),
@@ -34,9 +36,9 @@ const fakeModel = Object.assign(jest.fn(() => ({ save: saveCB })), {
 	find: jest.fn(() => query()),
 	findById: jest.fn(() => query()),
 	create: jest.fn(() => Promise.resolve()),
-	update: jest.fn(() => Promise.resolve(docs)),
+	update: jest.fn(() => Promise.resolve({ n: 2 })),
 	findByIdAndUpdate: jest.fn(() => Promise.resolve(doc)),
-	remove: jest.fn(() => Promise.resolve()),
+	remove: jest.fn(() => Promise.resolve({ result: { n: 2 }})),
 	findByIdAndRemove: jest.fn(() => Promise.resolve()),
 });
 
@@ -125,7 +127,7 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 
-	describe("Test doFiltering", () => {
+	describe("Test createCursor", () => {
 		it("init", () => {
 			adapter.model.find = jest.fn(() => ({
 				find: jest.fn(),
@@ -140,7 +142,7 @@ describe("Test MongooseStoreAdapter", () => {
 
 		it("call without params", () => {
 			adapter.model.find.mockClear();
-			adapter.doFiltering();
+			adapter.createCursor();
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith();
 		});
@@ -148,7 +150,7 @@ describe("Test MongooseStoreAdapter", () => {
 		it("call with query", () => {
 			adapter.model.find.mockClear();
 			let query = {};
-			adapter.doFiltering({ query });
+			adapter.createCursor({ query });
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith(query);
 		});
@@ -156,7 +158,7 @@ describe("Test MongooseStoreAdapter", () => {
 		it("call with sort string", () => {
 			adapter.model.find.mockClear();
 			let query = {};
-			let q = adapter.doFiltering({ query, sort: "-votes title" });
+			let q = adapter.createCursor({ query, sort: "-votes title" });
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith(query);
 			
@@ -167,7 +169,7 @@ describe("Test MongooseStoreAdapter", () => {
 		it("call with sort array", () => {
 			adapter.model.find.mockClear();
 			let query = {};
-			let q = adapter.doFiltering({ query, sort: ["createdAt", "title"] });
+			let q = adapter.createCursor({ query, sort: ["createdAt", "title"] });
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith(query);
 			
@@ -177,7 +179,7 @@ describe("Test MongooseStoreAdapter", () => {
 
 		it("call with limit & offset", () => {
 			adapter.model.find.mockClear();
-			let q = adapter.doFiltering({ limit: 5, offset: 10 });
+			let q = adapter.createCursor({ limit: 5, offset: 10 });
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith(undefined);
 			
@@ -189,7 +191,7 @@ describe("Test MongooseStoreAdapter", () => {
 
 		it("call with full-text search", () => {
 			adapter.model.find.mockClear();
-			let q = adapter.doFiltering({ search: "walter" });
+			let q = adapter.createCursor({ search: "walter" });
 			expect(adapter.model.find).toHaveBeenCalledTimes(1);
 			expect(adapter.model.find).toHaveBeenCalledWith(undefined);
 			
@@ -204,12 +206,12 @@ describe("Test MongooseStoreAdapter", () => {
 
 
 	it("call find", () => {
-		adapter.doFiltering = jest.fn(() => query());
+		adapter.createCursor = jest.fn(() => query());
 
 		let params = {};
 		return adapter.find(params).catch(protectReject).then(() => {
-			expect(adapter.doFiltering).toHaveBeenCalledTimes(1);
-			expect(adapter.doFiltering).toHaveBeenCalledWith(params);
+			expect(adapter.createCursor).toHaveBeenCalledTimes(1);
+			expect(adapter.createCursor).toHaveBeenCalledWith(params);
 
 			expect(execCB).toHaveBeenCalledTimes(1);
 		});
@@ -241,14 +243,14 @@ describe("Test MongooseStoreAdapter", () => {
 	});
 
 	it("call count", () => {
-		adapter.doFiltering = jest.fn(() => query());
+		adapter.createCursor = jest.fn(() => query());
 		leanCB.mockClear();
 		execCB.mockClear();
 
 		let params = {};
 		return adapter.count(params).catch(protectReject).then(() => {
-			expect(adapter.doFiltering).toHaveBeenCalledTimes(1);
-			expect(adapter.doFiltering).toHaveBeenCalledWith(params);
+			expect(adapter.createCursor).toHaveBeenCalledTimes(1);
+			expect(adapter.createCursor).toHaveBeenCalledWith(params);
 
 			expect(countCB).toHaveBeenCalledTimes(1);
 			expect(execCB).toHaveBeenCalledTimes(1);

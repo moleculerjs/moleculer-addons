@@ -1,9 +1,10 @@
 "use strict";
 
-let chalk = require("chalk");
 let { ServiceBroker } = require("moleculer");
 let StoreService = require("../../../moleculer-db/index");
+let ModuleChecker = require("../../../moleculer-db/test/checker");
 let MongooseAdapter = require("../../index");
+let Promise = require("bluebird");
 let Post = require("../models/posts");
 
 // Create broker
@@ -11,105 +12,177 @@ let broker = new ServiceBroker({
 	logger: console,
 	logLevel: "debug"
 });
+const adapter = new MongooseAdapter("mongodb://localhost/moleculer-db-demo");
 
 // Load my service
 broker.createService(StoreService, {
 	name: "posts",
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-db-demo"),
+	adapter,
 	model: Post,
-	settings: {
-		fields: ["_id", "title", "content", "votes"]
-	},
-
-	actions: {
-		vote(ctx) {
-			return this.Promise.resolve(ctx)
-				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
-		},
-
-		unvote(ctx) {
-			return this.Promise.resolve(ctx)
-				.then(ctx => this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }}));		
-		}
-	},
+	settings: {},
 
 	afterConnected() {
-		this.logger.info(chalk.green.bold("Connected successfully"));
-		this.clear();
+		this.logger.info("Connected successfully");
+		return this.clear().then(() => start());
 	}
 });
 
-// Start server
-broker.start().delay(500).then(() => {
-	let id;
-	Promise.resolve()
-		// Count of posts
-		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
-		.then(() => broker.call("posts.count").then(console.log))
-		
-		// Create new Posts
-		.then(() => console.log(chalk.yellow.bold("\n--- CREATE ---")))
-		.then(() => broker.call("posts.create", { entity: { title: "Hello", content: "Post content", votes: 0, author: null } })
-			.then(doc => {
-				id = doc._id;
-				console.log("Saved: ", doc);
-			})
-		)
+const checker = new ModuleChecker(24);
 
-		// List posts
-		.then(() => console.log(chalk.yellow.bold("\n--- FIND ---")))
-		.then(() => broker.call("posts.find").then(console.log))
-
-		// Get a post
-		.then(() => console.log(chalk.yellow.bold("\n--- GET ---")))
-		.then(() => broker.call("posts.get", { id }).then(console.log))
-
-		// Vote a post
-		.then(() => console.log(chalk.yellow.bold("\n--- VOTE ---")))
-		.then(() => broker.call("posts.vote", { 
-			id
-		}).then(console.log))
-
-		// Update a posts
-		.then(() => console.log(chalk.yellow.bold("\n--- UPDATE ---")))
-		.then(() => broker.call("posts.update", { 
-			id, 
-			update: { 
-				$set: { 
-					title: "Hello 2", 
-					content: "Post content 2",
-					updatedAt: new Date()
-				} 
-			} 
-		}).then(console.log))
-
-		// Get a post
-		.then(() => console.log(chalk.yellow.bold("\n--- GET ---")))
-		.then(() => broker.call("posts.get", { id }).then(console.log))
-
-		// Unvote a post
-		.then(() => console.log(chalk.yellow.bold("\n--- UNVOTE ---")))
-		.then(() => broker.call("posts.unvote", { 
-			id
-		}).then(console.log))
-		
-		// Count of posts
-		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
-		.then(() => broker.call("posts.count").then(console.log))
-		
-		// Remove a post
-		.then(() => console.log(chalk.yellow.bold("\n--- REMOVE ---")))
-		.then(() => broker.call("posts.remove", { id }).then(console.log))
-
-		// Count of posts
-		.then(() => console.log(chalk.yellow.bold("\n--- COUNT ---")))
-		.then(() => broker.call("posts.count").then(console.log))
-
-		// Error handling
+// Start checks
+function start() {
+	return Promise.resolve()
+		.delay(500)
+		.then(() => checker.execute())
 		.catch(console.error)
+		.then(() => broker.stop())
+		.then(() => checker.printTotal());	
+}
 
-		// Stop
-		.then(() => broker.stop());
+// --- TEST CASES ---
 
+let ids =[];
+let date = new Date();
 
+// Count of posts
+checker.add("COUNT", () => adapter.count(), res => {
+	console.log(res);
+	return res == 0;
 });
+
+// Insert a new Post
+checker.add("INSERT", () => adapter.insert({ title: "Hello", content: "Post content", votes: 3, status: true, createdAt: date }), doc => {
+	ids[0] = doc._id.toHexString();
+	console.log("Saved: ", doc);
+	return doc._id && doc.title === "Hello" && doc.content === "Post content" && doc.votes === 3 && doc.status === true && doc.createdAt === date;
+});
+
+// Find
+checker.add("FIND", () => adapter.find({}), res => {
+	console.log(res);
+	return res.length == 1 && res[0]._id.toHexString() == ids[0];
+});
+
+// Find by ID
+checker.add("GET", () => adapter.findById(ids[0]), res => {
+	console.log(res);
+	return res._id.toHexString() == ids[0];
+});
+
+// Count of posts
+checker.add("COUNT", () => adapter.count(), res => {
+	console.log(res);
+	return res == 1;
+});
+
+// Insert many new Posts
+checker.add("INSERT MANY", () => adapter.insertMany([
+	{ title: "Second", content: "Second post content", votes: 8, status: true, createdAt: new Date() },
+	{ title: "Last", content: "Last document", votes: 1, status: false, createdAt: new Date() }
+]), docs => {
+	console.log("Saved: ", docs);
+	ids[1] = docs[0]._id.toHexString();
+	ids[2] = docs[1]._id.toHexString();
+
+	return [
+		docs.length == 2,
+		ids[1] && docs[0].title === "Second" && docs[0].votes === 8,
+		ids[1] && docs[1].title === "Last" && docs[1].votes === 1 && docs[1].status === false
+	];
+});
+
+// Count of posts
+checker.add("COUNT", () => adapter.count(), res => {
+	console.log(res);
+	return res == 3;
+});		
+
+// Find
+checker.add("FIND by query", () => adapter.find({ query: { title: "Last" } }), res => {
+	console.log(res);
+	return res.length == 1 && res[0]._id.toHexString() == ids[2];
+});
+
+// Find
+checker.add("FIND by limit, sort, query", () => adapter.find({ limit: 1, sort: ["votes", "-title"], offset: 1 }), res => {
+	console.log(res);
+	return res.length == 1 && res[0]._id.toHexString() == ids[0];
+});
+
+// Find
+checker.add("FIND by query ($gt)", () => adapter.find({ query: { votes: { $gt: 2 } } }), res => {
+	console.log(res);
+	return res.length == 2;
+});
+
+// Find
+checker.add("COUNT by query ($gt)", () => adapter.count({ query: { votes: { $gt: 2 } } }), res => {
+	console.log(res);
+	return res == 2;
+});
+
+// Find
+checker.add("FIND by text search", () => adapter.find({ search: "content" }), res => {
+	console.log(res);
+	return [
+		res.length == 2,
+		res[0]._doc._score < 1 && res[0].title === "Hello",
+		res[1]._doc._score < 1 && res[1].title === "Second"
+	];
+});
+
+// Find by IDs
+checker.add("GET BY IDS", () => adapter.findByIds([ids[2], ids[0]]), res => {
+	console.log(res);
+	return res.length == 2;
+});
+
+// Update a posts
+checker.add("UPDATE", () => adapter.updateById(ids[2], { $set: { 
+	title: "Last 2", 
+	updatedAt: new Date(),
+	status: true
+}}), doc => {
+	console.log("Updated: ", doc);
+	return doc._id && doc.title === "Last 2" && doc.content === "Last document" && doc.votes === 1 && doc.status === true && doc.updatedAt;
+});
+
+// Update by query
+checker.add("UPDATE BY QUERY", () => adapter.updateMany({ votes: { $lt: 5 }}, { 
+	$set: { status: false }
+}), count => {
+	console.log("Updated: ", count);
+	return count == 2;
+});
+
+// Remove by query
+checker.add("REMOVE BY QUERY", () => adapter.removeMany({ votes: { $lt: 5 }}), count => {
+	console.log("Removed: ", count);
+	return count == 2;
+});
+
+// Count of posts
+checker.add("COUNT", () => adapter.count(), res => {
+	console.log(res);
+	return res == 1;
+});	
+
+// Remove by ID
+checker.add("REMOVE BY ID", () => adapter.removeById(ids[1]), doc => {
+	console.log("Removed: ", doc);
+	return doc && doc._id.toHexString() == ids[1];
+});
+
+// Count of posts
+checker.add("COUNT", () => adapter.count(), res => {
+	console.log(res);
+	return res == 0;
+});
+
+// Clear
+checker.add("CLEAR", () => adapter.clear(), res => {
+	console.log(res);
+	return res == 0;
+});
+
+broker.start();

@@ -18,6 +18,10 @@ let PostSchema = new Schema({
 	},
 	author: {
 		type: Schema.ObjectId
+	},
+	status: {
+		type: Boolean,
+		default: true
 	}
 
 }, {

@@ -7,6 +7,8 @@
 "use strict";
 
 const _ = require("lodash");
+const { MoleculerError } = require("moleculer").Errors;
+const { EntityNotFoundError } = require("./errors");
 const MemoryAdapter = require("./memory-adapter");
 
 /**
@@ -29,10 +31,10 @@ module.exports = {
 		/** @type {String} Name of ID field. */
 		idField: "_id",
 		
-		/** @type {Array<String>?} Field list for filtering. It can be an `Array`. If the value is `null` or `undefined` doesn't filter the fields. */
+		/** @type {Array<String>?} Field filtering list. It must be an `Array`. If the value is `null` or `undefined` doesn't filter the fields of entities. */
 		fields: null,
 
-		/** @type {Array?} Schema for population. [Read more](#populating) */
+		/** @type {Array?} Schema for population. [Read more](#populating). */
 		populates: null,
 
 		/** @type {Number} Default page size in `list` action. */
@@ -44,7 +46,7 @@ module.exports = {
 		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
 
-		/** @type {Object|Function} Validator schema or a function to validate the incoming  entity in "users.create" action */
+		/** @type {Object|Function} Validator schema or a function to validate the incoming entity in `users.create` action. */
 		entityValidator: null
 	},
 
@@ -58,13 +60,13 @@ module.exports = {
 		 * @actions
 		 * @cached
 		 * 
-		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} populate - Populated fields.
 		 * @param {Array<String>?} fields - Fields filter.
 		 * @param {Number} limit - Max count of rows.
 		 * @param {Number} offset - Count of skipped rows.
 		 * @param {String} sort - Sorted fields.
 		 * @param {String} search - Search text.
-		 * @param {String} searchFields - Fields list for searching.
+		 * @param {String} searchFields - Fields for searching.
 		 * @param {Object} query - Query object. Passes to adapter.
 		 * 
 		 * @returns {Array<Object>} List of found entities.
@@ -124,13 +126,13 @@ module.exports = {
 		 * @actions
 		 * @cached
 		 * 
-		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} populate - Populated fields.
 		 * @param {Array<String>?} fields - Fields filter.
 		 * @param {Number} page - Page number.
 		 * @param {Number} pageSize - Size of a page.
 		 * @param {String} sort - Sorted fields.
 		 * @param {String} search - Search text.
-		 * @param {String} searchFields - Fields list for searching.
+		 * @param {String} searchFields - Fields for searching.
 		 * @param {Object} query - Query object. Passes to adapter.
 		 * 
 		 * @returns {Object} List of found entities and count .
@@ -180,18 +182,40 @@ module.exports = {
 		 * 
 		 * @actions
 		 * 
-		 * @param {Object} entity - Entity to save.
-		 * 
 		 * @returns {Object} Saved entity.
 		 */
-		create: {
+		create: {			
+			handler(ctx) {
+				let params = ctx.params;
+
+				return this.create(ctx, params, {});
+			}
+		},
+
+		/**
+		 * Create many new entities.
+		 * 
+		 * @actions
+		 * 
+		 * @param {Object?} entity - Entity to save.
+		 * @param {Array.<Object>?} entities - Entities to save.
+		 * 
+		 * @returns {Object|Array.<Object>} Saved entity(ies).
+		 */
+		insert: {
 			params: {
-				entity: { type: "any" }
+				entity: { type: "object", optional: true },
+				entities: { type: "array", optional: true }
 			},			
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
-				return this.create(ctx, params);
+				if (Array.isArray(params.entities))
+					return this.createMany(ctx, params.entities, params);
+				else if (params.entity)
+					return this.create(ctx, params.entity, params);
+				
+				return Promise.reject(new MoleculerError("Invalid request! The 'params' must contain 'entity' or 'entities'!", 400));
 			}
 		},
 
@@ -234,20 +258,22 @@ module.exports = {
 		 * 
 		 * @actions
 		 * 
-		 * @param {any} id - ID of entity.
-		 * @param {Object} update - Fields for update.
-		 * 
 		 * @returns {Object} Updated entity.
 		 */
 		update: {
-			params: {
-				id: { type: "any" },
-				update: { type: "any" }
-			},			
 			handler(ctx) {
-				let params = this.sanitizeParams(ctx, ctx.params);
+				let id;
+				let sets = {};
 
-				return this.updateById(ctx, params);
+				// Convert fields from params to "$set" update object
+				Object.keys(ctx.params).forEach(prop => {
+					if (prop == "id" || prop == this.settings.idField)
+						id = ctx.params[prop];
+					else 
+						sets[prop] = ctx.params[prop];
+				});
+
+				return this.updateById(ctx, { id, update: { "$set": sets }});
 			}
 		},
 
@@ -391,11 +417,12 @@ module.exports = {
 		 * 
 		 * @methods
 		 * @param {Context} ctx - Context of request.
-		 * @param {Object} params - Params of request.
+		 * @param {Object} entity - Entity.
+		 * @param {Object} params - Request params.
 		 * @returns {Object} Saved entity.
 		 */
-		create(ctx, params) {
-			return this.validateEntity(params.entity)
+		create(ctx, entity, params) {
+			return this.validateEntity(entity)
 				.then(entity => this.adapter.insert(entity))
 				.then(doc => this.transformDocuments(ctx, params, doc))
 				.then(json => this.entityChanged("created", json, ctx).then(() => json));
@@ -406,11 +433,12 @@ module.exports = {
 		 * 
 		 * @methods
 		 * @param {Context} ctx - Context of request.
-		 * @param {Object} params - Params of request.
+		 * @param {Array<Object>} entitites - Entities.
+		 * @param {Object} params - Request params.
 		 * @returns {Array<Object>} Saved entities.
 		 */
-		createMany(ctx, params) {
-			return this.validateEntity(params.entities)
+		createMany(ctx, entities, params) {
+			return this.validateEntity(entities)
 				.then(entities => this.adapter.insertMany(entities))
 				.then(docs => this.transformDocuments(ctx, params, docs))
 				.then(json => this.entityChanged("created", json, ctx).then(() => json));
@@ -465,11 +493,18 @@ module.exports = {
 		 * @param {Context} ctx - Context of request.
 		 * @param {Object} params - Params of request.
 		 * @returns {Object} Updated entity.
+		 * 
+		 * @throws {EntityNotFoundError} - 404 Entity not found
 		 */
 		updateById(ctx, params) {
 			return this.adapter.updateById(this.decodeID(params.id), params.update)
-				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
+				.then(doc => {
+					if (!doc)
+						return Promise.reject(new EntityNotFoundError(params.id));
+
+					return this.transformDocuments(ctx, params, doc)
+						.then(json => this.entityChanged("updated", json, ctx).then(() => json));
+				});
 		},
 
 		/**
@@ -484,7 +519,7 @@ module.exports = {
 		updateMany(ctx, params) {
 			return this.adapter.updateMany(params.query, params.update)
 				.then(doc => this.transformDocuments(ctx, params, doc))
-				.then(json => this.entityChanged("updated", null, ctx).then(() => json));
+				.then(json => this.entityChanged("updated", json, ctx).then(() => json));
 		},
 
 		/**
@@ -494,11 +529,18 @@ module.exports = {
 		 * @methods
 		 * @param {Context} ctx - Context of request.
 		 * @returns {Number} Count of removed entities.
+		 * 
+		 * @throws {EntityNotFoundError} - 404 Entity not found
 		 */
 		removeById(ctx, params) {
 			return this.adapter.removeById(this.decodeID(params.id))
-				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
+				.then(doc => {
+					if (!doc)
+						return Promise.reject(new EntityNotFoundError(params.id));
+
+					return this.transformDocuments(ctx, params, doc)
+						.then(json => this.entityChanged("removed", json, ctx).then(() => json));
+				});
 		},
 
 		/**
@@ -512,7 +554,7 @@ module.exports = {
 		removeMany(ctx, params) {
 			return this.adapter.removeMany(params.query)
 				//.then(doc => this.transformDocuments(ctx, doc))
-				.then(json => this.entityChanged("removed", null, ctx).then(() => json));
+				.then(json => this.entityChanged("removed", json, ctx).then(() => json));
 		},
 
 		/**
@@ -525,14 +567,14 @@ module.exports = {
 		 */
 		clear(ctx) {
 			return this.adapter.clear()
-				.then(count => this.entityChanged("removed", null, ctx).then(() => count));
+				.then(count => this.entityChanged("removed", count, ctx).then(() => count));
 		},
 
 		/**
 		 * Clear the cache & call entity lifecycle events
 		 * 
 		 * @param {String} type 
-		 * @param {Object|Array} json 
+		 * @param {Object|Array|Number} json 
 		 * @param {Context} ctx 
 		 * @returns {Promise}
 		 */
@@ -569,7 +611,8 @@ module.exports = {
 				if (_.isObject(docs)) {
 					isDoc = true;
 					docs = [docs];
-				} else
+				} 
+				else
 					return this.Promise.resolve(docs);
 			}
 
@@ -614,8 +657,6 @@ module.exports = {
 		 * @param {Object} 	doc
 		 * @param {Array} 	fields	Filter properties of model.
 		 * @returns	{Object}
-		 * 
-		 * @memberOf Service
 		 */
 		filterFields(doc, fields) {
 			// Apply field filter (support nested paths)
@@ -635,7 +676,7 @@ module.exports = {
 		/**
 		 * Authorize the required field list. Remove fields which is not exist in the `this.settings.fields`
 		 * 
-		 * @param {Array} f 
+		 * @param {Array} fields
 		 * @returns {Array}
 		 */
 		authorizeFields(fields) {
@@ -673,7 +714,7 @@ module.exports = {
 		},
 
 		/**
-		 * Populate documents
+		 * Populate documents.
 		 * 
 		 * @param {Context} 		ctx
 		 * @param {Array|Object} 	docs
@@ -743,7 +784,7 @@ module.exports = {
 		},
 
 		/**
-		 * Validate an entity by validator
+		 * Validate an entity by validator.
 		 * 
 		 * @param {any} entity 
 		 * @returns {Promise}
@@ -757,7 +798,7 @@ module.exports = {
 		},
 
 		/**
-		 * Encode ID of entity
+		 * Encode ID of entity.
 		 * 
 		 * @methods
 		 * @param {any} id 
@@ -768,7 +809,7 @@ module.exports = {
 		},
 
 		/**
-		 * Decode ID of entity
+		 * Decode ID of entity.
 		 * 
 		 * @methods
 		 * @param {any} id 

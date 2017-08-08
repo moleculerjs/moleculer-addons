@@ -1,3 +1,60 @@
+<a name="0.5.0"></a>
+# 0.5.0 (2017-08-08)
+
+## Changes
+
+### Changed `create` & `insert` actions (breaking)
+The current `create` action renamed to `insert`. It accepts `entity` param to create an entity. Or `entities` array to create multiple entities.
+The `create` actions save a new entity from the `params` directly. So you can send an entity JSON directly to the `create` action.
+```js
+// Create a new entity
+broker.call("users.create", {
+    name: "John",
+    age: 33,
+    status: true
+});
+
+// Create a new entity
+broker.call("users.insert", {
+    entity: {
+        name: "John",
+        age: 33,
+        status: true
+    }
+});
+
+// Create multiple entities
+broker.call("users.insert", {
+    entities: [
+        {
+            name: "John",
+            age: 33,
+            status: true
+        },
+        {
+            name: "Jane",
+            age: 28,
+            status: true
+        }
+    ]
+});
+```
+
+### Better `update` action (breaking)
+The `update` action update entity fields from `params` directly. You don't need to wrap it under an `update` prop.
+```js
+broker.call("users.update", {
+    id: 5,
+    name: "Jane",
+    status: false
+});
+```
+
+## Minor changes
+- added `EntityNotFoundError`.
+
+
+--------------------------------------------------
 <a name="0.4.0"></a>
 # 0.4.0 (2017-07-17)
 

@@ -5,8 +5,11 @@ const DbService = require("../../src");
 //const lolex = require("lolex");
 
 function protectReject(err) {
-	console.error(err.stack);
-	expect().toBe(true);
+	if (err && err.stack) {
+		console.error(err);
+		console.error(err.stack);	
+	}
+	expect(err).toBe(true);
 }
 
 describe("Test DbService actions", () => {
@@ -123,11 +126,40 @@ describe("Test DbService actions", () => {
 		const p = {};
 
 		return broker.call("store.create", p).then(() => {
+			expect(service.create).toHaveBeenCalledTimes(1);
+			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p, {});
+		}).catch(protectReject);
+	});
+
+	it("should call the 'create' method", () => {
+		service.sanitizeParams.mockClear();
+		service.create = jest.fn();
+		const p = {
+			entity: {}
+		};
+
+		return broker.call("store.insert", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
 			expect(service.create).toHaveBeenCalledTimes(1);
-			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p.entity, p);
+		}).catch(protectReject);
+	});
+
+	it("should call the 'createMany' method", () => {
+		service.sanitizeParams.mockClear();
+		service.createMany = jest.fn();
+		const p = {
+			entities: []
+		};
+
+		return broker.call("store.insert", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
+			expect(service.createMany).toHaveBeenCalledTimes(1);
+			expect(service.createMany).toHaveBeenCalledWith(jasmine.any(Context), p.entities, p);
 		}).catch(protectReject);
 	});
 
@@ -148,14 +180,15 @@ describe("Test DbService actions", () => {
 	it("should call the 'update' method", () => {
 		service.sanitizeParams.mockClear();
 		service.updateById = jest.fn();
-		const p = {};
+		const p = {
+			_id: 123,
+			name: "John",
+			age: 45
+		};
 
 		return broker.call("store.update", p).then(() => {
-			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
-			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
-
 			expect(service.updateById).toHaveBeenCalledTimes(1);
-			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), { id: 123, update: { "$set": { name: "John", age: 45 }}});
 		}).catch(protectReject);
 	});
 
@@ -306,7 +339,7 @@ describe("Test DbService methods", () => {
 		service.entityChanged = jest.fn(() => Promise.resolve());
 		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
-		return service.create(ctx, ctx.params).then(res => {
+		return service.create(ctx, ctx.params.entity, ctx.params).then(res => {
 			expect(res).toBe(doc);
 
 			expect(service.validateEntity).toHaveBeenCalledTimes(1);
@@ -329,7 +362,7 @@ describe("Test DbService methods", () => {
 		service.entityChanged = jest.fn(() => Promise.resolve());
 		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
 
-		return service.createMany(ctx, ctx.params).then(res => {
+		return service.createMany(ctx, ctx.params.entities, ctx.params).then(res => {
 			expect(res).toBe(docs);
 
 			expect(service.validateEntity).toHaveBeenCalledTimes(1);
@@ -480,7 +513,7 @@ describe("Test DbService methods", () => {
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("updated", docs, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -503,7 +536,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 3);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -522,7 +555,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 5);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 5, ctx);			
 		}).catch(protectReject);
 	});
 
@@ -535,7 +568,7 @@ describe("Test DbService methods", () => {
 
 			expect(adapter.clear).toHaveBeenCalledTimes(1);
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", null, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
 		}).catch(protectReject);
 	});
 

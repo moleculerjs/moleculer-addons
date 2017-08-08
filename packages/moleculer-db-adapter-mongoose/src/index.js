@@ -9,15 +9,14 @@
 const _ 		= require("lodash");
 const Promise	= require("bluebird");
 const mongoose  = require("mongoose");
-//const ObjectId = require("mongoose").Types.ObjectId;
 
-class MongooseStoreAdapter {
+class MongooseDbAdapter {
 
 	/**
-	 * Creates an instance of MongooseStoreAdapter.
+	 * Creates an instance of MongooseDbAdapter.
 	 * @param {any} opts 
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	constructor(opts) {
 		this.opts = opts;
@@ -30,7 +29,7 @@ class MongooseStoreAdapter {
 	 * @param {ServiceBroker} broker 
 	 * @param {Service} service 
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	init(broker, service) {
 		this.broker = broker;
@@ -48,7 +47,7 @@ class MongooseStoreAdapter {
 	 * 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	connect() {
 		let uri, opts;
@@ -81,7 +80,7 @@ class MongooseStoreAdapter {
 	 * 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	disconnect() {
 		if (this.db) {
@@ -104,10 +103,10 @@ class MongooseStoreAdapter {
 	 * @param {any} filters 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	find(filters) {
-		return this.doFiltering(filters).exec();
+		return this.createCursor(filters).exec();
 	}
 
 	/**
@@ -116,7 +115,7 @@ class MongooseStoreAdapter {
 	 * @param {any} _id 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	findById(_id) {
 		return this.model.findById(_id).exec();
@@ -128,7 +127,7 @@ class MongooseStoreAdapter {
 	 * @param {Array} idList 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	findByIds(idList) {
 		return this.model.find({
@@ -149,10 +148,10 @@ class MongooseStoreAdapter {
 	 * @param {Object} [filters={}] 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	count(filters = {}) {
-		return this.doFiltering(filters).count().exec();
+		return this.createCursor(filters).count().exec();
 	}
 
 	/**
@@ -161,7 +160,7 @@ class MongooseStoreAdapter {
 	 * @param {Object} entity 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	insert(entity) {
 		const item = new this.model(entity);
@@ -174,7 +173,7 @@ class MongooseStoreAdapter {
 	 * @param {Array} entities 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	insertMany(entities) {
 		return this.model.create(entities);
@@ -187,10 +186,10 @@ class MongooseStoreAdapter {
 	 * @param {Object} update 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	updateMany(query, update) {
-		return this.model.update(query, update, { multi: true, "new": true });
+		return this.model.update(query, update, { multi: true, "new": true }).then(res => res.n);
 	}
 
 	/**
@@ -200,7 +199,7 @@ class MongooseStoreAdapter {
 	 * @param {Object} update 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	updateById(_id, update) {
 		return this.model.findByIdAndUpdate(_id, update, { "new": true });
@@ -212,10 +211,10 @@ class MongooseStoreAdapter {
 	 * @param {Object} query 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	removeMany(query) {
-		return this.model.remove(query);
+		return this.model.remove(query).then(res => res.result.n);
 	}
 
 	/**
@@ -224,7 +223,7 @@ class MongooseStoreAdapter {
 	 * @param {any} _id 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	removeById(_id) {
 		return this.model.findByIdAndRemove(_id);
@@ -235,10 +234,10 @@ class MongooseStoreAdapter {
 	 * 
 	 * @returns {Promise}
 	 * 
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	clear() {
-		return this.model.remove({}).then(() => null);
+		return this.model.remove({}).then(res => res.result.n);
 	}
 
 	/**
@@ -246,7 +245,7 @@ class MongooseStoreAdapter {
 	 * 
 	 * @param {any} entity 
 	 * @returns {Object}
-	 * @memberof MongooseStoreAdapter
+	 * @memberof MongooseDbAdapter
 	 */
 	entityToObject(entity) {
 		let json = entity.toJSON();
@@ -270,7 +269,7 @@ class MongooseStoreAdapter {
  	 * @param {Object} params 
 	 * @returns {MongoQuery}
 	 */
-	doFiltering(params) {
+	createCursor(params) {
 		if (params) {
 			const q = this.model.find(params.query);
 			// Full-text search
@@ -314,4 +313,4 @@ class MongooseStoreAdapter {
 
 }
 
-module.exports = MongooseStoreAdapter;
+module.exports = MongooseDbAdapter;
