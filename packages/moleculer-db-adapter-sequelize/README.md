@@ -2,7 +2,7 @@
 
 # moleculer-db-adapter-sequelize [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-sequelize.svg)](https://www.npmjs.com/package/moleculer-db-adapter-sequelize)
 
-SQL adapter for Moleculer DB service
+SQL adapter (Postgres, MySQL, SQLite & MSSQL) for Moleculer DB service with [Sequelize](https://github.com/sequelize/sequelize).
 
 # Features
 
@@ -12,386 +12,90 @@ SQL adapter for Moleculer DB service
 $ npm install moleculer-db-adapter-sequelize --save
 ```
 
-# Usage
-
-<!-- AUTO-CONTENT-START:USAGE -->
-<!-- AUTO-CONTENT-END:USAGE -->
-
-<!-- AUTO-CONTENT-TEMPLATE:USAGE
--->
-
-
-
-# Settings
-
-<!-- AUTO-CONTENT-START:SETTINGS -->
-<!-- AUTO-CONTENT-END:SETTINGS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:SETTINGS
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-
--->
-
-# Actions
-<!-- AUTO-CONTENT-START:ACTIONS -->
-<!-- AUTO-CONTENT-END:ACTIONS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:ACTIONS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
-
-# Methods
-
-<!-- AUTO-CONTENT-START:METHODS -->
-<!-- AUTO-CONTENT-END:METHODS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:METHODS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
+You have to install additional packages for your database server:
+```bash
+# For SQLite
+$ npm install sqlite3 --save
+
+# For MySQL
+$ npm install mysql2 --save
+
+# For PostgreSQL
+$ npm install pg pg-hstore --save
+
+# For MSSQL
+$ npm install tedious --save
+```
+
+## Usage
+
+```js
+"use strict";
+
+const { ServiceBroker } = require("moleculer");
+const DbService = require("moleculer-db");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
+const Sequelize = require("sequelize");
+
+const broker = new ServiceBroker();
+
+// Create a Mongoose service for `post` entities
+broker.createService({
+    name: "posts",
+    mixins: [DbService],
+    adapter: new SqlAdapter("sqlite://:memory:"),
+    model: {
+        name: "post",
+        define: {
+            title: Sequelize.STRING,
+            content: Sequelize.TEXT,
+            votes: Sequelize.INTEGER,
+            author: Sequelize.INTEGER,
+            status: Sequelize.BOOLEAN
+        },
+        options: {
+            // Options from http://docs.sequelizejs.com/manual/tutorial/models-definition.html
+        }
+    },
+});
+
+
+broker.start()
+// Create a new post
+.then(() => broker.call("posts.create", {
+    title: "My first post",
+    content: "Lorem ipsum...",
+    votes: 0
+}))
+
+// Get all posts
+.then(() => broker.call("posts.find").then(console.log));
+```
+
+## Options
+Every constructor arguments are passed to the `Sequelize` constructor. Read more about [Sequelize connection](http://docs.sequelizejs.com/manual/installation/getting-started.html).
+
+**Example with connection URI**
+```js
+new SqlAdapter("postgres://user:pass@example.com:5432/dbname");
+```
+
+**Example with connection options**
+```js
+new SqlAdapter('database', 'username', 'password', {
+    host: 'localhost',
+    dialect: 'mysql'|'sqlite'|'postgres'|'mssql',
+
+    pool: {
+        max: 5,
+        min: 0,
+        idle: 10000
+    },
+
+    // SQLite only
+    storage: 'path/to/database.sqlite'
+});
+```
 
 # Test
 ```

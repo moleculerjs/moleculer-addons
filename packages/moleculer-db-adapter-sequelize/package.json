@@ -1,7 +1,7 @@
 {
   "name": "moleculer-db-adapter-sequelize",
   "version": "0.0.0",
-  "description": "SQL adapter for Moleculer DB service",
+  "description": "SQL adapter (Postgres, MySQL, SQLite & MSSQL) for Moleculer DB service",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",
@@ -14,7 +14,9 @@
   },
   "keywords": [
     "microservice",
-    "moleculer"
+    "moleculer",
+    "orm",
+    "database"
   ],
   "repository": {
     "type": "git",

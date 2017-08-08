@@ -12,6 +12,7 @@
     "readme": "node node_modules/moleculer-docgen/index.js -t README.md src/index.js",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
+  "private": true,
   "keywords": [
     "microservice",
     "moleculer"

@@ -27,7 +27,7 @@ const broker = new ServiceBroker();
 // Create a Mongoose service for `post` entities
 broker.createService({
     name: "posts",
-    mixins: DbService,
+    mixins: [DbService],
 	adapter: new MongooseAdapter("mongodb://localhost/moleculer-demo"),
 	model: mongoose.model("Post", mongoose.Schema({
 		title: { type: String },
@@ -39,11 +39,11 @@ broker.createService({
 
 broker.start()
 // Create a new post
-.then(() => broker.call("posts.create", { entity: {
+.then(() => broker.call("posts.create", {
 	title: "My first post",
 	content: "Lorem ipsum...",
 	votes: 0
-}}))
+}))
 
 // Get all posts
 .then(() => broker.call("posts.find").then(console.log));

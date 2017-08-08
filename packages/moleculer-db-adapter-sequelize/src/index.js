@@ -215,7 +215,7 @@ class SequelizeDbAdapter {
 	 */
 	removeById(_id) {
 		return this.findById(_id).then(entity => {
-			return entity.destroy();
+			return entity.destroy().then(() => entity);
 		});
 	}
 
@@ -332,6 +332,7 @@ class SequelizeDbAdapter {
 			return Object.keys(sort).map(name => [name, sort[name] > 0 ? "ASC" : "DESC"]);
 		}
 
+		/* istanbul ignore next*/
 		return [];
 	}	
 

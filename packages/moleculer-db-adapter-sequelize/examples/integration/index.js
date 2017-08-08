@@ -13,10 +13,39 @@ const broker = new ServiceBroker({
 	logLevel: "debug"
 });
 
+/*
+	Test environments:
+
+		MySQL:
+			Server:
+				docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql 
+
+			CLI: 			
+				docker run -it --link mysql:mysql --rm mysql sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+
+				CREATE DATABASE moleculer_test;
+				SHOW DATABASES;
+
+		PostgreSQL:
+			Server:
+				docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres
+
+			CLI:
+				docker run -it --rm --link postgres:postgres postgres psql -h postgres -U postgres
+
+				CREATE DATABASE moleculer_test;
+				\list
+
+*/
+
 // Load my service
 broker.createService(StoreService, {
 	name: "posts",
 	adapter: new SequelizeAdapter("sqlite://:memory:"),
+	//adapter: new SequelizeAdapter({ dialect: "sqlite", storage: "d:\\moleculer-test.db"}),
+	//adapter: new SequelizeAdapter("mssql://sa:<password>@localhost/moleculer-test"),
+	//adapter: new SequelizeAdapter("mysql://root:mysql@192.168.51.29/moleculer_test"),
+	//adapter: new SequelizeAdapter("postgres://postgres:postgres@192.168.51.29/moleculer_test"),
 	model: {
 		name: "post",
 		define: {
