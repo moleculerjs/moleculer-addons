@@ -112,7 +112,7 @@ checker.add("FIND POSTS (limit: 3, offset: 2, sort: title, no author)", () => br
 		res.length == 3,
 		res[0].title && res[0].author == null && res[0].votes == 0,
 		res[1].title && res[1].author == null && res[1].votes == 4,
-		res[2].title && res[2].author == null && res[2].votes == 6,
+		res[2].title && res[2].author == null && res[2].votes == 6
 	];
 });
 

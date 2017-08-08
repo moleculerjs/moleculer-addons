@@ -34,7 +34,7 @@ class EntityNotFoundError extends MoleculerError {
 
 
 module.exports = {
-	EntityNotFoundError,
+	EntityNotFoundError
 
 	//ERR_ENTITY_NOT_FOUND,
 };

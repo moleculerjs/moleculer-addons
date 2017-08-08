@@ -28,7 +28,7 @@ describe("Test CRUD methods", () => {
 	});
 
 	// Load my service
-	const service = broker.createService(DbService, Object.assign({
+	broker.createService(DbService, Object.assign({
 		name: "posts",
 		adapter: new Adapter(),
 	}));

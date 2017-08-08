@@ -33,13 +33,6 @@ function protectReject(err) {
 	expect(err).toBe(true);
 }
 
-const doc = {
-	toJSON: jest.fn(() => ({})),
-	_id: {
-		toHexString: jest.fn()
-	}
-};
-
 const fakeModel = {
 	name: "posts",
 	define: {
