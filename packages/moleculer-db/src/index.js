@@ -60,13 +60,13 @@ module.exports = {
 		 * @actions
 		 * @cached
 		 * 
-		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} populate - Populated fields.
 		 * @param {Array<String>?} fields - Fields filter.
 		 * @param {Number} limit - Max count of rows.
 		 * @param {Number} offset - Count of skipped rows.
 		 * @param {String} sort - Sorted fields.
 		 * @param {String} search - Search text.
-		 * @param {String} searchFields - Fields list for searching.
+		 * @param {String} searchFields - Fields for searching.
 		 * @param {Object} query - Query object. Passes to adapter.
 		 * 
 		 * @returns {Array<Object>} List of found entities.
@@ -126,13 +126,13 @@ module.exports = {
 		 * @actions
 		 * @cached
 		 * 
-		 * @param {Array<String>?} populate - Field list for populate.
+		 * @param {Array<String>?} populate - Populated fields.
 		 * @param {Array<String>?} fields - Fields filter.
 		 * @param {Number} page - Page number.
 		 * @param {Number} pageSize - Size of a page.
 		 * @param {String} sort - Sorted fields.
 		 * @param {String} search - Search text.
-		 * @param {String} searchFields - Fields list for searching.
+		 * @param {String} searchFields - Fields for searching.
 		 * @param {Object} query - Query object. Passes to adapter.
 		 * 
 		 * @returns {Object} List of found entities and count .
@@ -182,8 +182,6 @@ module.exports = {
 		 * 
 		 * @actions
 		 * 
-		 * @param {Object} entity - Entity to save.
-		 * 
 		 * @returns {Object} Saved entity.
 		 */
 		create: {			
@@ -199,7 +197,7 @@ module.exports = {
 		 * 
 		 * @actions
 		 * 
-		 * @param {Array.<Object>?} entity - Entity to save.
+		 * @param {Object?} entity - Entity to save.
 		 * @param {Array.<Object>?} entities - Entities to save.
 		 * 
 		 * @returns {Object|Array.<Object>} Saved entity(ies).
