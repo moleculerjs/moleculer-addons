@@ -73,7 +73,8 @@ broker.start()
 
 # Settings
 
-<!-- AUTO-CONTENT-START:SETTINGS -->| Property | Type | Default | Description |
+<!-- AUTO-CONTENT-START:SETTINGS -->
+| Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `idField` | `String` | **required** | Name of ID field. |
 | `fields` | `Array.<String>` | `null` | Field filtering list. It must be an `Array`. If the value is `null` or `undefined` doesn't filter the fields of entities. |
@@ -99,7 +100,8 @@ broker.start()
 
 # Actions
 
-<!-- AUTO-CONTENT-START:ACTIONS -->## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
+<!-- AUTO-CONTENT-START:ACTIONS -->
+## `find` ![Cached action](https://img.shields.io/badge/cache-true-blue.svg) 
 
 Find entities by query.
 
@@ -279,7 +281,8 @@ _<sup>Since: {{this}}</sup>_
 
 # Methods
 
-<!-- AUTO-CONTENT-START:METHODS -->## `find` 
+<!-- AUTO-CONTENT-START:METHODS -->
+## `find` 
 
 Find entities by query. `params` contains the query fields.
 
@@ -363,7 +366,8 @@ Found entity(ies).
 
 ## `updateById` 
 
-Update an entity by ID.> After update, clear the cache & call lifecycle events.
+Update an entity by ID.
+> After update, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -379,7 +383,8 @@ Updated entity.
 
 ## `updateMany` 
 
-Update multiple entities by query.> After update, clear the cache & call lifecycle events.
+Update multiple entities by query.
+> After update, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -395,7 +400,8 @@ Updated entities.
 
 ## `removeById` 
 
-Remove an entity by ID.> After remove, clear the cache & call lifecycle events.
+Remove an entity by ID.
+> After remove, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -410,7 +416,8 @@ Count of removed entities.
 
 ## `removeMany` 
 
-Remove multiple entities by query.> After remove, clear the cache & call lifecycle events.
+Remove multiple entities by query.
+> After remove, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -425,7 +432,8 @@ Count of removed entities.
 
 ## `clear` 
 
-Delete all entities. > After delete, clear the cache & call lifecycle events.
+Delete all entities. 
+> After delete, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |

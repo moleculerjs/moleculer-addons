@@ -29,17 +29,17 @@ const broker = new ServiceBroker();
 broker.createService({
     name: "posts",
     mixins: [DbService],
-	adapter: new MongoDBAdapter("mongodb://localhost/moleculer-demo"),
-	collection: "posts"
+    adapter: new MongoDBAdapter("mongodb://localhost/moleculer-demo"),
+    collection: "posts"
 });
 
 
 broker.start()
 // Create a new post
 .then(() => broker.call("posts.create", {
-	title: "My first post",
-	content: "Lorem ipsum...",
-	votes: 0
+    title: "My first post",
+    content: "Lorem ipsum...",
+    votes: 0
 }))
 
 // Get all posts
@@ -57,16 +57,16 @@ new MongoDBAdapter("mongodb://localhost/moleculer-db")
 **Example with connection options**
 ```js
 new MongoDBAdapter({
-	uri: "mongodb://db-server-hostname/my-db",
-	options: {
-		user: process.env.MONGO_USERNAME,
-		pass: process.env.MONGO_PASSWORD
-		server: {
-			socketOptions: {
-				keepAlive: 1
-			}
-		}
-	})
+    uri: "mongodb://db-server-hostname/my-db",
+    options: {
+        user: process.env.MONGO_USERNAME,
+        pass: process.env.MONGO_PASSWORD
+        server: {
+            socketOptions: {
+                keepAlive: 1
+            }
+        }
+    })
 ```
 
 # Test

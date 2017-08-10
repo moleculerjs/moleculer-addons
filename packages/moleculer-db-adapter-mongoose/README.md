@@ -28,21 +28,21 @@ const broker = new ServiceBroker();
 broker.createService({
     name: "posts",
     mixins: [DbService],
-	adapter: new MongooseAdapter("mongodb://localhost/moleculer-demo"),
-	model: mongoose.model("Post", mongoose.Schema({
-		title: { type: String },
-		content: { type: String },
-		votes: { type: Number, default: 0}
-	}))
+    adapter: new MongooseAdapter("mongodb://localhost/moleculer-demo"),
+    model: mongoose.model("Post", mongoose.Schema({
+        title: { type: String },
+        content: { type: String },
+        votes: { type: Number, default: 0}
+    }))
 });
 
 
 broker.start()
 // Create a new post
 .then(() => broker.call("posts.create", {
-	title: "My first post",
-	content: "Lorem ipsum...",
-	votes: 0
+    title: "My first post",
+    content: "Lorem ipsum...",
+    votes: 0
 }))
 
 // Get all posts
@@ -60,16 +60,16 @@ new MongooseAdapter("mongodb://localhost/moleculer-db")
 **Example with connection options**
 ```js
 new MongooseAdapter({
-	uri: "mongodb://db-server-hostname/my-db",
-	options: {
-		user: process.env.MONGO_USERNAME,
-		pass: process.env.MONGO_PASSWORD
-		server: {
-			socketOptions: {
-				keepAlive: 1
-			}
-		}
-	})
+    uri: "mongodb://db-server-hostname/my-db",
+    options: {
+        user: process.env.MONGO_USERNAME,
+        pass: process.env.MONGO_PASSWORD
+        server: {
+            socketOptions: {
+                keepAlive: 1
+            }
+        }
+    })
 ```
 
 # Test
