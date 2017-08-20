@@ -31,16 +31,16 @@
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "2.13.1",
-    "eslint": "4.4.1",
+    "eslint": "4.5.0",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
     "lolex": "2.1.2",
     "moleculer": "0.10.0",
     "moleculer-docgen": "0.2.1",
-    "mysql2": "1.4.0",
+    "mysql2": "1.4.1",
     "nodemon": "1.11.0",
     "npm-check": "5.4.5",
-    "pg": "7.1.0",
+    "pg": "7.1.2",
     "pg-hstore": "2.3.2",
     "sqlite3": "3.1.9",
     "tedious": "2.0.0"
@@ -56,6 +56,6 @@
     "node": ">= 6.x.x"
   },
   "dependencies": {
-    "sequelize": "4.4.2"
+    "sequelize": "4.6.0"
   }
 }
