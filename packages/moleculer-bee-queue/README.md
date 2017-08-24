@@ -12,7 +12,7 @@ $ npm install moleculer-bee-queue --save
 
 # Usage
 
-## Create queue worker
+## Create queue worker service
 ```js
 broker.createService({
     name: "task-worker",
@@ -34,7 +34,7 @@ broker.createService({
 });
 ```
 
-## Create jobs
+## Create job in service
 ```js
 broker.createService({
     name: "job-maker",
