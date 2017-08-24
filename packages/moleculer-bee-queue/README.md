@@ -2,9 +2,7 @@
 
 # moleculer-bee-queue [![NPM version](https://img.shields.io/npm/v/moleculer-bee-queue.svg)](https://www.npmjs.com/package/moleculer-bee-queue)
 
-Task queue mixin for Bee-Queue
-
-# Features
+Task queue mixin for [Bee-Queue](https://github.com/bee-queue/bee-queue).
 
 # Install
 
@@ -14,384 +12,53 @@ $ npm install moleculer-bee-queue --save
 
 # Usage
 
-<!-- AUTO-CONTENT-START:USAGE -->
-<!-- AUTO-CONTENT-END:USAGE -->
-
-<!-- AUTO-CONTENT-TEMPLATE:USAGE
--->
-
-
-
-# Settings
-
-<!-- AUTO-CONTENT-START:SETTINGS -->
-<!-- AUTO-CONTENT-END:SETTINGS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:SETTINGS
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-
--->
-
-# Actions
-<!-- AUTO-CONTENT-START:ACTIONS -->
-<!-- AUTO-CONTENT-END:ACTIONS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:ACTIONS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
-
-# Methods
-
-<!-- AUTO-CONTENT-START:METHODS -->
-<!-- AUTO-CONTENT-END:METHODS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:METHODS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
+## Create queue worker
+```js
+broker.createService({
+	name: "task-worker",
+	mixins: [BeeService()],
+
+	queues: {
+		"sample.task"(job) {
+			this.logger.info("New job received!", job.data);
+			job.reportProgress(10);
+
+			return this.Promise.resolve({
+					done: true,
+					id: job.data.id,
+					worker: process.pid
+				});
+			});
+		}
+	}
+});
+```
+
+## Create jobs
+```js
+broker.createService({
+	name: "job-maker",
+	mixins: [BeeService()],
+
+	methods: {
+        sendEmail(data) {
+			const job = this.createJob("mail.send", payload);
+
+			job.on("progress", progress => {
+				this.logger.info(`Job #${job.id} progress is ${progress}%`);
+			});
+
+			job.on("succeeded", res => {
+				this.logger.info(`Job #${job.id} completed!. Result:`, res);
+			});
+
+            job
+                .retries(2)
+                .save();
+		}
+	}
+});
+```
 
 # Test
 ```
