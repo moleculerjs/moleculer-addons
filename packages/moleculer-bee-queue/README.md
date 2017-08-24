@@ -15,48 +15,48 @@ $ npm install moleculer-bee-queue --save
 ## Create queue worker
 ```js
 broker.createService({
-	name: "task-worker",
-	mixins: [BeeService()],
+    name: "task-worker",
+    mixins: [BeeService()],
 
-	queues: {
-		"sample.task"(job) {
-			this.logger.info("New job received!", job.data);
-			job.reportProgress(10);
+    queues: {
+        "sample.task"(job) {
+            this.logger.info("New job received!", job.data);
+            job.reportProgress(10);
 
-			return this.Promise.resolve({
-					done: true,
-					id: job.data.id,
-					worker: process.pid
-				});
-			});
-		}
-	}
+            return this.Promise.resolve({
+                    done: true,
+                    id: job.data.id,
+                    worker: process.pid
+                });
+            });
+        }
+    }
 });
 ```
 
 ## Create jobs
 ```js
 broker.createService({
-	name: "job-maker",
-	mixins: [BeeService()],
+    name: "job-maker",
+    mixins: [BeeService()],
 
-	methods: {
+    methods: {
         sendEmail(data) {
-			const job = this.createJob("mail.send", payload);
+            const job = this.createJob("mail.send", payload);
 
-			job.on("progress", progress => {
-				this.logger.info(`Job #${job.id} progress is ${progress}%`);
-			});
+            job.on("progress", progress => {
+                this.logger.info(`Job #${job.id} progress is ${progress}%`);
+            });
 
-			job.on("succeeded", res => {
-				this.logger.info(`Job #${job.id} completed!. Result:`, res);
-			});
+            job.on("succeeded", res => {
+                this.logger.info(`Job #${job.id} completed!. Result:`, res);
+            });
 
             job
                 .retries(2)
                 .save();
-		}
-	}
+        }
+    }
 });
 ```
 
