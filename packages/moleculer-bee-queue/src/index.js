@@ -1,35 +1,38 @@
 /*
- * moleculer-queue-bull
+ * moleculer-bee-queue
  * Copyright (c) 2017 Ice Services (https://github.com/ice-services/moleculer-addons)
  * MIT Licensed
  */
 
 "use strict";
 
-let _ = require("lodash");
-let Queue = require("bull");
+const _ 	= require("lodash");
+const Queue = require("bee-queue");
 
-module.exports = function createService(url, queueOpts) {
+module.exports = function createService(queueOpts) {
 
 	/**
-	 * Task queue service with Bull
+	 * Task queue mixin service for Bee-Queue
 	 *
-	 * @name moleculer-queue-bull
+	 * @name moleculer-bee-queue
 	 * @module Service
 	 */
 	return {
-		name: "bull",
+		name: "bee",
 
+		/**
+		 * Methods
+		 */
 		methods: {
 			/**
-			 * Enqueue a new task
+			 * Create a new job
 			 *
 			 * @param {String} name
 			 * @param {any} payload
-			 * @returns
+			 * @returns {Job}
 			 */
-			enqueue(name, payload) {
-				this.getQueue(name).add(payload);
+			createJob(name, payload) {
+				return this.getQueue(name).createJob(payload);
 			},
 
 			/**
@@ -40,12 +43,15 @@ module.exports = function createService(url, queueOpts) {
 			 */
 			getQueue(name) {
 				if (!this.$queues[name]) {
-					this.$queues[name] = Queue(name, url, queueOpts);
+					this.$queues[name] = new Queue(name, queueOpts);
 				}
 				return this.$queues[name];
 			}
 		},
 
+		/**
+		 * Service created lifecycle event handler
+		 */
 		created() {
 			this.$queues = {};
 
