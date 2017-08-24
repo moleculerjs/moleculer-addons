@@ -14,6 +14,8 @@ $ npm install moleculer-bee-queue --save
 
 ## Create queue worker service
 ```js
+const BeeService = require("moleculer-bee-queue");
+
 broker.createService({
     name: "task-worker",
     mixins: [BeeService()],
@@ -36,6 +38,8 @@ broker.createService({
 
 ## Create job in service
 ```js
+const BeeService = require("moleculer-bee-queue");
+
 broker.createService({
     name: "job-maker",
     mixins: [BeeService()],
