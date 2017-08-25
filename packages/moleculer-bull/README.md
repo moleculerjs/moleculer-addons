@@ -2,9 +2,7 @@
 
 # moleculer-bull [![NPM version](https://img.shields.io/npm/v/moleculer-bull.svg)](https://www.npmjs.com/package/moleculer-bull)
 
-Task queue service with Bull
-
-# Features
+Task queue mixin for [Bull](https://github.com/OptimalBits/bull).
 
 # Install
 
