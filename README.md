@@ -15,6 +15,7 @@ This is a monorepo, contains multiple services & addons for Moleculer project.
 | Name | Version | Description |
 | ---- | ------- | ----------- |
 | [moleculer-bee-queue](/packages/moleculer-bee-queue#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-bee-queue.svg)](https://www.npmjs.com/package/moleculer-bee-queue) | Task queue mixin for Bee-Queue |
+| [moleculer-bull](/packages/moleculer-bull#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-bull.svg)](https://www.npmjs.com/package/moleculer-bull) | Task queue service with Bull |
 | [moleculer-db](/packages/moleculer-db#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-db.svg)](https://www.npmjs.com/package/moleculer-db) | Moleculer service to store entities in database |
 | [moleculer-db-adapter-mongo](/packages/moleculer-db-adapter-mongo#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongo.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongo) | MongoDB native adapter for Moleculer DB service. |
 | [moleculer-db-adapter-mongoose](/packages/moleculer-db-adapter-mongoose#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-db-adapter-mongoose.svg)](https://www.npmjs.com/package/moleculer-db-adapter-mongoose) | Mongoose adapter for Moleculer DB service |
