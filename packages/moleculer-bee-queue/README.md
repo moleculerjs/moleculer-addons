@@ -14,22 +14,21 @@ $ npm install moleculer-bee-queue --save
 
 ## Create queue worker service
 ```js
-const BeeService = require("moleculer-bee-queue");
+const QueueService = require("moleculer-bee-queue");
 
 broker.createService({
     name: "task-worker",
-    mixins: [BeeService()],
+    mixins: [QueueService()],
 
     queues: {
-        "sample.task"(job) {
+        "mail.send"(job) {
             this.logger.info("New job received!", job.data);
             job.reportProgress(10);
 
             return this.Promise.resolve({
-                    done: true,
-                    id: job.data.id,
-                    worker: process.pid
-                });
+                done: true,
+                id: job.data.id,
+                worker: process.pid
             });
         }
     }
@@ -38,11 +37,11 @@ broker.createService({
 
 ## Create job in service
 ```js
-const BeeService = require("moleculer-bee-queue");
+const QueueService = require("moleculer-bee-queue");
 
 broker.createService({
     name: "job-maker",
-    mixins: [BeeService()],
+    mixins: [QueueService()],
 
     methods: {
         sendEmail(data) {
@@ -56,9 +55,7 @@ broker.createService({
                 this.logger.info(`Job #${job.id} completed!. Result:`, res);
             });
 
-            job
-                .retries(2)
-                .save();
+            job.retries(2).save();
         }
     }
 });

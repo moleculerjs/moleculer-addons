@@ -1,6 +1,6 @@
 ![Moleculer logo](http://moleculer.services/images/banner.png)
 
-# moleculer-queue-bull [![NPM version](https://img.shields.io/npm/v/moleculer-queue-bull.svg)](https://www.npmjs.com/package/moleculer-queue-bull)
+# moleculer-bull [![NPM version](https://img.shields.io/npm/v/moleculer-bull.svg)](https://www.npmjs.com/package/moleculer-bull)
 
 Task queue service with Bull
 
@@ -9,389 +9,57 @@ Task queue service with Bull
 # Install
 
 ```bash
-$ npm install moleculer-queue-bull --save
+$ npm install moleculer-bull --save
 ```
 
 # Usage
 
-<!-- AUTO-CONTENT-START:USAGE -->
-<!-- AUTO-CONTENT-END:USAGE -->
-
-<!-- AUTO-CONTENT-TEMPLATE:USAGE
--->
-
-
-
-# Settings
-
-<!-- AUTO-CONTENT-START:SETTINGS -->
-<!-- AUTO-CONTENT-END:SETTINGS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:SETTINGS
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-| `` |  |  |  |
-
--->
-
-# Actions
-<!-- AUTO-CONTENT-START:ACTIONS -->
-<!-- AUTO-CONTENT-END:ACTIONS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:ACTIONS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
-
-# Methods
-
-<!-- AUTO-CONTENT-START:METHODS -->
-<!-- AUTO-CONTENT-END:METHODS -->
-
-<!-- AUTO-CONTENT-TEMPLATE:METHODS
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
-## `` 
-
-
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-*No input parameters.*
-
-
-
--->
+## Create queue worker service
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "task-worker",
+    mixins: [QueueService()],
+
+    queues: {
+        "mail.send"(job) {
+            this.logger.info("New job received!", job.data);
+            job.progress(10);
+
+            return this.Promise.resolve({
+                done: true,
+                id: job.data.id,
+                worker: process.pid
+            });
+        }
+    }
+});
+```
+
+## Create job in service
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "job-maker",
+    mixins: [QueueService()],
+
+    methods: {
+        sendEmail(data) {
+            this.createJob("mail.send", payload);
+
+            this.getQueue("mail.send").on("global:progress", (jobID, progress) => {
+                this.logger.info(`Job #${jobID} progress is ${progress}%`);
+            });
+
+            this.getQueue("mail.send").on("global:completed", (job, res) => {
+                this.logger.info(`Job #${job.id} completed!. Result:`, res);
+            });
+        }
+    }
+});
+```
 
 # Test
 ```

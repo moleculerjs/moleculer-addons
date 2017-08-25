@@ -6,11 +6,13 @@ let BullService			= require("../../index");
 let broker = new ServiceBroker({ logger: console });
 
 broker.createService({
+	name: "task-worker",
 	mixins: [BullService()],
 
 	queues: {
 		"sample.task"(job) {
 			this.logger.info("New job received!", job.data);
+			job.progress(10);
 
 			return new this.Promise(resolve => {
 				setTimeout(() => resolve({

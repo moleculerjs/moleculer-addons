@@ -1,27 +1,79 @@
 "use strict";
 
-const { ServiceBroker } = require("moleculer");
-//const MyService = require("../../src");
+jest.mock("bull");
 
-describe("Test MyService", () => {
+let processCB = jest.fn();
+let addCB = jest.fn();
+
+let Queue = require("bull");
+Queue.mockImplementation(() => ({
+	process: processCB,
+	add: addCB
+}));
+
+const { ServiceBroker } = require("moleculer");
+const BullService = require("../../src");
+
+describe("Test BullService constructor", () => {
 	const broker = new ServiceBroker();
-//	const service = broker.createService(MyService);
+	const service = broker.createService(BullService());
 
 	it("should be created", () => {
-//		expect(service).toBeDefined();
-	});
-/*
-	it("should return with 'Hello Anonymous'", () => {
-		return broker.call("bull.test").then(res => {
-			expect(res).toBe("Hello Anonymous");
-		});
+		expect(service).toBeDefined();
+		expect(service.$queues).toBeDefined();
 	});
 
-	it("should return with 'Hello John'", () => {
-		return broker.call("bull.test", { name: "John" }).then(res => {
-			expect(res).toBe("Hello John");
-		});
-	});
-*/
 });
+
+describe("Test BullService created handler", () => {
+	const opts = { a: 5 };
+	const url = "redis://localhost";
+
+	const broker = new ServiceBroker();
+	const service = broker.createService({
+		mixins: [BullService(url, opts)],
+
+		queues: {
+			"task.first": jest.fn(),
+			"task.second": jest.fn(),
+		}
+	});
+
+	it("should be created queues", () => {
+		expect(service).toBeDefined();
+		expect(Object.keys(service.$queues).length).toBe(2);
+		expect(service.$queues["task.first"]).toBeDefined();
+		expect(service.$queues["task.second"]).toBeDefined();
+
+		expect(Queue).toHaveBeenCalledTimes(2);
+		expect(Queue).toHaveBeenCalledWith("task.first", url, opts);
+		expect(Queue).toHaveBeenCalledWith("task.second", url, opts);
+
+		expect(processCB).toHaveBeenCalledTimes(2);
+	});
+
+});
+
+describe("Test BullService created handler", () => {
+	const payload = { a: 10 };
+
+	const broker = new ServiceBroker();
+	const service = broker.createService({
+		mixins: [BullService()]
+	});
+
+	it("should be call getQueue", () => {
+		service.getQueue = jest.fn(() => ({ add: addCB }));
+
+		service.createJob("task.first", payload);
+
+		expect(service.getQueue).toHaveBeenCalledTimes(1);
+		expect(service.getQueue).toHaveBeenCalledWith("task.first");
+
+		expect(addCB).toHaveBeenCalledTimes(1);
+		expect(addCB).toHaveBeenCalledWith(payload);
+	});
+
+});
+
 

@@ -1,5 +1,5 @@
 {
-  "name": "moleculer-queue-bull",
+  "name": "moleculer-bull",
   "version": "0.0.0",
   "description": "Task queue service with Bull",
   "main": "index.js",
@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git@github.com:ice-services/moleculer-addons.git"
   },
-  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-queue-bull#readme",
+  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-bull#readme",
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {

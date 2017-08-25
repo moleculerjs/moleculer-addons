@@ -1,20 +1,20 @@
 /*
- * moleculer-queue-bull
+ * moleculer-bull
  * Copyright (c) 2017 Ice Services (https://github.com/ice-services/moleculer-addons)
  * MIT Licensed
  */
 
 "use strict";
 
-let _ = require("lodash");
-let Queue = require("bull");
+let _ 		= require("lodash");
+let Queue 	= require("bull");
 
 module.exports = function createService(url, queueOpts) {
 
 	/**
-	 * Task queue service with Bull
+	 * Task queue mixin service for Bull
 	 *
-	 * @name moleculer-queue-bull
+	 * @name moleculer-bull
 	 * @module Service
 	 */
 	return {
@@ -22,13 +22,13 @@ module.exports = function createService(url, queueOpts) {
 
 		methods: {
 			/**
-			 * Enqueue a new task
+			 * Create a new job
 			 *
 			 * @param {String} name
 			 * @param {any} payload
-			 * @returns
+			 * @returns {Job}
 			 */
-			enqueue(name, payload) {
+			createJob(name, payload) {
 				this.getQueue(name).add(payload);
 			},
 
