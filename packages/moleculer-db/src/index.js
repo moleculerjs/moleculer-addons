@@ -467,6 +467,9 @@ module.exports = {
 				})
 
 				.then(doc => {
+					if (!doc)
+						return Promise.reject(new EntityNotFoundError(params.id));
+
 					origDoc = doc;
 					return this.transformDocuments(ctx, ctx.params, doc);
 				})

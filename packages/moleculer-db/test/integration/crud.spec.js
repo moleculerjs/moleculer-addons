@@ -2,6 +2,7 @@
 
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../src");
+const { EntityNotFoundError } = require("../../src/errors");
 const Adapter = require("../../src/memory-adapter");
 
 function protectReject(err) {
@@ -90,6 +91,16 @@ describe("Test CRUD methods", () => {
 	it("should return with the entity by ID", () => {
 		return broker.call("posts.get", { id: posts[1]._id }).catch(protectReject).then(res => {
 			equalAtLeast(res, posts[1]);
+		});
+	});
+
+	it("should throw error if entity not found", () => {
+		return broker.call("posts.get", { id: 123123 }).then(protectReject).catch(res => {
+			expect(res).toBeInstanceOf(EntityNotFoundError);
+			expect(res.name).toBe("EntityNotFoundError");
+			expect(res.code).toBe(404);
+			expect(res.message).toBe("Entity not found");
+			expect(res.data.id).toBe(123123);
 		});
 	});
 
@@ -207,7 +218,7 @@ describe("Test CRUD methods", () => {
 
 	it("should throw 404 because entity is not exist (remove)", () => {
 		return broker.call("posts.remove", { id: posts[2]._id }).then(protectReject).catch(res => {
-			expect(res).toBeInstanceOf(Error);
+			expect(res).toBeInstanceOf(EntityNotFoundError);
 			expect(res.name).toBe("EntityNotFoundError");
 			expect(res.code).toBe(404);
 			expect(res.message).toBe("Entity not found");
@@ -217,7 +228,7 @@ describe("Test CRUD methods", () => {
 
 	it("should throw 404 because entity is not exist (update)", () => {
 		return broker.call("posts.update", { id: posts[2]._id, name: "Adam" }).then(protectReject).catch(res => {
-			expect(res).toBeInstanceOf(Error);
+			expect(res).toBeInstanceOf(EntityNotFoundError);
 			expect(res.name).toBe("EntityNotFoundError");
 			expect(res.code).toBe(404);
 			expect(res.message).toBe("Entity not found");
