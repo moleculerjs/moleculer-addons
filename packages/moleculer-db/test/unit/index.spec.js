@@ -7,7 +7,7 @@ const DbService = require("../../src");
 function protectReject(err) {
 	if (err && err.stack) {
 		console.error(err);
-		console.error(err.stack);	
+		console.error(err.stack);
 	}
 	expect(err).toBe(true);
 }
@@ -29,12 +29,12 @@ describe("Test DbService actions", () => {
 	it("should set default settings", () => {
 		expect(service.adapter).toBe(adapter);
 		expect(service.settings).toEqual({
-			entityValidator: null, 
-			fields: null, 
-			idField: "_id", 
-			maxLimit: -1, 
-			maxPageSize: 100, 
-			pageSize: 10, 
+			entityValidator: null,
+			fields: null,
+			idField: "_id",
+			maxLimit: -1,
+			maxPageSize: 100,
+			pageSize: 10,
 			populates: null
 		});
 	});
@@ -243,7 +243,7 @@ describe("Test reconnecting", () => {
 		return service.schema.started.call(service).catch(protectReject).then(() => {
 			expect(adapter.connect).toHaveBeenCalledTimes(2);
 		});
-	});	
+	});
 
 });
 
@@ -272,7 +272,7 @@ describe("Test DbService methods", () => {
 
 	const afterConnected = jest.fn();
 
-	const broker = new ServiceBroker({ validation: false });
+	const broker = new ServiceBroker({ validation: false, cacher: true });
 	const service = broker.createService(DbService, {
 		name: "store",
 		adapter,
@@ -286,12 +286,16 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call broker.emit to clear the cache", () => {
-		broker.emit = jest.fn();
+	it("should call broker.broadcast to clear the cache", () => {
+		broker.broadcast = jest.fn();
+		broker.cacher.clean = jest.fn();
 
 		return service.clearCache().then(() => {
-			expect(broker.emit).toHaveBeenCalledTimes(1);
-			expect(broker.emit).toHaveBeenCalledWith("cache.clean", "store.*");
+			expect(broker.broadcast).toHaveBeenCalledTimes(1);
+			expect(broker.broadcast).toHaveBeenCalledWith("cache.clean.store");
+
+			expect(broker.cacher.clean).toHaveBeenCalledTimes(1);
+			expect(broker.cacher.clean).toHaveBeenCalledWith("store.*");
 		}).catch(protectReject);
 	});
 
@@ -315,7 +319,7 @@ describe("Test DbService methods", () => {
 
 		return service.count(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
-			
+
 			expect(adapter.count).toHaveBeenCalledTimes(1);
 			expect(adapter.count).toHaveBeenCalledWith(ctx.params);
 		}).catch(protectReject);
@@ -327,7 +331,7 @@ describe("Test DbService methods", () => {
 
 		return service.count(ctx, ctx.params).then(res => {
 			expect(res).toBe(3);
-			
+
 			expect(adapter.count).toHaveBeenCalledTimes(1);
 			expect(adapter.count).toHaveBeenCalledWith({ limit: null, offset: null });
 		}).catch(protectReject);
@@ -375,7 +379,7 @@ describe("Test DbService methods", () => {
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("created", docs, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("created", docs, ctx);
 		}).catch(protectReject);
 	});
 
@@ -473,7 +477,7 @@ describe("Test DbService methods", () => {
 		});
 
 	});
-	
+
 
 	it("should call 'updateById' of adapter", () => {
 		const ctx = { params: { id: 5, update: {} } };
@@ -494,7 +498,7 @@ describe("Test DbService methods", () => {
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, doc);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", doc, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("updated", doc, ctx);
 		}).catch(protectReject);
 	});
 
@@ -513,7 +517,7 @@ describe("Test DbService methods", () => {
 			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", docs, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("updated", docs, ctx);
 		}).catch(protectReject);
 	});
 
@@ -536,7 +540,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 3);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);
 		}).catch(protectReject);
 	});
 
@@ -555,7 +559,7 @@ describe("Test DbService methods", () => {
 			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 5);
 
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 5, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 5, ctx);
 		}).catch(protectReject);
 	});
 
@@ -568,7 +572,7 @@ describe("Test DbService methods", () => {
 
 			expect(adapter.clear).toHaveBeenCalledTimes(1);
 			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);			
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);
 		}).catch(protectReject);
 	});
 
@@ -576,7 +580,7 @@ describe("Test DbService methods", () => {
 		return broker.stop().delay(100).then(() => {
 			expect(adapter.disconnect).toHaveBeenCalledTimes(1);
 		}).catch(protectReject);
-	});	
+	});
 });
 
 
@@ -600,7 +604,7 @@ describe("Test entityChanged method", () => {
 			expect(service.clearCache).toHaveBeenCalledTimes(1);
 
 			expect(service.schema.entityCreated).toHaveBeenCalledTimes(1);
-			expect(service.schema.entityCreated).toHaveBeenCalledWith(doc, ctx);			
+			expect(service.schema.entityCreated).toHaveBeenCalledWith(doc, ctx);
 		});
 	});
 
@@ -610,7 +614,7 @@ describe("Test entityChanged method", () => {
 			expect(service.clearCache).toHaveBeenCalledTimes(1);
 
 			expect(service.schema.entityUpdated).toHaveBeenCalledTimes(1);
-			expect(service.schema.entityUpdated).toHaveBeenCalledWith(doc, ctx);			
+			expect(service.schema.entityUpdated).toHaveBeenCalledWith(doc, ctx);
 		});
 	});
 
@@ -620,7 +624,7 @@ describe("Test entityChanged method", () => {
 			expect(service.clearCache).toHaveBeenCalledTimes(1);
 
 			expect(service.schema.entityRemoved).toHaveBeenCalledTimes(1);
-			expect(service.schema.entityRemoved).toHaveBeenCalledWith(doc, ctx);			
+			expect(service.schema.entityRemoved).toHaveBeenCalledWith(doc, ctx);
 		});
 	});
 
@@ -771,7 +775,7 @@ describe("Test transformDocuments method", () => {
 			service.populateDocs.mockClear();
 			service.encodeID.mockClear();
 			mockAdapter.entityToObject.mockClear();
-			
+
 			const ctx = { params: { fields: ["name"] } };
 			return service.transformDocuments(ctx, ctx.params, doc).then(res => {
 				expect(res).toBe(doc);
@@ -834,13 +838,13 @@ describe("Test transformDocuments method", () => {
 });
 
 describe("Test authorizeFields method", () => {
-	/*const doc = { 
+	/*const doc = {
 		id : 1,
 		name: "Walter",
 		address: {
 			street: "3828 Piermont Dr",
 			city: "Albuquerque",
-			state: "NM",			
+			state: "NM",
 			zip: "87112",
 			country: "USA"
 		},
@@ -897,12 +901,12 @@ describe("Test authorizeFields method", () => {
 });
 
 describe("Test filterFields method", () => {
-	const doc = { 
+	const doc = {
 		id : 1,
 		name: "Walter",
 		address: {
 			city: "Albuquerque",
-			state: "NM",			
+			state: "NM",
 			zip: 87111
 		}
 	};

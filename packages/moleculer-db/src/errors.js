@@ -6,23 +6,23 @@
 
 "use strict";
 
-const { MoleculerError } = require("moleculer").Errors;
+const { MoleculerClientError } = require("moleculer").Errors;
 
 //const ERR_ENTITY_NOT_FOUND = "ERR_ENTITY_NOT_FOUND";
 
 /**
  * Entity not found
- * 
+ *
  * @class EntityNotFoundError
- * @extends {MoleculerError}
+ * @extends {MoleculerClientError}
  */
-class EntityNotFoundError extends MoleculerError {
+class EntityNotFoundError extends MoleculerClientError {
 
 	/**
 	 * Creates an instance of EntityNotFoundError.
-	 * 
+	 *
 	 * @param {any} ID of entity
-	 * 
+	 *
 	 * @memberOf EntityNotFoundError
 	 */
 	constructor(id) {
