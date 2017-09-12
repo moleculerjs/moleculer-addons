@@ -1,6 +1,6 @@
 {
   "name": "moleculer-elasticsearch",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Elasticsearch service for Moleculer.",
   "main": "index.js",
   "scripts": {
