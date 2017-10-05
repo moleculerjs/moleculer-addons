@@ -24,18 +24,18 @@
   "license": "MIT",
   "homepage": "https://github.com/ice-services/moleculer-addons#readme",
   "devDependencies": {
-    "coveralls": "2.13.1",
-    "eslint": "4.3.0",
+    "coveralls": "3.0.0",
+    "eslint": "4.8.0",
     "glob": "7.1.2",
     "jest": "20.0.4",
     "jest-cli": "20.0.4",
-    "lerna": "2.0.0-rc.5",
+    "lerna": "2.3.1",
     "lodash": "4.17.4",
-    "markdown-magic": "0.1.17",
-    "nodemon": "1.11.0"
+    "markdown-magic": "0.1.19",
+    "nodemon": "1.12.1"
   },
   "dependencies": {
-    "moleculer-cli": "0.3.4"
+    "moleculer-cli": "0.4.0"
   },
   "jest": {
     "testEnvironment": "node",
