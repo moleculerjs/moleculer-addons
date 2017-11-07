@@ -25,7 +25,10 @@ describe("Test MailService template handling", () => {
 
 	it("should create templates", () => {
 		const broker = new ServiceBroker();
-		const service = broker.createService(MailService, { settings: { transport: {}, templateFolder: __dirname + "/templates" } });
+		const service = broker.createService(MailService, { settings: {
+			transport: {},
+			templateFolder: __dirname + "/templates"
+		} });
 
 		// Mocking
 		service.send = jest.fn(() => Promise.resolve());
@@ -35,7 +38,7 @@ describe("Test MailService template handling", () => {
 			text: "Hello",
 			subject: "Hello Subject"
 		}));
-		
+
 		// Call
 		return broker.call("mail.send", {
 			template: "welcome",
@@ -52,7 +55,7 @@ describe("Test MailService template handling", () => {
 		});
 	});
 
-	
+
 	describe("should render templates", () => {
 		let broker, service;
 		let spySend = jest.fn(() => Promise.resolve());
@@ -74,7 +77,7 @@ describe("Test MailService template handling", () => {
 				}
 			}).then(() => {
 				expect(service.send).toHaveBeenCalledTimes(1);
-				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>", "subject": "Full", "to": "john.doe@johndoe.com"});
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>\n", "subject": "Full", "to": "john.doe@johndoe.com"});
 			});
 		});
 
@@ -109,9 +112,9 @@ describe("Test MailService template handling", () => {
 				}
 			}).then(() => {
 				expect(service.send).toHaveBeenCalledTimes(1);
-				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>", "subject": "Full", "to": "john.doe@johndoe.com"});
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John!</h1>\n", "subject": "Full", "to": "john.doe@johndoe.com"});
 			});
-		});		
+		});
 
 		it("should reject if template is not exist", () => {
 			service.send.mockClear();
@@ -129,7 +132,41 @@ describe("Test MailService template handling", () => {
 				expect(err.message).toBe("Missing e-mail template: nothing");
 				expect(service.send).toHaveBeenCalledTimes(0);
 			});
-		});		
+		});
+
+	});
+
+
+	describe("should render templates with global data", () => {
+		let broker, service;
+		let spySend = jest.fn(() => Promise.resolve());
+		beforeEach(() => {
+			broker = new ServiceBroker();
+			service = broker.createService(MailService, { settings: {
+				transport: { type: "sendmail" },
+				templateFolder: __dirname + "/templates",
+				data: {
+					siteName: "My App"
+				}
+			} });
+			service.send = spySend;
+		});
+
+		it("should render default template without localization", () => {
+			service.send.mockClear();
+
+			return broker.call("mail.send", {
+				template: "data",
+				subject: "Data",
+				to: "john.doe@johndoe.com",
+				data: {
+					name: "John"
+				}
+			}).then(() => {
+				expect(service.send).toHaveBeenCalledTimes(1);
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Hi John on My App!</h1>\n", "subject": "Data", "to": "john.doe@johndoe.com"});
+			});
+		});
 
 	});
 

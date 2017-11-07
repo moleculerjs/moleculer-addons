@@ -9,9 +9,11 @@
 const fs 			= require("fs");
 const path 			= require("path");
 const _ 			= require("lodash");
-const nodemailer 	= require("nodemailer");
-const htmlToText 	= require("nodemailer-html-to-text").htmlToText;
-const EmailTemplate = require("email-templates").EmailTemplate;
+
+const { MoleculerError, MoleculerRetryableError } 	= require("moleculer").Errors;
+const nodemailer 			= require("nodemailer");
+const htmlToText 			= require("nodemailer-html-to-text").htmlToText;
+const EmailTemplate 		= require("email-templates").EmailTemplate;
 
 module.exports = {
 
@@ -46,7 +48,10 @@ module.exports = {
 		htmlToText: true,
 
 		// Templates folder
-		templateFolder: null
+		templateFolder: null,
+
+		// Common data
+		data: {}
 	},
 
 	/**
@@ -58,13 +63,14 @@ module.exports = {
 		 */
 		send: {
 			handler(ctx) {
+				const data = _.defaultsDeep(ctx.params.data || {}, this.settings.data);
 				if (ctx.params.template) {
 					const templateName = ctx.params.template;
 					// Use templates
 					const template = this.getTemplate(templateName);
 					if (template) {
 						// Render template
-						return template.render(ctx.params.data || {}, ctx.params.locale).then(rendered => {
+						return template.render(data || {}, ctx.params.locale).then(rendered => {
 							const params = _.omit(ctx.params, ["template", "locale", "data"]);
 							params.html = rendered.html;
 							if (rendered.text)
@@ -76,11 +82,12 @@ module.exports = {
 							return this.send(params);
 						});
 					}
-					return this.Promise.reject(new Error("Missing e-mail template: " + templateName));
+					return this.Promise.reject(new MoleculerError("Missing e-mail template: " + templateName));
 
 				} else {
 					// Send e-mail
-					return this.send(ctx.params);
+					const params = _.omit(ctx.params, ["template", "locale", "data"]);
+					return this.send(params);
 				}
 			}
 		}
@@ -92,9 +99,9 @@ module.exports = {
 	methods: {
 		/**
 		 * Get template renderer by name
-		 * 
-		 * @param {any} templateName 
-		 * @returns 
+		 *
+		 * @param {any} templateName
+		 * @returns
 		 */
 		getTemplate(templateName) {
 			if (this.templates[templateName]) {
@@ -112,13 +119,13 @@ module.exports = {
 
 		/**
 		 * Send an email
-		 * 
-		 * @param {Object} msg 
-		 * @returns 
+		 *
+		 * @param {Object} msg
+		 * @returns
 		 */
 		send(msg) {
 			return new this.Promise((resolve, reject) => {
-				this.logger.debug(`Sending email to ${msg.to} with subject ${msg.subject}...`);
+				this.logger.debug(`Sending email to ${msg.to} with subject '${msg.subject}'...`);
 
 				if (!msg.from)
 					msg.from = this.settings.from;
@@ -127,15 +134,15 @@ module.exports = {
 					this.transporter.sendMail(msg, (err, info) => {
 						if (err) {
 							this.logger.warn("Unable to send email: ", err);
-							reject(err);
+							reject(new MoleculerRetryableError("Unable to send email! " + err.message));
 						} else {
-							this.logger.debug("Email message sent.", info.response);
+							this.logger.info("Email message sent.", info.response);
 							resolve(info);
 						}
 					});
 				}
-				else 
-					return reject(new Error("Unable to send email! Invalid mailer transport: " + this.settings.transport));
+				else
+					return reject(new MoleculerError("Unable to send email! Invalid mailer transport: " + this.settings.transport));
 
 			});
 		}

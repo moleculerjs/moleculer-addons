@@ -86,7 +86,12 @@ broker.createService(require("moleculer-mail"), {
         transport: {
             type: "sendmail"
         },
-        templateFolder: "./email-templates"
+        templateFolder: "./email-templates",
+
+        // Global data for templates
+        data: {
+            siteName: "My app"
+        }
     }
 });
 
@@ -110,6 +115,7 @@ broker.call("mail.send", {
 | `transport` | `Object` | Transport settings. Send to `nodemailer.createTransporter`  |
 | `htmlToText` | `Boolean` | Enable [html-to-text](https://github.com/andris9/nodemailer-html-to-text) conversion |
 | `templateFolder` | `String` | Path to template folder |
+| `data` | `Object` | Global data for templates |
 
 ### Transport options
 [Read more from transport options](https://nodemailer.com/smtp/)

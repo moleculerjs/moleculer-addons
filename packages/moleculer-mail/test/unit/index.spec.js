@@ -36,10 +36,12 @@ describe("Test MailService", () => {
 			};
 
 			return broker.call("mail.send", params).then(res => {
-				expect(res).toBe(params);
-				expect(res.from).toBe("moleculer@company.net");
+				expect(res).toEqual({
+					from: "moleculer@company.net",
+					to: "john.doe@gmail.com"
+				});
 				expect(spySendMail).toHaveBeenCalledTimes(1);
-				expect(spySendMail).toHaveBeenCalledWith(params, jasmine.any(Function));
+				expect(spySendMail).toHaveBeenCalledWith(res, jasmine.any(Function));
 			});
 
 		});
@@ -57,7 +59,7 @@ describe("Test MailService", () => {
 			};
 
 			return broker.call("mail.send", params).then(res => {
-				expect(res).toBe(params);
+				expect(res).toEqual(params);
 				expect(res.from).toBe("boss@company.net");
 				expect(spySendMail).toHaveBeenCalledTimes(1);
 				expect(spySendMail).toHaveBeenCalledWith(params, jasmine.any(Function));
