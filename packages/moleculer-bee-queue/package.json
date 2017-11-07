@@ -1,6 +1,6 @@
 {
   "name": "moleculer-bee-queue",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Task queue mixin for Bee-Queue",
   "main": "index.js",
   "scripts": {
