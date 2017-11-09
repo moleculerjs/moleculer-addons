@@ -391,7 +391,7 @@ module.exports = {
 		 */
 		find(ctx, params) {
 			return this.adapter.find(params)
-				.then(docs => this.transformDocuments(ctx, ctx.params, docs));
+				.then(docs => this.transformDocuments(ctx, params, docs));
 		},
 
 		/**
