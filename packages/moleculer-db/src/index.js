@@ -7,7 +7,7 @@
 "use strict";
 
 const _ = require("lodash");
-const { MoleculerClientError } = require("moleculer").Errors;
+const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("./errors");
 const MemoryAdapter = require("./memory-adapter");
 
@@ -849,7 +849,7 @@ module.exports = {
 				if (res === true)
 					return this.Promise.resolve();
 				else
-					return this.Promise.reject(res);
+					return this.Promise.reject(new ValidationError("Entity validation error!", null, res));
 			};
 		}
 

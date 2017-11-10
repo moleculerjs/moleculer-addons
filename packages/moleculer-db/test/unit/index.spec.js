@@ -1,6 +1,7 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
+const { ValidationError } = require("moleculer").Errors;
 const DbService = require("../../src");
 //const lolex = require("lolex");
 
@@ -1163,8 +1164,12 @@ describe("Test validateEntity method", () => {
 			let entities = [{ id: 5, name: "John" }, { name: "Jane" }];
 			return service.validateEntity(entities).then(protectReject).catch(err => {
 				expect(err).toBeDefined();
-				expect(err[0].type).toBe("required");
-				expect(err[0].field).toBe("id");
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.code).toBe(422);
+				expect(err.message).toBe("Entity validation error!");
+
+				expect(err.data[0].type).toBe("required");
+				expect(err.data[0].field).toBe("id");
 			});
 		});
 
