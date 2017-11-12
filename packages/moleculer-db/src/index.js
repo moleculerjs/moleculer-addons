@@ -46,7 +46,7 @@ module.exports = {
 		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
 
-		/** @type {Object|Function} Validator schema or a function to validate the incoming entity in `users.create` action. */
+		/** @type {Object|Function} Validator schema or a function to validate the incoming entity in `create` & 'insert' actions. */
 		entityValidator: null
 	},
 

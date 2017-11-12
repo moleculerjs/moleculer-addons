@@ -14,11 +14,27 @@ function protectReject(err) {
 }
 
 describe("Test DbService actions", () => {
+	const doc = { id : 1 };
+	const docs = [doc];
+
 	const adapter = {
 		init: jest.fn(() => Promise.resolve()),
 		connect: jest.fn(() => Promise.resolve()),
-		disconnect: jest.fn(() => Promise.resolve())
+		disconnect: jest.fn(() => Promise.resolve()),
+		find: jest.fn(() => Promise.resolve(docs)),
+		findById: jest.fn(() => Promise.resolve(doc)),
+		findByIds: jest.fn(() => Promise.resolve(docs)),
+		count: jest.fn(() => Promise.resolve(3)),
+		insert: jest.fn(() => Promise.resolve(doc)),
+		insertMany: jest.fn(() => Promise.resolve(docs)),
+		updateMany: jest.fn(() => Promise.resolve(docs)),
+		updateById: jest.fn(() => Promise.resolve(doc)),
+		removeMany: jest.fn(() => Promise.resolve(5)),
+		removeById: jest.fn(() => Promise.resolve(3)),
+		clear: jest.fn(() => Promise.resolve(3)),
+		entityToObject: jest.fn(obj => obj)
 	};
+
 	const broker = new ServiceBroker({ validation: false });
 	const service = broker.createService(DbService, {
 		name: "store",
@@ -26,6 +42,7 @@ describe("Test DbService actions", () => {
 	});
 
 	service.sanitizeParams = jest.fn((ctx, p) => p);
+	service.transformDocuments = jest.fn((ctx, params, docs) => Promise.resolve(docs));
 
 	it("should set default settings", () => {
 		expect(service.adapter).toBe(adapter);
@@ -54,22 +71,27 @@ describe("Test DbService actions", () => {
 	});
 
 	it("should call the 'find' method", () => {
+		service.transformDocuments.mockClear();
 		service.sanitizeParams.mockClear();
-		service.find = jest.fn();
 		const p = {};
 
 		return broker.call("store.find", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
-			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(adapter.find).toHaveBeenCalledTimes(1);
+			expect(adapter.find).toHaveBeenCalledWith(p);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, docs);
+
 		}).catch(protectReject);
 	});
 
 	it("should call the 'find' method with params", () => {
+		service.transformDocuments.mockClear();
+		adapter.find.mockClear();
 		service.sanitizeParams.mockClear();
-		service.find = jest.fn();
 		const p = {
 			limit: 5,
 			offset: "3"
@@ -82,105 +104,204 @@ describe("Test DbService actions", () => {
 				offset: "3"
 			});
 
-			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), {
+			expect(adapter.find).toHaveBeenCalledTimes(1);
+			expect(adapter.find).toHaveBeenCalledWith({
 				limit: 5,
 				offset: "3"
 			});
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), {
+				limit: 5,
+				offset: "3"
+			}, docs);
+
 		}).catch(protectReject);
 	});
 
 	it("should call the 'list' method", () => {
 		service.sanitizeParams.mockClear();
-		service.find = jest.fn();
-		service.count = jest.fn();
+		service.transformDocuments.mockClear();
+		adapter.find.mockClear();
+		adapter.count.mockClear();
 		const p = {};
 
 		return broker.call("store.list", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
-			expect(service.find).toHaveBeenCalledTimes(1);
-			expect(service.count).toHaveBeenCalledTimes(1);
-			expect(service.find).toHaveBeenCalledWith(jasmine.any(Context), p);
-			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(adapter.find).toHaveBeenCalledTimes(1);
+			expect(adapter.count).toHaveBeenCalledTimes(1);
+			expect(adapter.find).toHaveBeenCalledWith(p);
+			expect(adapter.count).toHaveBeenCalledWith(p);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, docs);
 		}).catch(protectReject);
 	});
 
 	it("should call the 'count' method", () => {
 		service.sanitizeParams.mockClear();
-		service.count = jest.fn();
+		adapter.count = jest.fn();
 		const p = {};
 
 		return broker.call("store.count", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
-			expect(service.count).toHaveBeenCalledTimes(1);
-			expect(service.count).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(adapter.count).toHaveBeenCalledTimes(1);
+			expect(adapter.count).toHaveBeenCalledWith(p);
 		}).catch(protectReject);
 	});
 
-	it("should call the 'create' method", () => {
+	it("should call the 'count' method with pagination params", () => {
 		service.sanitizeParams.mockClear();
-		service.create = jest.fn();
+		adapter.count = jest.fn();
+		const p = { limit: 5, offset: 10 };
+
+		return broker.call("store.count", p).then(() => {
+			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
+			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+
+			expect(adapter.count).toHaveBeenCalledTimes(1);
+			expect(adapter.count).toHaveBeenCalledWith({ limit: null, offset: null});
+		}).catch(protectReject);
+	});
+
+	it("should call the 'insert' method", () => {
+		service.sanitizeParams.mockClear();
+		service.transformDocuments.mockClear();
+		service.entityChanged = jest.fn(() => Promise.resolve());
+		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
+		adapter.insert.mockClear();
 		const p = {};
 
 		return broker.call("store.create", p).then(() => {
-			expect(service.create).toHaveBeenCalledTimes(1);
-			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p, {});
+			expect(service.validateEntity).toHaveBeenCalledTimes(1);
+			expect(service.validateEntity).toHaveBeenCalledWith(p);
+
+			expect(adapter.insert).toHaveBeenCalledTimes(1);
+			expect(adapter.insert).toHaveBeenCalledWith(p);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), {}, doc);
+
+			expect(service.entityChanged).toHaveBeenCalledTimes(1);
+			expect(service.entityChanged).toHaveBeenCalledWith("created", doc, jasmine.any(Context));
 		}).catch(protectReject);
 	});
 
-	it("should call the 'create' method", () => {
+	it("should call the 'insert' method #2", () => {
 		service.sanitizeParams.mockClear();
-		service.create = jest.fn();
+		service.transformDocuments.mockClear();
+		service.entityChanged = jest.fn(() => Promise.resolve());
+		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
+		adapter.insert.mockClear();
 		const p = {
 			entity: {}
 		};
 
 		return broker.call("store.insert", p).then(() => {
-			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
-			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.validateEntity).toHaveBeenCalledTimes(1);
+			expect(service.validateEntity).toHaveBeenCalledWith(p.entity);
 
-			expect(service.create).toHaveBeenCalledTimes(1);
-			expect(service.create).toHaveBeenCalledWith(jasmine.any(Context), p.entity, p);
+			expect(adapter.insert).toHaveBeenCalledTimes(1);
+			expect(adapter.insert).toHaveBeenCalledWith(p.entity);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, doc);
+
+			expect(service.entityChanged).toHaveBeenCalledTimes(1);
+			expect(service.entityChanged).toHaveBeenCalledWith("created", doc, jasmine.any(Context));
 		}).catch(protectReject);
 	});
 
-	it("should call the 'createMany' method", () => {
+	it("should call the 'insertMany' method", () => {
 		service.sanitizeParams.mockClear();
-		service.createMany = jest.fn();
+		service.transformDocuments.mockClear();
+		service.entityChanged = jest.fn(() => Promise.resolve());
+		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
+		adapter.insert.mockClear();
 		const p = {
 			entities: []
 		};
 
 		return broker.call("store.insert", p).then(() => {
-			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
-			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.validateEntity).toHaveBeenCalledTimes(1);
+			expect(service.validateEntity).toHaveBeenCalledWith(p.entities);
 
-			expect(service.createMany).toHaveBeenCalledTimes(1);
-			expect(service.createMany).toHaveBeenCalledWith(jasmine.any(Context), p.entities, p);
+			expect(adapter.insertMany).toHaveBeenCalledTimes(1);
+			expect(adapter.insertMany).toHaveBeenCalledWith(p.entities);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, docs);
+
+			expect(service.entityChanged).toHaveBeenCalledTimes(1);
+			expect(service.entityChanged).toHaveBeenCalledWith("created", docs, jasmine.any(Context));
 		}).catch(protectReject);
 	});
 
 	it("should call the 'getById' method", () => {
 		service.sanitizeParams.mockClear();
-		service.getById = jest.fn();
-		const p = {};
+		service.transformDocuments.mockClear();
+		service.getById = jest.fn(() => Promise.resolve(doc));
+		const p = { id: 5 };
 
 		return broker.call("store.get", p).then(() => {
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
 			expect(service.getById).toHaveBeenCalledTimes(1);
-			expect(service.getById).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(service.getById).toHaveBeenCalledWith(5, true);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, doc);
+
+		}).catch(protectReject);
+	});
+
+	it("should call the 'getById' method with multi IDs, and should convert the result to object", () => {
+		service.transformDocuments.mockClear();
+		const p = { id: [5, 3, 8], fields: false, mapping: true };
+
+		let docs = [
+			{ _id: 5, name: "John" },
+			{ _id: 3, name: "Walter" },
+			{ _id: 8, name: "Jane" }
+		];
+		service.getById = jest.fn(() => Promise.resolve(docs));
+
+		return broker.call("store.get", p).then(res => {
+			expect(res).toEqual({
+				"3": {
+					"_id": 3,
+					"name": "Walter"
+				},
+				"5": {
+					"_id": 5,
+					"name": "John"
+				},
+				"8": {
+					"_id": 8,
+					"name": "Jane"
+				}
+			});
+
+			expect(service.getById).toHaveBeenCalledTimes(1);
+			expect(service.getById).toHaveBeenCalledWith([5, 3, 8], true);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, docs);
+
 		}).catch(protectReject);
 	});
 
 	it("should call the 'update' method", () => {
 		service.sanitizeParams.mockClear();
-		service.updateById = jest.fn();
+		service.decodeID = jest.fn(id => id);
+		service.transformDocuments.mockClear();
+		service.entityChanged.mockClear();
+		adapter.updateById.mockClear();
 		const p = {
 			_id: 123,
 			name: "John",
@@ -188,34 +309,46 @@ describe("Test DbService actions", () => {
 		};
 
 		return broker.call("store.update", p).then(() => {
-			expect(service.updateById).toHaveBeenCalledTimes(1);
-			expect(service.updateById).toHaveBeenCalledWith(jasmine.any(Context), { id: 123, update: { "$set": { name: "John", age: 45 }}});
+			expect(service.decodeID).toHaveBeenCalledTimes(1);
+			expect(service.decodeID).toHaveBeenCalledWith(123);
+
+			expect(adapter.updateById).toHaveBeenCalledTimes(1);
+			expect(adapter.updateById).toHaveBeenCalledWith(123, { "$set": { name: "John", age: 45 }});
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, doc);
+
+			expect(service.entityChanged).toHaveBeenCalledTimes(1);
+			expect(service.entityChanged).toHaveBeenCalledWith("updated", doc, jasmine.any(Context));
 		}).catch(protectReject);
 	});
 
 	it("should call the 'remove' method", () => {
 		service.sanitizeParams.mockClear();
-		service.removeById = jest.fn();
-		const p = {};
+		service.decodeID = jest.fn(id => id);
+		service.transformDocuments.mockClear();
+		service.entityChanged.mockClear();
+		adapter.removeById.mockClear();
+		const p = { id: 3 };
 
 		return broker.call("store.remove", p).then(() => {
+			expect(service.decodeID).toHaveBeenCalledTimes(1);
+			expect(service.decodeID).toHaveBeenCalledWith(3);
+
 			expect(service.sanitizeParams).toHaveBeenCalledTimes(1);
 			expect(service.sanitizeParams).toHaveBeenCalledWith(jasmine.any(Context), p);
 
-			expect(service.removeById).toHaveBeenCalledTimes(1);
-			expect(service.removeById).toHaveBeenCalledWith(jasmine.any(Context), p);
+			expect(adapter.removeById).toHaveBeenCalledTimes(1);
+			expect(adapter.removeById).toHaveBeenCalledWith(3);
+
+			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
+			expect(service.transformDocuments).toHaveBeenCalledWith(jasmine.any(Context), p, 3);
+
+			expect(service.entityChanged).toHaveBeenCalledTimes(1);
+			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, jasmine.any(Context));
+
 		}).catch(protectReject);
 	});
-
-	/*it("should call the 'clear' method", () => {
-		service.clear = jest.fn();
-
-		return broker.call("store.clear").then(() => {
-			expect(service.clear).toHaveBeenCalledTimes(1);
-			expect(service.clear).toHaveBeenCalledWith(jasmine.any(Context));
-		}).catch(protectReject);
-	});*/
-
 
 	it("should call the 'disconnect' method", () => {
 		service.disconnect = jest.fn();
@@ -300,42 +433,56 @@ describe("Test DbService methods", () => {
 		}).catch(protectReject);
 	});
 
-	it("should call 'find' of adapter", () => {
-		const ctx = { params: {} };
-		service.transformDocuments = jest.fn((ctx, params, docs) => Promise.resolve(docs));
+	describe("Test `this.getById` method", () => {
+		service.encodeID = jest.fn(id => id);
+		service.decodeID = jest.fn(id => id);
 
-		return service.find(ctx, ctx.params).then(res => {
-			expect(res).toBe(docs);
+		it("call with one ID without encoding", () => {
+			adapter.findById.mockClear();
 
-			expect(adapter.find).toHaveBeenCalledTimes(1);
-			expect(adapter.find).toHaveBeenCalledWith(ctx.params);
+			return service.getById(5).then(res => {
+				expect(res).toBe(doc);
 
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
-		}).catch(protectReject);
-	});
+				expect(service.decodeID).toHaveBeenCalledTimes(0);
 
-	it("should call 'count' of adapter", () => {
-		const ctx = { params: {} };
+				expect(adapter.findById).toHaveBeenCalledTimes(1);
+				expect(adapter.findById).toHaveBeenCalledWith(5);
+			}).catch(protectReject);
+		});
 
-		return service.count(ctx, ctx.params).then(res => {
-			expect(res).toBe(3);
+		it("call with one ID and encoding", () => {
+			adapter.findById.mockClear();
 
-			expect(adapter.count).toHaveBeenCalledTimes(1);
-			expect(adapter.count).toHaveBeenCalledWith(ctx.params);
-		}).catch(protectReject);
-	});
+			return service.getById(5, true).then(res => {
+				expect(res).toBe(doc);
 
-	it("should call 'count' of adapter but remove pagination params", () => {
-		adapter.count.mockClear();
-		const ctx = { params: { limit: 5, offset: 3 } };
+				expect(service.decodeID).toHaveBeenCalledTimes(1);
+				expect(service.decodeID).toHaveBeenCalledWith(5);
 
-		return service.count(ctx, ctx.params).then(res => {
-			expect(res).toBe(3);
+				expect(adapter.findById).toHaveBeenCalledTimes(1);
+				expect(adapter.findById).toHaveBeenCalledWith(5);
+			}).catch(protectReject);
+		});
 
-			expect(adapter.count).toHaveBeenCalledTimes(1);
-			expect(adapter.count).toHaveBeenCalledWith({ limit: null, offset: null });
-		}).catch(protectReject);
+		it("call with multi IDs", () => {
+			service.encodeID.mockClear();
+			service.decodeID.mockClear();
+			adapter.findByIds.mockClear();
+
+			return service.getById([5, 3, 8], true).then(res => {
+				expect(res).toBe(docs);
+
+				expect(service.decodeID).toHaveBeenCalledTimes(3);
+				expect(service.decodeID).toHaveBeenCalledWith(5);
+				expect(service.decodeID).toHaveBeenCalledWith(3);
+				expect(service.decodeID).toHaveBeenCalledWith(8);
+
+				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
+				expect(adapter.findByIds).toHaveBeenCalledWith([5, 3, 8]);
+
+			}).catch(protectReject);
+		});
+
 	});
 
 	it("should call 'find' of adapter", () => {
@@ -346,245 +493,6 @@ describe("Test DbService methods", () => {
 
 			expect(adapter.find).toHaveBeenCalledTimes(1);
 			expect(adapter.find).toHaveBeenCalledWith(params);
-		}).catch(protectReject);
-	});
-
-	it("should call 'insert' of adapter", () => {
-		const ctx = { params: { entity: {} } };
-		service.transformDocuments.mockClear();
-		service.entityChanged = jest.fn(() => Promise.resolve());
-		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
-
-		return service.create(ctx, ctx.params.entity, ctx.params).then(res => {
-			expect(res).toBe(doc);
-
-			expect(service.validateEntity).toHaveBeenCalledTimes(1);
-			expect(service.validateEntity).toHaveBeenCalledWith(ctx.params.entity);
-
-			expect(adapter.insert).toHaveBeenCalledTimes(1);
-			expect(adapter.insert).toHaveBeenCalledWith(ctx.params.entity);
-
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, doc);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("created", doc, ctx);
-		}).catch(protectReject);
-	});
-
-	it("should call 'insertMany' of adapter", () => {
-		const ctx = { params: { entities: [{}, {}] } };
-		service.transformDocuments.mockClear();
-		service.entityChanged = jest.fn(() => Promise.resolve());
-		service.validateEntity = jest.fn(entity => Promise.resolve(entity));
-
-		return service.createMany(ctx, ctx.params.entities, ctx.params).then(res => {
-			expect(res).toBe(docs);
-
-			expect(service.validateEntity).toHaveBeenCalledTimes(1);
-			expect(service.validateEntity).toHaveBeenCalledWith(ctx.params.entities);
-
-			expect(adapter.insertMany).toHaveBeenCalledTimes(1);
-			expect(adapter.insertMany).toHaveBeenCalledWith(ctx.params.entities);
-
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("created", docs, ctx);
-		}).catch(protectReject);
-	});
-
-	describe("Test `this.getById` method", () => {
-		service.encodeID = jest.fn(id => id);
-		service.decodeID = jest.fn(id => id);
-		service.transformDocuments = jest.fn((ctx, params, docs) => Promise.resolve(docs));
-
-		it("call with one ID", () => {
-			service.transformDocuments.mockClear();
-			adapter.findById.mockClear();
-			const ctx = { params: { id: 5 } };
-
-			return service.getById(ctx, ctx.params).then(res => {
-				expect(res).toBe(doc);
-
-				expect(service.decodeID).toHaveBeenCalledTimes(1);
-				expect(service.decodeID).toHaveBeenCalledWith(5);
-
-				expect(adapter.findById).toHaveBeenCalledTimes(1);
-				expect(adapter.findById).toHaveBeenCalledWith(5);
-
-				expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-				expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, doc);
-
-			}).catch(protectReject);
-		});
-
-		it("call with multi IDs", () => {
-			service.encodeID.mockClear();
-			service.decodeID.mockClear();
-			adapter.findByIds.mockClear();
-			service.transformDocuments.mockClear();
-			const ctx = { params: { id: [5, 3, 8], fields: false, populate: true } };
-
-			return service.getById(ctx, ctx.params).then(res => {
-				expect(res).toBe(docs);
-
-				expect(service.decodeID).toHaveBeenCalledTimes(3);
-				expect(service.decodeID).toHaveBeenCalledWith(5);
-				expect(service.decodeID).toHaveBeenCalledWith(3);
-				expect(service.decodeID).toHaveBeenCalledWith(8);
-
-				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
-				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
-
-				expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-				expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
-
-			}).catch(protectReject);
-		});
-
-		it("call with multi IDs, and should convert the result to object", () => {
-			service.encodeID.mockClear();
-			service.decodeID.mockClear();
-			adapter.findByIds.mockClear();
-			service.transformDocuments.mockClear();
-			const ctx = { params: { id: [5, 3, 8], fields: false, mapping: true } };
-
-			let docs = [
-				{ _id: 5, name: "John" },
-				{ _id: 3, name: "Walter" },
-				{ _id: 8, name: "Jane" }
-			];
-			adapter.findByIds = jest.fn(() => Promise.resolve(docs));
-
-			return service.getById(ctx, ctx.params).then(res => {
-				expect(res).toEqual({
-					"3": {
-						"_id": 3,
-						"name": "Walter"
-					},
-					"5": {
-						"_id": 5,
-						"name": "John"
-					},
-					"8": {
-						"_id": 8,
-						"name": "Jane"
-					}
-				});
-
-				expect(service.decodeID).toHaveBeenCalledTimes(3);
-				expect(service.decodeID).toHaveBeenCalledWith(5);
-				expect(service.decodeID).toHaveBeenCalledWith(3);
-				expect(service.decodeID).toHaveBeenCalledWith(8);
-
-				expect(adapter.findByIds).toHaveBeenCalledTimes(1);
-				expect(adapter.findByIds).toHaveBeenCalledWith(ctx.params.id);
-
-				expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-				expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
-
-			}).catch(protectReject);
-		});
-
-	});
-
-
-	it("should call 'updateById' of adapter", () => {
-		const ctx = { params: { id: 5, update: {} } };
-		service.transformDocuments.mockClear();
-		service.entityChanged.mockClear();
-		service.decodeID = jest.fn(id => id);
-
-		return service.updateById(ctx, ctx.params).then(res => {
-			expect(res).toBe(doc);
-
-			expect(service.decodeID).toHaveBeenCalledTimes(1);
-			expect(service.decodeID).toHaveBeenCalledWith(5);
-
-			expect(adapter.updateById).toHaveBeenCalledTimes(1);
-			expect(adapter.updateById).toHaveBeenCalledWith(ctx.params.id, ctx.params.update);
-
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, doc);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", doc, ctx);
-		}).catch(protectReject);
-	});
-
-	it("should call 'updateMany' of adapter", () => {
-		const ctx = { params: { query: {}, update: {} } };
-		service.transformDocuments.mockClear();
-		service.entityChanged.mockClear();
-
-		return service.updateMany(ctx, ctx.params).then(res => {
-			expect(res).toBe(docs);
-
-			expect(adapter.updateMany).toHaveBeenCalledTimes(1);
-			expect(adapter.updateMany).toHaveBeenCalledWith(ctx.params.query, ctx.params.update);
-
-			expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, docs);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("updated", docs, ctx);
-		}).catch(protectReject);
-	});
-
-	it("should call 'removeById' of adapter", () => {
-		const ctx = { params: { id: 5 } };
-		service.decodeID = jest.fn(id => id);
-		//service.transformDocuments.mockClear();
-		service.entityChanged.mockClear();
-
-		return service.removeById(ctx, ctx.params).then(res => {
-			expect(res).toBe(3);
-
-			expect(service.decodeID).toHaveBeenCalledTimes(1);
-			expect(service.decodeID).toHaveBeenCalledWith(5);
-
-			expect(adapter.removeById).toHaveBeenCalledTimes(1);
-			expect(adapter.removeById).toHaveBeenCalledWith(ctx.params.id);
-
-			//expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 3);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);
-		}).catch(protectReject);
-	});
-
-	it("should call 'removeMany' of adapter", () => {
-		const ctx = { params: { query: {} } };
-		//service.transformDocuments.mockClear();
-		service.entityChanged.mockClear();
-
-		return service.removeMany(ctx, ctx.params).then(res => {
-			expect(res).toBe(5);
-
-			expect(adapter.removeMany).toHaveBeenCalledTimes(1);
-			expect(adapter.removeMany).toHaveBeenCalledWith(ctx.params.query);
-
-			//expect(service.transformDocuments).toHaveBeenCalledTimes(1);
-			//expect(service.transformDocuments).toHaveBeenCalledWith(ctx, ctx.params, 5);
-
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 5, ctx);
-		}).catch(protectReject);
-	});
-
-	it("should call 'clear' of adapter", () => {
-		const ctx = {};
-		service.entityChanged.mockClear();
-
-		return service.clear(ctx).then(res => {
-			expect(res).toBe(3);
-
-			expect(adapter.clear).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledTimes(1);
-			expect(service.entityChanged).toHaveBeenCalledWith("removed", 3, ctx);
 		}).catch(protectReject);
 	});
 
@@ -710,10 +618,10 @@ describe("Test sanitizeParams method", () => {
 		expect(res).toEqual({ limit: 50, offset: 0, page: 1, pageSize: 50});
 	});
 
-	/*it("should limit the limit", () => {
-		const res = service.sanitizeParams(ctxList, { limit: 400 });
+	it("should limit the limit", () => {
+		const res = service.sanitizeParams({ action: {	name: "greeter.find" } }, { limit: 400 });
 		expect(res).toEqual({ limit: 200 });
-	});*/
+	});
 
 
 });
