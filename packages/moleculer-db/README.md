@@ -82,7 +82,7 @@ broker.start()
 | `pageSize` | `Number` | **required** | Default page size in `list` action. |
 | `maxPageSize` | `Number` | **required** | Maximum page size in `list` action. |
 | `maxLimit` | `Number` | **required** | Maximum value of limit in `find` action. Default: `-1` (no limit) |
-| `entityValidator` | `Object`, `function` | `null` | Validator schema or a function to validate the incoming entity in `users.create` action. |
+| `entityValidator` | `Object`, `function` | `null` | Validator schema or a function to validate the incoming entity in `create` & 'insert' actions. |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
@@ -159,7 +159,7 @@ List entities by filters and pagination results.
 ### Results
 **Type:** `Object`
 
-List of found entities and count .
+List of found entities and count.
 
 
 ## `create` 
@@ -214,6 +214,7 @@ Found entity(ies).
 ## `update` 
 
 Update an entity by ID.
+> After update, clear the cache & call lifecycle events.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -282,70 +283,19 @@ _<sup>Since: {{this}}</sup>_
 # Methods
 
 <!-- AUTO-CONTENT-START:METHODS -->
-## `find` 
+## `findOne` 
 
-Find entities by query. `params` contains the query fields.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
-
-### Results
-**Type:** `Array.<Object>`
-
-List of found entities.
-
-
-## `count` 
-
-Get count of entities by query.
+Find first item.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
-
-### Results
-**Type:** `Number`
-
-Count of found entities.
-
-
-## `create` 
-
-Create a new entity.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `entity` | `Object` | **required** | Entity. |
-| `params` | `Object` | **required** | Request params. |
+| `params` | `Object` | **required** |  |
 
 ### Results
 **Type:** `Object`
 
-Saved entity.
-
-
-## `createMany` 
-
-Create many new entities.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `entitites` | `Array.<Object>` | **required** | Entities. |
-| `params` | `Object` | **required** | Request params. |
-
-### Results
-**Type:** `Array.<Object>`
-
-Saved entities.
+Found entity.
 
 
 ## `getById` 
@@ -355,95 +305,13 @@ Get entity(ies) by ID(s).
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
+| `id` | `String`, `Number`, `Array` | **required** | ID or IDs. |
+| `decoding` | `Boolean` | **required** | Need to decode IDs. |
 
 ### Results
 **Type:** `Object`, `Array.<Object>`
 
 Found entity(ies).
-
-
-## `updateById` 
-
-Update an entity by ID.
-> After update, clear the cache & call lifecycle events.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
-
-### Results
-**Type:** `Object`
-
-Updated entity.
-
-
-## `updateMany` 
-
-Update multiple entities by query.
-> After update, clear the cache & call lifecycle events.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-| `params` | `Object` | **required** | Params of request. |
-
-### Results
-**Type:** `Object`
-
-Updated entities.
-
-
-## `removeById` 
-
-Remove an entity by ID.
-> After remove, clear the cache & call lifecycle events.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-
-### Results
-**Type:** `Number`
-
-Count of removed entities.
-
-
-## `removeMany` 
-
-Remove multiple entities by query.
-> After remove, clear the cache & call lifecycle events.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-
-### Results
-**Type:** `Number`
-
-Count of removed entities.
-
-
-## `clear` 
-
-Delete all entities. 
-> After delete, clear the cache & call lifecycle events.
-
-### Parameters
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `ctx` | `Context` | **required** | Context of request. |
-
-### Results
-**Type:** `Number`
-
-Count of removed entities.
 
 
 ## `clearCache` 
@@ -597,9 +465,6 @@ broker.createService({
 
 # Extend with custom actions
 Naturally you can extend this service with your custom actions.
-In this case we recommend to use only built-in methods to access or manipulate entities. 
-
-> In the worst case you can call directly the adapter as `this.adapter.findById`.
 
 ```js
 const DbService = require("moleculer-db");
@@ -615,18 +480,18 @@ module.exports = {
     actions: {
         // Increment `votes` field by post ID
         vote(ctx) {
-            return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }}));
+            return this.adapter.updateById(ctx.params.id, { $inc: { votes: 1 } });
         },
 
         // List posts of an author
         byAuthors(ctx) {
-            return this.find(ctx, {
+            return this.find({
                 query: {
                     author: ctx.params.authorID
                 },
                 limit: ctx.params.limit || 10,
                 sort: "-createdAt"
-            })
+            });
         }
     }
 }

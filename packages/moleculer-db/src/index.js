@@ -458,9 +458,11 @@ module.exports = {
 		},
 
 		/**
-		 * Find only one item by query.
+		 * Find first item.
 		 *
-		 * @param {Object} query
+		 * @methods
+		 * @param {Object} params
+		 * @returns {Object} Found entity.
 		 */
 		findOne(params) {
 			return this.adapter.find(params)
