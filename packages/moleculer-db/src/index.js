@@ -413,6 +413,19 @@ module.exports = {
 		},
 
 		/**
+		 * Find only one item by query.
+		 *
+		 * @param {Object} query
+		 */
+		findOne(query) {
+			return this.adapter.find({ query })
+				.then(res => {
+					if (res && res.length > 0)
+						return res[0];
+				});
+		},
+
+		/**
 		 * Create a new entity.
 		 *
 		 * @methods
