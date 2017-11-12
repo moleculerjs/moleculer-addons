@@ -162,12 +162,20 @@ module.exports = {
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
+				let countParams = Object.assign({}, params);
+				// Remove pagination params
+				if (countParams && countParams.limit)
+					countParams.limit = null;
+				if (countParams && countParams.offset)
+					countParams.offset = null;
+
+
 				return this.Promise.all([
 					// Get rows
 					this.adapter.find(params),
 
 					// Get count of all rows
-					this.adapter.count(params)
+					this.adapter.count(countParams)
 				]).then(res => {
 					return this.transformDocuments(ctx, params, res[0])
 						.then(docs => {
@@ -483,18 +491,6 @@ module.exports = {
 						return this.adapter.findById(id);
 					}
 				});
-		},
-
-		/**
-		 * Delete all entities.
-		 * > After delete, clear the cache & call lifecycle events.
-		 *
-		 * @methods
-		 * @param {Context} ctx - Context of request.
-		 * @returns {Number} Count of removed entities.
-		 */
-		clear() {
-			return this.adapter.clear();
 		},
 
 		/**

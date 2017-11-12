@@ -1,15 +1,5 @@
-{"username":"Adam","fullName":"Adam Doe","email":"adam.doe@gmail.com","status":1,"_id":"8r0ZTAKVkCeWcJtd"}
-{"username":"John","fullName":"John Doe","email":"john.doe@gmail.com","status":1,"_id":"F9GMcRun2XBvQTxa"}
-{"username":"Bill","fullName":"Bill Doe","email":"bill.doe@gmail.com","status":1,"_id":"QFIM0qu6TCZK8jTH"}
-{"username":"Susan","fullName":"Susan Doe","email":"susan.doe@gmail.com","status":1,"_id":"VPaAk2e7ozDfhdzj"}
-{"username":"Jane","fullName":"Jane Doe","email":"jane.doe@gmail.com","status":0,"_id":"x7rurSSvk7hhltxy"}
-{"$$deleted":true,"_id":"8r0ZTAKVkCeWcJtd"}
-{"$$deleted":true,"_id":"F9GMcRun2XBvQTxa"}
-{"$$deleted":true,"_id":"QFIM0qu6TCZK8jTH"}
-{"$$deleted":true,"_id":"VPaAk2e7ozDfhdzj"}
-{"$$deleted":true,"_id":"x7rurSSvk7hhltxy"}
-{"username":"John","fullName":"John Doe","email":"john.doe@gmail.com","status":1,"_id":"9c035oJEROtU9G1Q"}
-{"username":"Adam","fullName":"Adam Doe","email":"adam.doe@gmail.com","status":1,"_id":"nPPnxPxjCFtBcC5r"}
-{"username":"Jane","fullName":"Jane Doe","email":"jane.doe@gmail.com","status":0,"_id":"iMV9DW697HiIndct"}
-{"username":"Susan","fullName":"Susan Doe","email":"susan.doe@gmail.com","status":1,"_id":"VTw1gXm09aAgWVOL"}
-{"username":"Bill","fullName":"Bill Doe","email":"bill.doe@gmail.com","status":1,"_id":"wnBOv5NP2nQ6G0xL"}
+{"username":"John","fullName":"John Doe","email":"john.doe@gmail.com","status":1,"_id":"0DPqMhv09lJ9gbMy"}
+{"username":"Adam","fullName":"Adam Doe","email":"adam.doe@gmail.com","status":1,"_id":"d8LCEZHurwJYGuej"}
+{"username":"Jane","fullName":"Jane Doe","email":"jane.doe@gmail.com","status":0,"_id":"MTD5GN0zgoQIMQeD"}
+{"username":"Susan","fullName":"Susan Doe","email":"susan.doe@gmail.com","status":1,"_id":"64QH4QdH8gqW69Wn"}
+{"username":"Bill","fullName":"Bill Doe","email":"bill.doe@gmail.com","status":1,"_id":"nf5FJ7LaO0JTzCa4"}

@@ -36,7 +36,7 @@ broker.createService(DbService, {
 
 	afterConnected() {
 		this.logger.info("Connected successfully");
-		return this.count().delay(500).then(count => {
+		return this.adapter.count().delay(500).then(count => {
 			if (count == 0) {
 				this.logger.info("Seed products...");
 				let products = _.times(20, i => {
@@ -44,7 +44,7 @@ broker.createService(DbService, {
 						name: "Product " + i
 					};
 				});
-				return this.createMany(products)
+				return this.adapter.insertMany(products)
 					.then(() => this.adapter.count())
 					.then(count => console.log("Saved products:", count ));
 

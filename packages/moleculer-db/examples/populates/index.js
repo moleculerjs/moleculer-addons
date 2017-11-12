@@ -48,11 +48,11 @@ broker.createService(DbService, {
 
 	afterConnected() {
 		this.logger.info("Connected successfully");
-		return this.clear().delay(1000).then(() => {
+		return this.adapter.clear().delay(1000).then(() => {
 			if (users.length == 0) return;
 
 			this.logger.info("Seed Posts collection...");
-			return this.createMany([
+			return this.adapter.insertMany([
 				{ title: "1st post", content: "First post content.", votes: 3, author: users[2]._id },
 				{ title: "2nd post", content: "Labore eum veritatis ut.", votes: 8, author: users[1]._id },
 				{ title: "3rd post", content: "Rerum deleniti repellendus error ea.", votes: 0, author: users[4]._id },
@@ -87,9 +87,9 @@ broker.createService(DbService, {
 
 	afterConnected() {
 		this.logger.info("Connected successfully");
-		return this.clear().then(() => {
+		return this.adapter.clear().then(() => {
 			this.logger.info("Seed Users collection...");
-			return this.createMany([
+			return this.adapter.insertMany([
 				{ username: "John", fullName: "John Doe", email: "john.doe@gmail.com", status: 1 },
 				{ username: "Adam", fullName: "Adam Doe", email: "adam.doe@gmail.com", status: 1 },
 				{ username: "Jane", fullName: "Jane Doe", email: "jane.doe@gmail.com", status: 0 },

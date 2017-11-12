@@ -31,7 +31,7 @@ broker.createService(DbService, {
 
 	afterConnected() {
 		this.logger.info(chalk.green.bold("Connected successfully"));
-		this.clear();
+		this.adapter.clear();
 	},
 
 	entityCreated(json) {

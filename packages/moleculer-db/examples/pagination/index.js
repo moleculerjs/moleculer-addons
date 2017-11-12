@@ -22,17 +22,18 @@ broker.createService(DbService, {
 
 	methods: {
 		seedDB() {
-			return this.createMany(_.times(28, i => {
-				return {
-					title: `Post #${_.padStart(i + 1, 2, "0")}`
-				};
-			}));
+			return this.adapter.clear()
+				.then(() => this.adapter.insertMany(_.times(28, i => {
+					return {
+						title: `Post #${_.padStart(i + 1, 2, "0")}`
+					};
+				})));
 		}
 	},
 
 	afterConnected() {
 		this.logger.info(chalk.green.bold("Connected successfully"));
-		return this.clear().then(() => this.seedDB());
+		return this.seedDB();
 	}
 });
 
