@@ -52,14 +52,15 @@ broker.createService(DbService, {
 			if (users.length == 0) return;
 
 			this.logger.info("Seed Posts collection...");
-			return this.createMany(null, [
+			return this.createMany([
 				{ title: "1st post", content: "First post content.", votes: 3, author: users[2]._id },
 				{ title: "2nd post", content: "Labore eum veritatis ut.", votes: 8, author: users[1]._id },
 				{ title: "3rd post", content: "Rerum deleniti repellendus error ea.", votes: 0, author: users[4]._id },
 				{ title: "4th post", content: "Normal post content.", votes: 4, author: users[3]._id },
 				{ title: "5th post", content: "Voluptatum praesentium voluptatibus est nesciunt fugiat.", votes: 6, author: users[1]._id }
-			]).then(docs => posts = docs);
-		});			
+			]).then(docs => this.transformDocuments(null, {}, docs))
+				.then(docs => posts = docs);
+		});
 	}
 });
 
@@ -88,15 +89,16 @@ broker.createService(DbService, {
 		this.logger.info("Connected successfully");
 		return this.clear().then(() => {
 			this.logger.info("Seed Users collection...");
-			return this.createMany(null, [
+			return this.createMany([
 				{ username: "John", fullName: "John Doe", email: "john.doe@gmail.com", status: 1 },
 				{ username: "Adam", fullName: "Adam Doe", email: "adam.doe@gmail.com", status: 1 },
 				{ username: "Jane", fullName: "Jane Doe", email: "jane.doe@gmail.com", status: 0 },
 				{ username: "Susan", fullName: "Susan Doe", email: "susan.doe@gmail.com", status: 1 },
 				{ username: "Bill", fullName: "Bill Doe", email: "bill.doe@gmail.com", status: 1 }
-			]).then(docs => {
-				users = docs;
-			});
+			]).then(docs => this.transformDocuments(null, {}, docs))
+				.then(docs => {
+					users = docs;
+				});
 		});
 	}
 });
@@ -110,7 +112,7 @@ function start() {
 		.then(() => checker.execute())
 		.catch(console.error)
 		.then(() => broker.stop())
-		.then(() => checker.printTotal());	
+		.then(() => checker.printTotal());
 }
 
 // --- TEST CASES ---

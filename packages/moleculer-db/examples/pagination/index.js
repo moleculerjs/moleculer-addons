@@ -22,7 +22,7 @@ broker.createService(DbService, {
 
 	methods: {
 		seedDB() {
-			return this.createMany(null, _.times(28, i => {
+			return this.createMany(_.times(28, i => {
 				return {
 					title: `Post #${_.padStart(i + 1, 2, "0")}`
 				};
@@ -45,7 +45,7 @@ function start() {
 		.then(() => checker.execute())
 		.catch(console.error)
 		.then(() => broker.stop())
-		.then(() => checker.printTotal());	
+		.then(() => checker.printTotal());
 }
 
 // --- TEST CASES ---

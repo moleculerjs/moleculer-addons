@@ -21,11 +21,11 @@ broker.createService(DbService, {
 
 	actions: {
 		vote(ctx) {
-			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: 1 } }});
+			return this.updateById(ctx.params.id, { $inc: { votes: 1 } });
 		},
 
 		unvote(ctx) {
-			return this.updateById(ctx, { id: ctx.params.id, update: { $inc: { votes: -1 } }});		
+			return this.updateById(ctx.params.id, { $inc: { votes: -1 } });
 		}
 	},
 
@@ -57,7 +57,7 @@ function start() {
 		.then(() => checker.execute())
 		.catch(console.error)
 		.then(() => broker.stop())
-		.then(() => checker.printTotal());	
+		.then(() => checker.printTotal());
 }
 
 // --- TEST CASES ---
@@ -102,7 +102,7 @@ checker.add("--- GET ---", () => broker.call("posts.get", { id }), res => {
 });
 
 // Vote a post
-checker.add("--- VOTE ---", () => broker.call("posts.vote", { 
+checker.add("--- VOTE ---", () => broker.call("posts.vote", {
 	id
 }), res => {
 	console.log(res);
@@ -110,9 +110,9 @@ checker.add("--- VOTE ---", () => broker.call("posts.vote", {
 });
 
 // Update a posts
-checker.add("--- UPDATE ---", () => broker.call("posts.update", { 
-	id, 
-	title: "Hello 2", 
+checker.add("--- UPDATE ---", () => broker.call("posts.update", {
+	id,
+	title: "Hello 2",
 	content: "Post content 2",
 	updatedAt: new Date()
 }), doc => {
@@ -134,7 +134,7 @@ checker.add("--- GET[] mapping ---", () => broker.call("posts.get", { id: [id], 
 });
 
 // Unvote a post
-checker.add("--- UNVOTE ---", () => broker.call("posts.unvote", { 
+checker.add("--- UNVOTE ---", () => broker.call("posts.unvote", {
 	id
 }), res => {
 	console.log(res);

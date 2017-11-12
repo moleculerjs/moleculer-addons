@@ -44,12 +44,12 @@ broker.createService(DbService, {
 						name: "Product " + i
 					};
 				});
-				return this.createMany(null, products)
+				return this.createMany(products)
 					.then(() => this.adapter.count())
 					.then(count => console.log("Saved products:", count ));
 
 			}
-		});		
+		});
 	}
 });
 
@@ -62,7 +62,7 @@ function start() {
 		.then(() => checker.execute())
 		.catch(console.error)
 		.then(() => broker.stop())
-		.then(() => checker.printTotal());	
+		.then(() => checker.printTotal());
 }
 
 // --- TEST CASES ---
@@ -84,8 +84,8 @@ checker.add("GET BY ID", () => broker.call("products.get", { id }), res => {
 });
 
 // Update a product
-checker.add("UPDATE", () => broker.call("products.update", { 
-	id, 
+checker.add("UPDATE", () => broker.call("products.update", {
+	id,
 	name: "Modified product"
 }), res => {
 	console.log(res);
