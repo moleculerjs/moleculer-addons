@@ -417,8 +417,8 @@ module.exports = {
 		 *
 		 * @param {Object} query
 		 */
-		findOne(query) {
-			return this.adapter.find({ query })
+		findOne(params) {
+			return this.adapter.find(params)
 				.then(res => {
 					if (res && res.length > 0)
 						return res[0];

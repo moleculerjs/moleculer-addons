@@ -250,8 +250,8 @@ describe("Test reconnecting", () => {
 
 
 describe("Test DbService methods", () => {
-	const docs = [];
 	const doc = { id : 1 };
+	const docs = [doc];
 
 	const adapter = {
 		init: jest.fn(() => Promise.resolve()),
@@ -335,6 +335,17 @@ describe("Test DbService methods", () => {
 
 			expect(adapter.count).toHaveBeenCalledTimes(1);
 			expect(adapter.count).toHaveBeenCalledWith({ limit: null, offset: null });
+		}).catch(protectReject);
+	});
+
+	it("should call 'find' of adapter", () => {
+		adapter.find.mockClear();
+		let params = {query: { username: "john" }};
+		return service.findOne(params).then(res => {
+			expect(res).toBe(docs[0]);
+
+			expect(adapter.find).toHaveBeenCalledTimes(1);
+			expect(adapter.find).toHaveBeenCalledWith(params);
 		}).catch(protectReject);
 	});
 
