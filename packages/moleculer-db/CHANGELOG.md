@@ -10,7 +10,7 @@
 - `this.getById(ctx, params)` arguments have been changed. First argument is the ID or IDs, second argument is a `decoding` boolean. If true, it calls the `decodeID` method with every ID. The mapping feature has been moved to `get` action.
 - `this.updateById(ctx, params)` method has been removed. Use `this.adapter.updateById(params.id, params.update)` instead.
 - `this.updateMany(ctx, params)` method has been removed. Use `this.adapter.updateMany(params.query, params.update)` instead.
-- `this.removeById(ctx, params)` method has been removed. Use `this.adapter.removeById(params.id, params.update)` instead.
+- `this.removeById(ctx, params)` method has been removed. Use `this.adapter.removeById(params.id)` instead.
 - `this.removeMany(ctx, params)` method has been removed. Use `this.adapter.removeMany(params.query)` instead.
 - `this.clear(ctx)` method has been removed. Use `this.adapter.clear()` instead and call the `entityChanged` method.
 
