@@ -88,7 +88,7 @@ module.exports = {
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
-				return this.find(params)
+				return this.adapter.find(params)
 					.then(docs => this.transformDocuments(ctx, params, docs));
 
 			}
@@ -118,7 +118,13 @@ module.exports = {
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
 
-				return this.count(params);
+				// Remove pagination params
+				if (params && params.limit)
+					params.limit = null;
+				if (params && params.offset)
+					params.offset = null;
+
+				return this.adapter.count(params);
 			}
 		},
 
@@ -158,10 +164,10 @@ module.exports = {
 
 				return this.Promise.all([
 					// Get rows
-					this.find(params),
+					this.adapter.find(params),
 
 					// Get count of all rows
-					this.count(params)
+					this.adapter.count(params)
 				]).then(res => {
 					return this.transformDocuments(ctx, params, res[0])
 						.then(docs => {
@@ -193,7 +199,8 @@ module.exports = {
 			handler(ctx) {
 				let entity = ctx.params;
 
-				return this.create(entity)
+				return this.validateEntity(entity)
+					.then(entity => this.adapter.insert(entity))
 					.then(doc => this.transformDocuments(ctx, {}, doc))
 					.then(json => this.entityChanged("created", json, ctx).then(() => json));
 
@@ -220,11 +227,13 @@ module.exports = {
 
 				return this.Promise.resolve()
 					.then(() => {
-						if (Array.isArray(params.entities))
-							return this.createMany(params.entities);
-						else if (params.entity)
-							return this.create(params.entity);
-
+						if (Array.isArray(params.entities)) {
+							return this.validateEntity(params.entities)
+								.then(entities => this.adapter.insertMany(entities));
+						} else if (params.entity) {
+							return this.validateEntity(params.entity)
+								.then(entity => this.adapter.insert(entity));
+						}
 						return Promise.reject(new MoleculerClientError("Invalid request! The 'params' must contain 'entity' or 'entities'!", 400));
 					})
 					.then(docs => this.transformDocuments(ctx, params, docs))
@@ -309,12 +318,12 @@ module.exports = {
 				// Convert fields from params to "$set" update object
 				Object.keys(ctx.params).forEach(prop => {
 					if (prop == "id" || prop == this.settings.idField)
-						id = ctx.params[prop];
+						id = this.decodeID(ctx.params[prop]);
 					else
 						sets[prop] = ctx.params[prop];
 				});
 
-				return this.updateById(id, { "$set": sets }, true)
+				return this.adapter.updateById(id, { "$set": sets })
 					.then(doc => {
 						if (!doc)
 							return Promise.reject(new EntityNotFoundError(id));
@@ -332,7 +341,6 @@ module.exports = {
 		 * @actions
 		 *
 		 * @param {any} id - ID of entity.
-		 *
 		 * @returns {Number} Count of removed entities.
 		 *
 		 * @throws {EntityNotFoundError} - 404 Entity not found
@@ -343,9 +351,9 @@ module.exports = {
 			},
 			handler(ctx) {
 				let params = this.sanitizeParams(ctx, ctx.params);
-				const id = params.id;
+				const id = this.decodeID(params.id);
 
-				return this.removeById(id, true)
+				return this.adapter.removeById(id)
 					.then(doc => {
 						if (!doc)
 							return Promise.reject(new EntityNotFoundError(params.id));
@@ -442,34 +450,6 @@ module.exports = {
 		},
 
 		/**
-		 * Find entities by query. `params` contains the query fields.
-		 *
-		 * @methods
-		 * @param {Object} params - Params of request.
-		 * @returns {Array<Object>} List of found entities.
-		 */
-		find(params) {
-			return this.adapter.find(params);
-		},
-
-		/**
-		 * Get count of entities by query.
-		 *
-		 * @methods
-		 * @param {Object} params - Params of request.
-		 * @returns {Number} Count of found entities.
-		 */
-		count(params) {
-			// Remove pagination params
-			if (params && params.limit)
-				params.limit = null;
-			if (params && params.offset)
-				params.offset = null;
-
-			return this.adapter.count(params);
-		},
-
-		/**
 		 * Find only one item by query.
 		 *
 		 * @param {Object} query
@@ -480,30 +460,6 @@ module.exports = {
 					if (res && res.length > 0)
 						return res[0];
 				});
-		},
-
-		/**
-		 * Create a new entity.
-		 *
-		 * @methods
-		 * @param {Object} entity - Entity.
-		 * @returns {Object} Saved entity.
-		 */
-		create(entity) {
-			return this.validateEntity(entity)
-				.then(entity => this.adapter.insert(entity));
-		},
-
-		/**
-		 * Create many new entities.
-		 *
-		 * @methods
-		 * @param {Array<Object>} entitites - Entities.
-		 * @returns {Array<Object>} Saved entities.
-		 */
-		createMany(entities) {
-			return this.validateEntity(entities)
-				.then(entities => this.adapter.insertMany(entities));
 		},
 
 		/**
@@ -530,64 +486,6 @@ module.exports = {
 		},
 
 		/**
-		 * Update an entity by ID.
-		 *
-		 * @methods
-		 * @param {String|Number} id - ID
-		 * @param {Object} update - Update config.
-		 * @param {Boolean} decoding - Need to decode IDs.
-		 * @returns {Object} Updated entity.
-		 */
-		updateById(id, update, decoding) {
-			if (decoding)
-				id = this.decodeID(id);
-
-			return this.adapter.updateById(id, update);
-		},
-
-		/**
-		 * Update multiple entities by query.
-		 *
-		 * @methods
-		 * @param {Object} query - Query.
-		 * @param {Object} update - Update config.
-		 * @returns {Object} Updated entities.
-		 */
-		updateMany(query, update) {
-			return this.adapter.updateMany(query, update);
-			//	.then(doc => this.transformDocuments(ctx, params, doc))
-			//	.then(json => this.entityChanged("updated", json, ctx).then(() => json));
-		},
-
-		/**
-		 * Remove an entity by ID.
-		 *
-		 * @methods
-		 * @param {String|Number} id - ID
-		 * @param {Boolean} decoding - Need to decode IDs.
-		 * @returns {Number} Count of removed entities.
-		 */
-		removeById(id, decoding) {
-			if (decoding)
-				id = this.decodeID(id);
-
-			return this.adapter.removeById(id);
-		},
-
-		/**
-		 * Remove multiple entities by query.
-		 *
-		 * @methods
-		 * @param {Object} query - Query.
-		 * @returns {Number} Count of removed entities.
-		 */
-		removeMany(query) {
-			return this.adapter.removeMany(query);
-				//.then(doc => this.transformDocuments(ctx, doc))
-				//.then(json => this.entityChanged("removed", json, ctx).then(() => json));
-		},
-
-		/**
 		 * Delete all entities.
 		 * > After delete, clear the cache & call lifecycle events.
 		 *
@@ -597,7 +495,6 @@ module.exports = {
 		 */
 		clear() {
 			return this.adapter.clear();
-				//.then(count => this.entityChanged("removed", count, ctx).then(() => count));
 		},
 
 		/**

@@ -21,11 +21,11 @@ broker.createService(DbService, {
 
 	actions: {
 		vote(ctx) {
-			return this.updateById(ctx.params.id, { $inc: { votes: 1 } });
+			return this.adapter.updateById(ctx.params.id, { $inc: { votes: 1 } });
 		},
 
 		unvote(ctx) {
-			return this.updateById(ctx.params.id, { $inc: { votes: -1 } });
+			return this.adapter.updateById(ctx.params.id, { $inc: { votes: -1 } });
 		}
 	},
 
