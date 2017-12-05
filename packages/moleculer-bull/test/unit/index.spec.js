@@ -88,16 +88,14 @@ describe("Test BullService job with delay", () => {
 	it("should be able to add a job with delay options", () => {
 		service.getQueue = jest.fn(() => ({ add: addDelayedCB }));
 
-		service.createJob("task.scheduled", payload, { delay: 1000 });
+		service.createJob("task.scheduled", payload, { delay: 1000, a:1 });
 
 		expect(service.getQueue).toHaveBeenCalledTimes(1);
 		expect(service.getQueue).toHaveBeenCalledWith("task.scheduled");
 
-		expect(addCB).toHaveBeenCalledTimes(1);
-
 		setTimeout(() => {
-			expect(addCB).toHaveBeenCalledTimes(2);
-			expect(addCB).toHaveBeenCalledWith(payload);
+			expect(addDelayedCB).toHaveBeenCalledTimes(1);
+			expect(addDelayedCB).toHaveBeenCalledWith(payload);
 		},1001);
 	});
 
