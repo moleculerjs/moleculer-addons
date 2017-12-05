@@ -4,6 +4,7 @@ jest.mock("bull");
 
 let processCB = jest.fn();
 let addCB = jest.fn();
+let addDelayedCB = jest.fn();
 
 let Queue = require("bull");
 Queue.mockImplementation(() => ({
@@ -72,6 +73,32 @@ describe("Test BullService created handler", () => {
 
 		expect(addCB).toHaveBeenCalledTimes(1);
 		expect(addCB).toHaveBeenCalledWith(payload);
+	});
+
+});
+
+
+describe("Test BullService job with delay", () => {
+	const payload = { a: 10 };
+	const broker = new ServiceBroker();
+	const service = broker.createService({
+		mixins: [BullService()]
+	});
+
+	it("should be able to add a job with delay options", () => {
+		service.getQueue = jest.fn(() => ({ add: addDelayedCB }));
+
+		service.createJob("task.scheduled", payload, { delay: 1000 });
+
+		expect(service.getQueue).toHaveBeenCalledTimes(1);
+		expect(service.getQueue).toHaveBeenCalledWith("task.scheduled");
+
+		expect(addCB).toHaveBeenCalledTimes(1);
+
+		setTimeout(() => {
+			expect(addCB).toHaveBeenCalledTimes(2);
+			expect(addCB).toHaveBeenCalledWith(payload);
+		},1001);
 	});
 
 });
