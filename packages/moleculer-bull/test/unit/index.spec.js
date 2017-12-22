@@ -103,3 +103,56 @@ describe("Test BullService job with delay", () => {
 });
 
 
+
+describe("Test BullService createJob return a promise", () => {
+	const payload = { a: 10 };
+	const broker = new ServiceBroker();
+	const service = broker.createService({
+		mixins: [BullService()]
+	});
+
+	let processCB = jest.fn();
+	let addCB = jest.fn().mockImplementation(() => {
+		return Promise.resolve({ id: 'id'})
+	});
+
+
+	let Queue = require("bull");
+	Queue.mockImplementation(() => ({
+		process: processCB,
+		add: addCB
+	}));
+
+
+	it("should be able to add a job with delay options", async () => {
+		service.getQueue = jest.fn(() => ({ add: addCB }));
+
+		function promisedFunction (queue, payload) {
+			return new Promise((resolve, reject) => {
+				service.createJob(queue, payload)
+					.then(data => {
+						resolve(data)
+					}).catch(err => {
+						reject(err)
+					});
+			})
+		}
+
+		return promisedFunction("task.scheduled", payload)
+			.then(job => {
+				expect(service.getQueue).toHaveBeenCalledTimes(1);
+				expect(service.getQueue).toHaveBeenCalledWith("task.scheduled");
+
+				expect(addCB).toHaveBeenCalledTimes(1);
+				expect(addCB).toHaveBeenCalledWith(payload);
+
+				expect(job).toBeDefined();
+				expect(job.id).toBeDefined();
+			});
+
+
+
+	});
+
+});
+
