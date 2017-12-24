@@ -124,7 +124,7 @@ describe("Test BullService createJob return a promise", () => {
 	}));
 
 
-	it("should be able to add a job with delay options", async () => {
+	it("should be able to add a job with delay options", () => {
 		service.getQueue = jest.fn(() => ({ add: addCB }));
 
 		function promisedFunction (queue, payload) {
