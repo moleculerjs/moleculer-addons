@@ -113,7 +113,7 @@ describe("Test BullService createJob return a promise", () => {
 
 	let processCB = jest.fn();
 	let addCB = jest.fn().mockImplementation(() => {
-		return Promise.resolve({ id: 'id'})
+		return Promise.resolve({ id: "id"});
 	});
 
 
@@ -131,11 +131,11 @@ describe("Test BullService createJob return a promise", () => {
 			return new Promise((resolve, reject) => {
 				service.createJob(queue, payload)
 					.then(data => {
-						resolve(data)
+						resolve(data);
 					}).catch(err => {
-						reject(err)
+						reject(err);
 					});
-			})
+			});
 		}
 
 		return promisedFunction("task.scheduled", payload)
