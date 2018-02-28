@@ -18,9 +18,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:ice-services/moleculer-addons.git"
+    "url": "git@github.com:moleculerjs/moleculer-addons.git"
   },
-  "homepage": "https://github.com/ice-services/moleculer-addons/tree/master/packages/moleculer-bull#readme",
+  "homepage": "https://github.com/moleculerjs/moleculer-addons/tree/master/packages/moleculer-bull#readme",
   "author": "Ice Services",
   "license": "MIT",
   "peerDependencies": {

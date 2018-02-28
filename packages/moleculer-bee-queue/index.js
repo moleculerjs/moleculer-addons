@@ -1,6 +1,6 @@
 /*
  * moleculer-bee-queue
- * Copyright (c) 2017 Ice Services (https://github.com/ice-services/moleculer-addons)
+ * Copyright (c) 2017 Ice Services (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
