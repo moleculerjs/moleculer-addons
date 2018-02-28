@@ -20,7 +20,7 @@
     "url": "git+https://github.com/moleculerjs/moleculer-addons.git"
   },
   "keywords": [],
-  "author": "Ice Services",
+  "author": "MoleculerJS",
   "license": "MIT",
   "homepage": "https://github.com/moleculerjs/moleculer-addons#readme",
   "devDependencies": {
