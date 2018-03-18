@@ -37,20 +37,28 @@ describe("Test BullService created handler", () => {
 		queues: {
 			"task.first": jest.fn(),
 			"task.second": jest.fn(),
+			"task.concurrency": {
+				concurrency: 100,
+				process(job) {
+					return jest.fn();
+				},
+			},
 		}
 	});
 
 	it("should be created queues", () => {
 		expect(service).toBeDefined();
-		expect(Object.keys(service.$queues).length).toBe(2);
+		expect(Object.keys(service.$queues).length).toBe(3);
 		expect(service.$queues["task.first"]).toBeDefined();
 		expect(service.$queues["task.second"]).toBeDefined();
+		expect(service.$queues["task.concurrency"]).toBeDefined();
 
-		expect(Queue).toHaveBeenCalledTimes(2);
+		expect(Queue).toHaveBeenCalledTimes(3);
 		expect(Queue).toHaveBeenCalledWith("task.first", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.second", url, opts);
+		expect(Queue).toHaveBeenCalledWith("task.concurrency", url, opts);
 
-		expect(processCB).toHaveBeenCalledTimes(2);
+		expect(processCB).toHaveBeenCalledTimes(3);
 	});
 
 });
