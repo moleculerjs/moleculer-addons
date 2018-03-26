@@ -30,6 +30,21 @@ describe("Test BullService created handler", () => {
 	const opts = { a: 5 };
 	const url = "redis://localhost";
 
+	const concurrency = {
+		concurrency: 100,
+		process: jest.fn(),
+	};
+	const named = {
+		name: "name",
+		process: jest.fn(),
+	};
+
+	const namedconcurrency = {
+		name: "name",
+		concurrency: 100,
+		process: jest.fn(),
+	}
+
 	const broker = new ServiceBroker();
 	const service = broker.createService({
 		mixins: [BullService(url, opts)],
@@ -37,28 +52,33 @@ describe("Test BullService created handler", () => {
 		queues: {
 			"task.first": jest.fn(),
 			"task.second": jest.fn(),
-			"task.concurrency": {
-				concurrency: 100,
-				process(job) {
-					return jest.fn();
-				},
-			},
+			"task.concurrency": concurrency,
+			"task.name": named,
+			"task.name.concurrency": namedconcurrency,
 		}
 	});
 
 	it("should be created queues", () => {
 		expect(service).toBeDefined();
-		expect(Object.keys(service.$queues).length).toBe(3);
+		expect(Object.keys(service.$queues).length).toBe(5);
 		expect(service.$queues["task.first"]).toBeDefined();
 		expect(service.$queues["task.second"]).toBeDefined();
 		expect(service.$queues["task.concurrency"]).toBeDefined();
+		expect(service.$queues["task.name"]).toBeDefined();
 
-		expect(Queue).toHaveBeenCalledTimes(3);
+		expect(Queue).toHaveBeenCalledTimes(5);
 		expect(Queue).toHaveBeenCalledWith("task.first", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.second", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.concurrency", url, opts);
+		expect(Queue).toHaveBeenCalledWith("task.name", url, opts);
+		expect(Queue).toHaveBeenCalledWith("task.name.concurrency", url, opts);
 
-		expect(processCB).toHaveBeenCalledTimes(3);
+		expect(processCB).toHaveBeenCalledTimes(5);
+		expect(processCB).toHaveBeenCalledWith(expect.anything());
+		expect(processCB).toHaveBeenCalledWith(expect.anything());
+		expect(processCB).toHaveBeenCalledWith(concurrency.concurrency, expect.anything());
+		expect(processCB).toHaveBeenCalledWith(named.name, expect.anything());
+		expect(processCB).toHaveBeenCalledWith(namedconcurrency.name, namedconcurrency.concurrency, expect.anything());
 	});
 
 });
@@ -163,4 +183,3 @@ describe("Test BullService createJob return a promise", () => {
 	});
 
 });
-

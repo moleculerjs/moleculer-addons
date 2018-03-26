@@ -57,8 +57,21 @@ module.exports = function createService(url, queueOpts) {
 				_.forIn(this.schema.queues, (fn, name) => {
 					if(typeof fn === "function")
 						this.getQueue(name).process(fn.bind(this));
-					else
-						this.getQueue(name).process(fn.concurrency, fn.process.bind(this));
+					else {
+						let args = [];
+
+						if (fn.name) {
+							args.push(fn.name);
+						}
+
+						if (fn.concurrency) {
+							args.push(fn.concurrency);
+						}
+
+						args.push(fn.process.bind(this));
+
+						this.getQueue(name).process.apply(null, args);
+					}
 				});
 			}
 
