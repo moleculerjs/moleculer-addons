@@ -1,6 +1,6 @@
 {
   "name": "moleculer-fake",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Fake data generator by Fakerator",
   "main": "index.js",
   "scripts": {
@@ -29,13 +29,13 @@
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "3.0.0",
-    "eslint": "4.8.0",
-    "jest": "20.0.4",
-    "jest-cli": "20.0.4",
-    "lolex": "2.1.3",
+    "eslint": "4.19.1",
+    "jest": "22.4.3",
+    "jest-cli": "22.4.3",
+    "lolex": "2.3.2",
     "moleculer": "0.12.1",
-    "nodemon": "1.12.1",
-    "npm-check": "5.4.5"
+    "nodemon": "1.17.2",
+    "npm-check": "5.6.0"
   },
   "jest": {
     "testEnvironment": "node",
@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "fakerator": "0.3.0",
-    "lodash": "4.17.4"
+    "lodash": "4.17.5"
   }
 }
