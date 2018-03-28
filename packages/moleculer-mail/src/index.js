@@ -152,11 +152,6 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		if (!this.settings.transport) {
-			this.logger.error("Missing transport configuration!");
-			return;
-		}
-
 		this.templates = {};
 		if (this.settings.templateFolder) {
 			if (!fs.existsSync(this.settings.templateFolder)) {
@@ -165,7 +160,18 @@ module.exports = {
 			}
 		}
 
-		this.transporter = nodemailer.createTransport(this.settings.transport);
+		if (_.isFunction(this.createTransport)) {
+			this.transporter = this.createTransport();
+
+		} else {
+			if (!this.settings.transport) {
+				this.logger.error("Missing transport configuration!");
+				return;
+			}
+
+			this.transporter = nodemailer.createTransport(this.settings.transport);
+		}
+
 		if (this.transporter) {
 			if (this.settings.htmlToText)
 				this.transporter.use("compile", htmlToText());

@@ -28,16 +28,16 @@
   "devDependencies": {
     "benchmarkify": "2.1.0",
     "coveralls": "3.0.0",
-    "eslint": "4.10.0",
+    "eslint": "4.19.1",
     "handlebars": "4.0.11",
-    "jest": "20.0.4",
-    "jest-cli": "20.0.4",
-    "lolex": "2.2.0",
-    "moleculer": "0.11.6",
-    "node-sass": "4.6.0",
-    "nodemon": "1.12.1",
-    "npm-check": "5.5.2",
-    "pug": "2.0.0-rc.1"
+    "jest": "22.4.3",
+    "jest-cli": "22.4.3",
+    "lolex": "2.3.2",
+    "moleculer": "0.12.1",
+    "node-sass": "4.8.3",
+    "nodemon": "1.17.2",
+    "npm-check": "5.6.0",
+    "pug": "2.0.3"
   },
   "jest": {
     "testEnvironment": "node",
@@ -51,8 +51,8 @@
   },
   "dependencies": {
     "email-templates": "2.7.1",
-    "lodash": "4.17.4",
-    "nodemailer": "4.3.1",
+    "lodash": "4.17.5",
+    "nodemailer": "4.6.3",
     "nodemailer-html-to-text": "2.1.0"
   }
 }
