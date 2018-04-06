@@ -7,6 +7,7 @@ let addCB = jest.fn();
 let addDelayedCB = jest.fn();
 
 let Queue = require("bull");
+
 Queue.mockImplementation(() => ({
 	process: processCB,
 	add: addCB
@@ -25,6 +26,8 @@ describe("Test BullService constructor", () => {
 	});
 
 });
+
+
 
 describe("Test BullService created handler", () => {
 	const opts = { a: 5 };
@@ -61,10 +64,12 @@ describe("Test BullService created handler", () => {
 	it("should be created queues", () => {
 		expect(service).toBeDefined();
 		expect(Object.keys(service.$queues).length).toBe(5);
+
 		expect(service.$queues["task.first"]).toBeDefined();
 		expect(service.$queues["task.second"]).toBeDefined();
 		expect(service.$queues["task.concurrency"]).toBeDefined();
 		expect(service.$queues["task.name"]).toBeDefined();
+		expect(service.$queues["task.name.concurrency"]).toBeDefined();
 
 		expect(Queue).toHaveBeenCalledTimes(5);
 		expect(Queue).toHaveBeenCalledWith("task.first", url, opts);
@@ -81,9 +86,18 @@ describe("Test BullService created handler", () => {
 		expect(processCB).toHaveBeenCalledWith(namedconcurrency.name, namedconcurrency.concurrency, expect.anything());
 	});
 
+	it("should return defined queues", () => {
+		expect(service.getQueue("task.first")).toBeDefined();
+		expect(service.getQueue("task.second")).toBeDefined();
+		expect(service.getQueue("task.concurrency")).toBeDefined();
+		expect(service.getQueue("task.name")).toBeDefined();
+		expect(service.getQueue("task.name.concurrency")).toBeDefined();
+	});
+
 });
 
-describe("Test BullService created handler", () => {
+
+describe("Test BullService getQueue when creating a job", () => {
 	const payload = { a: 10 };
 
 	const broker = new ServiceBroker();
@@ -91,7 +105,7 @@ describe("Test BullService created handler", () => {
 		mixins: [BullService()]
 	});
 
-	it("should be call getQueue", () => {
+	it("should call getQueue", () => {
 		service.getQueue = jest.fn(() => ({ add: addCB }));
 
 		service.createJob("task.first", payload);
@@ -101,6 +115,31 @@ describe("Test BullService created handler", () => {
 
 		expect(addCB).toHaveBeenCalledTimes(1);
 		expect(addCB).toHaveBeenCalledWith(payload);
+	});
+
+});
+
+describe("Test BullService job with named queue", () => {
+	const payload = { a: 10 };
+	const jobOpts = { a: 1 };
+	const namedAdd = jest.fn();
+	const name = "named";
+
+	const broker = new ServiceBroker();
+	const service = broker.createService({
+		mixins: [BullService()]
+	});
+
+	it("should be able to add a named job", () => {
+		service.getQueue = jest.fn(() => ({ add: namedAdd }));
+
+		service.createJob("task.scheduled", name, payload, jobOpts);
+
+		expect(service.getQueue).toHaveBeenCalledTimes(1);
+		expect(service.getQueue).toHaveBeenCalledWith("task.scheduled");
+
+		expect(namedAdd).toHaveBeenCalledTimes(1);
+		expect(namedAdd).toHaveBeenCalledWith("named", payload, jobOpts);
 	});
 
 });
@@ -122,10 +161,8 @@ describe("Test BullService job with delay", () => {
 		expect(service.getQueue).toHaveBeenCalledTimes(1);
 		expect(service.getQueue).toHaveBeenCalledWith("task.scheduled");
 
-		setTimeout(() => {
-			expect(addDelayedCB).toHaveBeenCalledTimes(1);
-			expect(addDelayedCB).toHaveBeenCalledWith(payload, jobOpts);
-		},1001);
+		expect(addDelayedCB).toHaveBeenCalledTimes(1);
+		expect(addDelayedCB).toHaveBeenCalledWith(payload, jobOpts);
 	});
 
 });
@@ -144,15 +181,7 @@ describe("Test BullService createJob return a promise", () => {
 		return Promise.resolve({ id: "id"});
 	});
 
-
-	let Queue = require("bull");
-	Queue.mockImplementation(() => ({
-		process: processCB,
-		add: addCB
-	}));
-
-
-	it("should be able to add a job with delay options", () => {
+	it("should be able to add a job", () => {
 		service.getQueue = jest.fn(() => ({ add: addCB }));
 
 		function promisedFunction (queue, payload) {
@@ -177,9 +206,6 @@ describe("Test BullService createJob return a promise", () => {
 				expect(job).toBeDefined();
 				expect(job.id).toBeDefined();
 			});
-
-
-
 	});
 
 });
