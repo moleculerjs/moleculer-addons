@@ -25,15 +25,19 @@ module.exports = function createService(url, queueOpts) {
 			 * Create a new job
 			 *
 			 * @param {String} name
+			 * @param {any} jobName
 			 * @param {any} payload
 			 * @param {any} opts
 			 * @returns {Job}
 			 */
-			createJob(name, payload, opts) {
+			createJob(name, jobName, payload, opts) {
 				if(opts)
-					return this.getQueue(name).add(payload, opts);
+					return this.getQueue(name).add(jobName, payload, opts);
 				else
-					return this.getQueue(name).add(payload);
+					if (payload)
+						return this.getQueue(name).add(jobName, payload);
+					else
+						return this.getQueue(name).add(jobName);
 			},
 
 			/**

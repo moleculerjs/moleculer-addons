@@ -35,6 +35,33 @@ broker.createService({
 });
 ```
 
+## Create queue worker service with concurrency and named jobs
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "task-worker",
+    mixins: [QueueService()],
+
+    queues: {
+        "mail.send": {
+            name: 'important',
+            concurrency: 5,
+            process(job) {
+                this.logger.info("New job received!", job.data);
+                job.progress(10);
+
+                return this.Promise.resolve({
+                    done: true,
+                    id: job.data.id,
+                    worker: process.pid
+                });
+            }
+        }
+    }
+});
+```
+
 ## Create job in service
 ```js
 const QueueService = require("moleculer-bull");
@@ -44,8 +71,32 @@ broker.createService({
     mixins: [QueueService()],
 
     methods: {
-        sendEmail(data) {
+        sendEmail(payload) {
             this.createJob("mail.send", payload);
+
+            this.getQueue("mail.send").on("global:progress", (jobID, progress) => {
+                this.logger.info(`Job #${jobID} progress is ${progress}%`);
+            });
+
+            this.getQueue("mail.send").on("global:completed", (job, res) => {
+                this.logger.info(`Job #${job.id} completed!. Result:`, res);
+            });
+        }
+    }
+});
+```
+
+## Create named job in service
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "job-maker",
+    mixins: [QueueService()],
+
+    methods: {
+        sendEmail(payload) {
+            this.createJob("mail.send", "important", payload);
 
             this.getQueue("mail.send").on("global:progress", (jobID, progress) => {
                 this.logger.info(`Job #${jobID} progress is ${progress}%`);
