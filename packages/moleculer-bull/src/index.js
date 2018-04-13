@@ -74,7 +74,7 @@ module.exports = function createService(url, queueOpts) {
 
 						args.push(fn.process.bind(this));
 
-						this.getQueue(name).process.apply(null, args);
+						this.getQueue(name).process(...args);
 					}
 				});
 			}
