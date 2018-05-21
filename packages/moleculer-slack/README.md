@@ -1,13 +1,13 @@
 ![Moleculer logo](http://moleculer.services/images/banner.png)
 
-# moleculer-twilio [![NPM version](https://img.shields.io/npm/v/moleculer-twilio.svg)](https://www.npmjs.com/package/moleculer-twilio)
+# moleculer-slack [![NPM version](https://img.shields.io/npm/v/moleculer-slack.svg)](https://www.npmjs.com/package/moleculer-slack)
 
-Send SMS using Twilio API.
+Send Messages to Slack API.
 
 # Install
 
 ```bash
-$ npm install moleculer-twilio --save
+$ npm install moleculer-slack --save
 ```
 
 # Usage
@@ -16,17 +16,17 @@ $ npm install moleculer-twilio --save
 
 ```js
 let { ServiceBroker }     = require("moleculer");
-let SmsService             = require("../../index");
+let SlackService             = require("../../index");
 
 // Create broker
 let broker = new ServiceBroker({ logger: console });
 
 // Load my service
 broker.createService({
-    name: "twilio",
-    mixins: [SmsService],
+    name: "slack",
+    mixins: [SlackService],
     settings: {
-        phoneNumber: "+15005550006"
+        text: "Hello slack"
     }
 });
 
@@ -34,8 +34,8 @@ broker.createService({
 broker.start().then(() => {
 
     broker
-        .call("twilio.send", { to: "+14108675309", message: "Hello Twilio!" })
-        .then(sms => console.log("SMS sent. Sid:", sms.sid))
+        .call("slack.send", { message: "Hello Slack!" })
+        .then(res => console.log("Slack message sent. Sid:", res.ts))
         .catch(console.error);
 
 });
@@ -46,9 +46,8 @@ broker.start().then(() => {
 <!-- AUTO-CONTENT-START:SETTINGS -->
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `accountSid` | `String` | **required** | Twilio account Sid. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "ACCOUNT SID" here or set `TWILIO_ACCOUNT_SID` env var. |
-| `authToken` | `String` | **required** | Twilio auth token. Visit your [Twilio dashboard's](https://www.twilio.com/console/voice/dashboard) main page. Click "Show API Credentials", then copy and paste your "AUTH TOKEN" here or set `TWILIO_AUTH_TOKEN` env var. |
-| `phoneNumber` | `String` | **required** | This is the 'From' phone number you'd like to use to send the SMS. This phone number is assigned to you by [Twilio](https://www.twilio.com/console/phone-numbers/incoming). |
+| `slackToken` | `String` | **required** | Slack API Token. Visit your [Slack App dashboard's](https://www.slack.com/apps) main page. Click "Create App, Generate Token", then copy and paste your "API TOKEN" here. |
+| `slackChannel` | `String` | **required** | Slack API Token. Visit your [Slack App dashboard's](https://www.slack.com/apps) main page. Add incoming webhook and create/select a channel, then copy and paste here. |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
@@ -68,14 +67,12 @@ broker.start().then(() => {
 <!-- AUTO-CONTENT-START:ACTIONS -->
 ## `send` 
 
-Send an SMS
+Send a Slack Message
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `to` | `String` | **required** | Target phone number |
 | `message` | `String` | **required** | Message text |
-| `mediaUrl` | `String` | - | Media URL |
 
 ### Results
 **Type:** `String`
@@ -124,16 +121,14 @@ _<sup>Since: {{this}}</sup>_
 # Methods
 
 <!-- AUTO-CONTENT-START:METHODS -->
-## `sendSMS` 
+## `sendMessage` 
 
-Send an SMS
+Send a slack message
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `to` | `String` | **required** | Target phone number |
-| `body` | `String` | `"\"\""` | Body of SMS |
-| `mediaUrl` | `String` | - | Media URL |
+| `message` | `String` | - | Body of the message |
 
 ### Results
 **Type:** `String`
