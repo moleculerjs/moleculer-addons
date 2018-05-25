@@ -19,6 +19,7 @@ This is a monorepo, contains multiple services & addons for Moleculer project.
 | [moleculer-elasticsearch](/packages/moleculer-elasticsearch#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-elasticsearch.svg)](https://www.npmjs.com/package/moleculer-elasticsearch) | Elasticsearch service for Moleculer. |
 | [moleculer-fake](/packages/moleculer-fake#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-fake.svg)](https://www.npmjs.com/package/moleculer-fake) | Fake data generator by Fakerator |
 | [moleculer-mail](/packages/moleculer-mail#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-mail.svg)](https://www.npmjs.com/package/moleculer-mail) | Send emails |
+| [moleculer-slack](/packages/moleculer-slack#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-slack.svg)](https://www.npmjs.com/package/moleculer-slack) | Send Messages to slack |
 | [moleculer-twilio](/packages/moleculer-twilio#readme) | [![NPM version](https://img.shields.io/npm/v/moleculer-twilio.svg)](https://www.npmjs.com/package/moleculer-twilio) | Send SMS Message with Twilio. |
 <!-- AUTO-GENERATED-CONTENT:END -->
 
