@@ -41,5 +41,8 @@
       "/node_modules/",
       "/test/services/"
     ]
+  },
+  "dependencies": {
+    "@slack/client": "^4.2.2"
   }
 }
