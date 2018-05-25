@@ -9,6 +9,7 @@
 const { MoleculerError } = require("moleculer").Errors;
 const { WebClient } = require('@slack/client');
 
+require('dotenv').config()
 /**
  * Send a message using the Slack API.
  * 

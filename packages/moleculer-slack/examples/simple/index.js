@@ -3,19 +3,13 @@
 let { ServiceBroker } 	= require("moleculer");
 let SlackService 			= require("../../index");
 
-/**
- * For testing:
- * ------------
- * 
- * Test credentials: https://www.twilio.com/console/voice/dev-tools/test-credentials
- * Test phone numbers: https://www.twilio.com/docs/api/rest/test-credentials#test-sms-messages-example-1
- */
-
 // Create broker
 let broker = new ServiceBroker({
 	logger: console,
 	logLevel: "debug"
 });
+
+require('dotenv').config()
 
 // Load my service
 broker.createService({
@@ -23,8 +17,8 @@ broker.createService({
 	mixins: [SlackService],
 	settings: {
 		// Create Slack App, Enable incoming webhook, generate API token. Please read https://api.slack.com/slack-apps
-		slackToken: "",
-		slackChannel: ""
+        slackToken: process.env.SLACK_TOKEN,
+        slackChannel: process.env.SLACK_CHANNEL,
 	}
 });
 

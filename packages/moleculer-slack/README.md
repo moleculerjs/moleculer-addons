@@ -12,7 +12,7 @@ $ npm install moleculer-slack --save
 
 # Usage
 
-> Before use please set the `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_PHONE_NUMBER` environment variables.
+> Before use please set the `SLACK_TOKEN` and `SLACK_CHANNEL` environment variables.
 
 ```js
 let { ServiceBroker }     = require("moleculer");

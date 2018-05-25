@@ -1,7 +1,7 @@
 {
   "name": "moleculer-slack",
   "version": "1.0.7",
-  "description": "Send Messages with slack",
+  "description": "Send Messages to slack",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",
@@ -49,6 +49,7 @@
     "node": ">= 6.x.x"
   },
   "dependencies": {
-    "slack": "3.7.0"
+    "@slack/client": "^4.2.2",
+    "dotenv": "^5.0.1"
   }
 }
