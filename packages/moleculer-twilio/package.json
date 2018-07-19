@@ -49,6 +49,6 @@
     "node": ">= 6.x.x"
   },
   "dependencies": {
-    "twilio": "3.14.0"
+    "twilio": "3.17.1"
   }
 }
