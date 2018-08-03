@@ -2,35 +2,41 @@
 
 let { ServiceBroker } 	= require("moleculer");
 let SharedObj 			= require("../../index");
+const util = require("util");
 
 // Create broker #1
 const broker1 = new ServiceBroker({
-	namespace: "streaming",
-	nodeID: "client-" + process.pid,
+	namespace: "shared",
+	nodeID: "first",
 	transporter: "NATS",
 	serializer: "JSON",
 	logger: console,
-	logLevel: "info"
+	logLevel: "info",
+	logObjectPrinter: o => util.inspect(o, { depth: 4, breakLength: 100 })
 });
 
 // Create broker #2
 const broker2 = new ServiceBroker({
-	namespace: "streaming",
-	nodeID: "encrypter-" + process.pid,
+	namespace: "shared",
+	nodeID: "second",
 	transporter: "NATS",
 	serializer: "JSON",
 	logger: console,
-	logLevel: "info"
+	logLevel: "info",
+	logObjectPrinter: o => util.inspect(o, { depth: 4, breakLength: 100 })
 });
 
 broker1.createService({
 	name: "posts",
 	mixins: [SharedObj(["obj"])],
 	started() {
-		this.logger.info("Obj: ", this.obj);
+		this.obj.user = {
+			name: "John"
+		};
 
 		setTimeout(() => {
-			this.obj.name = "John";
+			this.obj.user.roles = ["admin"];
+			this.obj.user.roles.push("member");
 		}, 2000);
 	}
 });

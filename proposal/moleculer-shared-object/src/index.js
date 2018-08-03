@@ -21,6 +21,7 @@ function createSharedObj(data, notifier) {
  */
 module.exports = function(opts) {
 	let self = null;
+	let servicePath;
 
 	const sharedObjects = {};
 
@@ -29,13 +30,15 @@ module.exports = function(opts) {
 		created() {
 			self = this;
 
+			servicePath = `${this.broker.nodeID}:${this.name}.${this.version}`;
+
 			Object.keys(sharedObjects).forEach(name => self[name] = sharedObjects[name]);
 		}
 	};
 
 	const getOnChanges = name => changes => {
-		self.logger.info("Changed: ", name, JSON.stringify(changes));
-		self.broker.broadcast(`sharedObject.${name}`, changes);
+		//self.logger.info("Changed: ", name, changes);
+		self.broker.broadcast(`sharedObject.${name}`, { sender: servicePath, changes });
 	};
 
 	if (opts) {
@@ -44,11 +47,19 @@ module.exports = function(opts) {
 
 		opts.forEach(opt => {
 			const name = _.isString(opt) ? opt : opt.name;
-			sharedObjects[opt] = createSharedObj({}, getOnChanges(opt));
-			res.events[`sharedObject.${name}`] = function(changes) {
+			const obj = createSharedObj({}, getOnChanges(opt));
+			res.events[`sharedObject.${name}`] = function({ sender, changes }) {
+				if (sender == servicePath) return;
 				// TODO: apply changes
 				self.logger.info("Received changes:", changes);
+
+				changes.forEach(change => {
+					_.set(obj.__getTarget, change.currentPath, _.cloneDeep(change.newValue));
+				});
+
+				self.logger.info("------------------", "New object", obj);
 			};
+			sharedObjects[opt] = obj;
 		});
 	}
 
