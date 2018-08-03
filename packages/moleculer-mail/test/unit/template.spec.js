@@ -7,14 +7,14 @@ const _ = require("lodash");
 describe("Test MailService template handling", () => {
 
 	it("should create an empty templates prop", () => {
-		const broker = new ServiceBroker();
+		const broker = new ServiceBroker({ logger: false});
 		const service = broker.createService(MailService, { settings: { transport: {} } });
 		expect(service).toBeDefined();
 		expect(service.templates).toEqual({});
 	});
 
 	it("should create templates", () => {
-		const broker = new ServiceBroker();
+		const broker = new ServiceBroker({ logger: false});
 		const service = broker.createService(MailService, { settings: { transport: {}, templateFolder: __dirname + "/templates" } });
 
 		expect(Object.keys(service.templates).length).toBe(0);
@@ -24,35 +24,40 @@ describe("Test MailService template handling", () => {
 	});
 
 	it("should create templates", () => {
-		const broker = new ServiceBroker();
+		const broker = new ServiceBroker({ logger: false});
 		const service = broker.createService(MailService, { settings: {
 			transport: {},
 			templateFolder: __dirname + "/templates"
 		} });
 
-		// Mocking
-		service.send = jest.fn(() => Promise.resolve());
-		let tmp = service.getTemplate("welcome");
-		tmp.render = jest.fn(() => Promise.resolve({
-			html: "<h1>Hello</h1",
-			text: "Hello",
-			subject: "Hello Subject"
-		}));
+		return broker.start()
+			.then(() => {
+				// Mocking
+				service.send = jest.fn(() => Promise.resolve());
+				let tmp = service.getTemplate("welcome");
+				tmp.render = jest.fn(() => Promise.resolve({
+					html: "<h1>Hello</h1>",
+					text: "Hello",
+					subject: "Hello Subject"
+				}));
 
-		// Call
-		return broker.call("mail.send", {
-			template: "welcome",
-			to: "john.doe@johndoe.com",
-			data: {
-				name: "John"
-			}
-		}).then(() => {
-			expect(tmp.render).toHaveBeenCalledTimes(1);
-			expect(tmp.render).toHaveBeenCalledWith({ name: "John" }, undefined);
+				// Call
+				return broker.call("mail.send", {
+					template: "welcome",
+					to: "john.doe@johndoe.com",
+					data: {
+						name: "John"
+					}
+				}).then(() => {
+					expect(tmp.render).toHaveBeenCalledTimes(1);
+					expect(tmp.render).toHaveBeenCalledWith({ name: "John" }, undefined);
 
-			expect(service.send).toHaveBeenCalledTimes(1);
-			expect(service.send).toHaveBeenCalledWith({"to": "john.doe@johndoe.com", "html": "<h1>Hello</h1", "subject": "Hello Subject", "text": "Hello"});
-		});
+					expect(service.send).toHaveBeenCalledTimes(1);
+					expect(service.send).toHaveBeenCalledWith({"to": "john.doe@johndoe.com", "html": "<h1>Hello</h1>", "subject": "Hello Subject", "text": "Hello"});
+				});
+
+			})
+			.then(() => broker.stop());
 	});
 
 
@@ -60,10 +65,13 @@ describe("Test MailService template handling", () => {
 		let broker, service;
 		let spySend = jest.fn(() => Promise.resolve());
 		beforeEach(() => {
-			broker = new ServiceBroker();
+			broker = new ServiceBroker({ logger: false});
 			service = broker.createService(MailService, { settings: { transport: { type: "sendmail" }, templateFolder: __dirname + "/templates" } });
 			service.send = spySend;
+			return broker.start();
 		});
+
+		afterEach(() => broker.stop());
 
 		it("should render default template without localization", () => {
 			service.send.mockClear();
@@ -94,7 +102,7 @@ describe("Test MailService template handling", () => {
 				}
 			}).then(() => {
 				expect(service.send).toHaveBeenCalledTimes(1);
-				expect(service.send).toHaveBeenCalledWith({"html": "<h1 style=\"color: red;\">Szia John!</h1>", "subject": "Üdvözlünk, John!", "text": "Szia John!", "to": "john.doe@johndoe.com"});
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1 style=\"color: red;\">Szia John!</h1>\n", "subject": "Üdvözlünk, John!\n", "text": "Szia John!\n", "to": "john.doe@johndoe.com"});
 			});
 		});
 
@@ -141,7 +149,7 @@ describe("Test MailService template handling", () => {
 		let broker, service;
 		let spySend = jest.fn(() => Promise.resolve());
 		beforeEach(() => {
-			broker = new ServiceBroker();
+			broker = new ServiceBroker({ logger: false});
 			service = broker.createService(MailService, { settings: {
 				transport: { type: "sendmail" },
 				templateFolder: __dirname + "/templates",
@@ -150,7 +158,11 @@ describe("Test MailService template handling", () => {
 				}
 			} });
 			service.send = spySend;
+
+			return broker.start();
 		});
+
+		afterEach(() => broker.stop());
 
 		it("should render default template without localization", () => {
 			service.send.mockClear();

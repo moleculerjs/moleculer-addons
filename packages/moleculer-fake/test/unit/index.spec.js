@@ -9,13 +9,17 @@ describe("Test FakeService", () => {
 	let service;
 
 	beforeEach(() => {
-		broker = new ServiceBroker();
+		broker = new ServiceBroker({ logger: false});
 		service = broker.createService(FakeService, {
 			settings: {
 				seed: 4278
 			}
 		});
+
+		return broker.start();
 	});
+
+	afterEach(() => broker.stop());
 
 	it("should be created", () => {
 		expect(service).toBeDefined();
@@ -23,15 +27,15 @@ describe("Test FakeService", () => {
 	});
 
 	it("should be create with language from settings", () => {
-		const broker = new ServiceBroker();
+		const broker = new ServiceBroker({ logger: false});
 		broker.createService(FakeService, {
 			settings: {
 				seed: 5555,
 				locale: "it-IT"
 			}
 		});
-
-		return expect(broker.call("fake.name")).resolves.toBe("Lino Marini");
+		return broker.start()
+			.then(() => expect(broker.call("fake.name")).resolves.toBe("Lino Marini"));
 	});
 
 	it("should create langs only once", () => {
@@ -131,12 +135,12 @@ describe("Test FakeService", () => {
 			{ action: "fake.avatar", expect: "https://s3.amazonaws.com/uifaces/faces/twitter/derekcramer/128.jpg" },
 			{ action: "fake.gravatar", expect: "https://www.gravatar.com/avatar/2676ada503dacf4695547679c79b7809" },
 			{ action: "fake.gravatar", params: { email: "john.doe@gmail.com" }, expect: "https://www.gravatar.com/avatar/e13743a7f1db7f4246badd6fd6ff54ff" },
-			
+
 			// Lorem
 			{ action: "fake.word", expect: "dolores" },
 			{ action: "fake.sentence", expect: "Praesentium error voluptas accusantium rerum sit." },
 			{ action: "fake.paragraph", expect: "Error voluptas accusantium rerum sit est. Magnam repudiandae laboriosam labore ipsum voluptatem dolorem. Eos eaque sit voluptatibus hic nulla perferendis nostrum error quidem. Quas iusto sapiente et ut magni tenetur molestias." },
-			
+
 			// Misc
 			{ action: "fake.uuid", expect: jasmine.any(String) },
 

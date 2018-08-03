@@ -33,7 +33,7 @@ function protectReject(err) {
 const SlackService = require("../../src");
 
 describe("Test SlackService", () => {
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService(SlackService);
 
 	it("should be created", () => {

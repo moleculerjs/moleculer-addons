@@ -26,7 +26,7 @@ function protectReject(err) {
 }
 
 describe("Test Elasticsearch service", () => {
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService(ESService);
 
 	beforeAll(() => broker.start());
@@ -39,8 +39,8 @@ describe("Test Elasticsearch service", () => {
 		expect(Elasticsearch.Client).toHaveBeenCalledWith(service.settings.elasticsearch);
 
 		expect(service.client.ping).toHaveBeenCalledTimes(1);
-		expect(service.client.ping).toHaveBeenCalledWith({ requestTimeout: 5000 });		
-	});	
+		expect(service.client.ping).toHaveBeenCalledWith({ requestTimeout: 5000 });
+	});
 
 	it("should call client.bulk", () => {
 		let p = {
@@ -149,7 +149,7 @@ describe("Test Elasticsearch service", () => {
 
 	it("should call client.count with body", () => {
 		service.client.count.mockClear();
-		
+
 		let p = {
 			body: {}
 		};

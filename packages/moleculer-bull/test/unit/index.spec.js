@@ -17,7 +17,7 @@ const { ServiceBroker } = require("moleculer");
 const BullService = require("../../src");
 
 describe("Test BullService constructor", () => {
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService(BullService());
 
 	it("should be created", () => {
@@ -48,7 +48,7 @@ describe("Test BullService created handler", () => {
 		process: jest.fn(),
 	}
 
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BullService(url, opts)],
 
@@ -100,7 +100,7 @@ describe("Test BullService created handler", () => {
 describe("Test BullService getQueue when creating a job", () => {
 	const payload = { a: 10 };
 
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BullService()]
 	});
@@ -125,7 +125,7 @@ describe("Test BullService job with named queue", () => {
 	const namedAdd = jest.fn();
 	const name = "named";
 
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BullService()]
 	});
@@ -148,7 +148,7 @@ describe("Test BullService job with named queue", () => {
 describe("Test BullService job with delay", () => {
 	const payload = { a: 10 };
 	const jobOpts = { delay: 1000, a:1 };
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BullService()]
 	});
@@ -171,7 +171,7 @@ describe("Test BullService job with delay", () => {
 
 describe("Test BullService createJob return a promise", () => {
 	const payload = { a: 10 };
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BullService()]
 	});

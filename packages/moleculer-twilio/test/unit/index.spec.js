@@ -31,7 +31,7 @@ function protectReject(err) {
 const SmsService = require("../../src");
 
 describe("Test SmsService", () => {
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService(SmsService);
 
 	it("should be created", () => {

@@ -15,7 +15,7 @@ const { ServiceBroker } = require("moleculer");
 const BeeService = require("../../src");
 
 describe("Test BeeService constructor", () => {
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService(BeeService());
 
 	it("should be created", () => {
@@ -28,7 +28,7 @@ describe("Test BeeService constructor", () => {
 describe("Test BeeService created handler", () => {
 	const opts = { a: 5 };
 
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BeeService(opts)],
 
@@ -56,7 +56,7 @@ describe("Test BeeService created handler", () => {
 describe("Test BeeService created handler", () => {
 	const payload = { a: 10 };
 
-	const broker = new ServiceBroker();
+	const broker = new ServiceBroker({ logger: false});
 	const service = broker.createService({
 		mixins: [BeeService()]
 	});
