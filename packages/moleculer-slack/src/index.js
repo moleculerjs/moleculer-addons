@@ -12,9 +12,9 @@ const { WebClient } = require('@slack/client');
 require('dotenv').config()
 /**
  * Send a message using the Slack API.
- * 
+ *
  * https://www.slack.com
- * 
+ *
  * @module Service
  */
 module.exports = {
@@ -37,7 +37,7 @@ module.exports = {
 
 		/**
 		 * Send a message
-		 * 
+		 *
 		 * @actions
 		 * @param {String} message - Message text
 		 * @returns {String}
@@ -59,7 +59,7 @@ module.exports = {
 
 		/**
 		 * Send an SMS
-		 * 
+		 *
 		 * @methods
 		 * @param {String} to - Target phone number
 		 * @param {String} [body=""] - Body of SMS
@@ -88,11 +88,11 @@ module.exports = {
 		/* istanbul ignore next */
 		if (this.settings.slackToken == null)
 			this.logger.warn("The `slackToken` is not configured. Please set the 'SLACK_TOKEN' environment variable!");
-		
+
 		/* istanbul ignore next */
 		if (this.settings.slackChannel == null)
 			this.logger.warn("The `slackChannel` is not configured. Please set the 'SLACK_CHANNEL' environment variable!");
-		
+
 		return this.Promise.resolve();
 	},
 
@@ -101,8 +101,6 @@ module.exports = {
 	 */
 	started() {
 		this.client = new WebClient(this.settings.slackToken);
-
-		console.log(this.settings);
 		return this.Promise.resolve();
 	},
 
