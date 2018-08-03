@@ -24,10 +24,7 @@ let broker = new ServiceBroker({ logger: console });
 // Load my service
 broker.createService({
     name: "slack",
-    mixins: [SlackService],
-    settings: {
-        text: "Hello slack"
-    }
+    mixins: [SlackService]
 });
 
 // Start server
@@ -47,7 +44,7 @@ broker.start().then(() => {
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `slackToken` | `String` | **required** | Slack API Token. Visit your [Slack App dashboard's](https://www.slack.com/apps) main page. Click "Create App, Generate Token", then copy and paste your "API TOKEN" here. |
-| `slackChannel` | `String` | **required** | Slack API Token. Visit your [Slack App dashboard's](https://www.slack.com/apps) main page. Add incoming webhook and create/select a channel, then copy and paste here. |
+| `slackChannel` | `String` | `null` | Slack API Token. Visit your [Slack App dashboard's](https://www.slack.com/apps) main page. Add incoming webhook and create/select a channel, then copy and paste here. |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
@@ -73,6 +70,7 @@ Send a Slack Message
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `message` | `String` | **required** | Message text |
+| `channel` | `String` | `null` | Channel name |
 
 ### Results
 **Type:** `String`
@@ -129,6 +127,7 @@ Send a slack message
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `message` | `String` | - | Body of the message |
+| `channel` | `String` | - | Channel name |
 
 ### Results
 **Type:** `String`

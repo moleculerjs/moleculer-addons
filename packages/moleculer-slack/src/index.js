@@ -7,9 +7,9 @@
 "use strict";
 
 const { MoleculerError } = require("moleculer").Errors;
-const { WebClient } = require('@slack/client');
+const { WebClient } = require("@slack/client");
 
-require('dotenv').config()
+require("dotenv").config();
 /**
  * Send a message using the Slack API.
  *
@@ -44,10 +44,11 @@ module.exports = {
 		 */
 		send: {
 			params: {
+				channel: { type: "string", optional: true },
 				message: { type: "string" }
 			},
 			handler(ctx) {
-				return this.sendMessage(ctx.params.message);
+				return this.sendMessage(ctx.params.message, ctx.params.channel);
 			}
 		}
 	},
@@ -61,17 +62,17 @@ module.exports = {
 		 * Send an SMS
 		 *
 		 * @methods
-		 * @param {String} to - Target phone number
-		 * @param {String} [body=""] - Body of SMS
-		 * @param {String} [mediaUrl] - Media URL
+		 * @param {String} [message] - Message
+		 * @param {String} [channel] - Channel
 		 * @returns {String}
 		 */
-		sendMessage(message) {
-			this.logger.debug(`Sending message to '${this.settings.slackChannel}' slack channel. Message: ${message}`);
+		sendMessage(message, channel) {
+			channel = channel || this.settings.slackChannel;
+			this.logger.debug(`Sending message to '${channel}' slack channel. Message: ${message}`);
 
-			return this.client.chat.postMessage({ channel: this.settings.slackChannel, text: message})
+			return this.client.chat.postMessage({ channel: channel, text: message})
 				.then(res => {
-					this.logger.debug(`The Message sent to '${this.settings.slackChannel}' successfully! Ts: ${res.ts}`);
+					this.logger.debug(`The Message sent to '${channel}' successfully! Ts: ${res.ts}`);
 					return res;
 				}).catch(err => {
 					// Possible errors: https://www.slack.com
@@ -88,10 +89,6 @@ module.exports = {
 		/* istanbul ignore next */
 		if (this.settings.slackToken == null)
 			this.logger.warn("The `slackToken` is not configured. Please set the 'SLACK_TOKEN' environment variable!");
-
-		/* istanbul ignore next */
-		if (this.settings.slackChannel == null)
-			this.logger.warn("The `slackChannel` is not configured. Please set the 'SLACK_CHANNEL' environment variable!");
 
 		return this.Promise.resolve();
 	},

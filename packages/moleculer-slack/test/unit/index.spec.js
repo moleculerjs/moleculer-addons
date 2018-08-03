@@ -47,7 +47,7 @@ describe("Test SlackService", () => {
 			expect(WebClient).toHaveBeenCalledWith(process.env.SLACK_TOKEN);
 		});
 	});
-	
+
 	it("should call client.chat.postMessage", () => {
 		return service.sendMessage("Hello world").catch(protectReject).then(res => {
 			expect(res).toEqual({
@@ -60,7 +60,7 @@ describe("Test SlackService", () => {
 			});
 		});
 	});
-	
+
 	it("should call client.messages.create and return with error", () => {
 		return service.sendMessage().then(protectReject).catch(err => {
 			expect(err).toBeInstanceOf(MoleculerError);
@@ -69,7 +69,7 @@ describe("Test SlackService", () => {
 			expect(err.type).toBe("POSTMESSAGE_ERROR");
 		});
 	});
-	
+
 	it("should call the sendMessage method successfully", () => {
 		let message = {
 			sid: "12345"
@@ -79,7 +79,22 @@ describe("Test SlackService", () => {
 		return broker.call("slack.send", {message: "Test Slack"}).catch(protectReject).then(res => {
 			expect(res).toBe(message);
 			expect(service.sendMessage).toHaveBeenCalledTimes(1);
-			expect(service.sendMessage).toHaveBeenCalledWith("Test Slack");
+			expect(service.sendMessage).toHaveBeenCalledWith("Test Slack", undefined);
+
+			return broker.stop();
+		});
+	});
+
+	it("should call the sendMessage method successfully with channel", () => {
+		let message = {
+			sid: "12345"
+		};
+		service.sendMessage = jest.fn(() => Promise.resolve(message));
+
+		return broker.call("slack.send", { message: "Test Slack", channel: "some-topic" }).catch(protectReject).then(res => {
+			expect(res).toBe(message);
+			expect(service.sendMessage).toHaveBeenCalledTimes(1);
+			expect(service.sendMessage).toHaveBeenCalledWith("Test Slack", "some-topic");
 
 			return broker.stop();
 		});
