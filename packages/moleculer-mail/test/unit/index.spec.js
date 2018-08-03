@@ -70,21 +70,15 @@ describe("Test MailService", () => {
 
 	});
 
-	describe.skip("Test send", () => {
+	describe("Test send", () => {
 		const spySendMail = jest.fn((msg, cb) => cb(null, msg));
 
-		let broker, svc;
+		let broker, service;
 		beforeEach(() => {
 			broker = new ServiceBroker({ logger: false});
-			svc = _.cloneDeep(MailService);
+			const svc = _.cloneDeep(MailService);
 
-			return broker.start();
-		});
-
-		afterEach(() => broker.stop());
-
-		it("should call nodemailer.sendMail", () => {
-			const service = broker.createService(svc, {
+			service = broker.createService(svc, {
 				settings: {
 					from: "moleculer@company.net"
 				}
@@ -93,6 +87,12 @@ describe("Test MailService", () => {
 				sendMail: spySendMail
 			};
 
+			return broker.start();
+		});
+
+		afterEach(() => broker.stop());
+
+		it("should call nodemailer.sendMail", () => {
 			const params = {
 				to: "john.doe@gmail.com"
 			};
@@ -110,11 +110,6 @@ describe("Test MailService", () => {
 
 		it("should call nodemailer.sendMail & set from", () => {
 			spySendMail.mockClear();
-			const service = broker.createService(svc);
-			service.transporter = {
-				sendMail: spySendMail
-			};
-
 			const params = {
 				from: "boss@company.net",
 				to: "john.doe@gmail.com"
@@ -131,7 +126,6 @@ describe("Test MailService", () => {
 
 		it("should reject the request", () => {
 			spySendMail.mockClear();
-			const service = broker.createService(svc);
 			service.transporter = {
 				sendMail: jest.fn((msg, cb) => cb(new Error("Invalid format!")))
 			};
@@ -145,7 +139,7 @@ describe("Test MailService", () => {
 
 		it("should reject because there is no transporter", () => {
 			spySendMail.mockClear();
-			broker.createService(svc);
+			service.transporter = null;
 
 			const params = {
 				to: "john.doe@gmail.com"
