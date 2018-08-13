@@ -30,7 +30,7 @@ module.exports = function(opts) {
 		created() {
 			self = this;
 
-			servicePath = `${this.broker.nodeID}:${this.name}.${this.version}`;
+			servicePath = `${this.broker.nodeID}:${this.fullName}`;
 
 			Object.keys(sharedObjects).forEach(name => self[name] = sharedObjects[name]);
 		}
