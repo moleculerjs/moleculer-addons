@@ -3,6 +3,7 @@
 let { ServiceBroker } 	= require("moleculer");
 let SharedObj 			= require("../../index");
 const util = require("util");
+const _ = require("lodash");
 
 // Create broker #1
 const broker1 = new ServiceBroker({
@@ -26,18 +27,35 @@ const broker2 = new ServiceBroker({
 	logObjectPrinter: o => util.inspect(o, { depth: 4, breakLength: 100 })
 });
 
+let origObj;
+
 broker1.createService({
 	name: "posts",
 	mixins: [SharedObj(["obj"])],
 	started() {
-		this.obj.user = {
-			name: "John"
-		};
+		setTimeout(() => {
+			this.obj.user = {
+				name: "John",
+				age: 35
+			};
+			origObj = this.obj;
+			this.obj.user.roles = ["admin", "moderator"];
+		}, 1000);
 
 		setTimeout(() => {
-			this.obj.user.roles = ["admin"];
 			this.obj.user.roles.push("member");
+		}, 1500);
+
+		setTimeout(() => {
+			this.obj.user.name = "Jane";
+			this.obj.user.roles[3] = "user";
 		}, 2000);
+
+		setTimeout(() => {
+			delete this.obj.user.age;
+			this.obj.user.roles.splice(1, 1);
+			//this.obj.user.roles.shift();
+		}, 2500);
 	}
 });
 
@@ -46,6 +64,11 @@ broker2.createService({
 	mixins: [SharedObj(["obj"])],
 	started() {
 		this.logger.info("Obj: ", this.obj);
+
+		setTimeout(() => {
+			this.logger.info("Final received", this.obj);
+			this.logger.info("Equals:", _.isEqual(this.obj, origObj));
+		}, 5000);
 	}
 });
 

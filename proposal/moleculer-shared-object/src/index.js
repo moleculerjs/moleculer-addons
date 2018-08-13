@@ -36,8 +36,9 @@ module.exports = function(opts) {
 		}
 	};
 
-	const getOnChanges = name => changes => {
+	const getOnChanges = name => changelog => {
 		//self.logger.info("Changed: ", name, changes);
+		const changes = changelog.map(c => _.pick(c, ["type", "currentPath", "newValue"]));
 		self.broker.broadcast(`sharedObject.${name}`, { sender: servicePath, changes });
 	};
 
@@ -53,8 +54,12 @@ module.exports = function(opts) {
 				// TODO: apply changes
 				self.logger.info("Received changes:", changes);
 
-				changes.forEach(change => {
-					_.set(obj.__getTarget, change.currentPath, _.cloneDeep(change.newValue));
+				changes.forEach(c => {
+					if (c.type == "add" || c.type == "update") {
+						_.set(obj.__getTarget, c.currentPath, _.cloneDeep(c.newValue));
+					} else if (c.type == "delete") {
+						_.unset(obj.__getTarget, c.currentPath);
+					}
 				});
 
 				self.logger.info("------------------", "New object", obj);
