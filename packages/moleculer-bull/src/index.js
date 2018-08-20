@@ -58,23 +58,30 @@ module.exports = function createService(url, queueOpts) {
 			this.$queues = {};
 
 			if (this.schema.queues) {
-				_.forIn(this.schema.queues, (fn, name) => {
-					if(typeof fn === "function")
-						this.getQueue(name).process(fn.bind(this));
-					else {
-						let args = [];
+				_.forIn(this.schema.queues, (inline, name) => {
+					if (typeof inline === "function") {
+						this.getQueue(name).process('inline', inline.bind(this));
+					} else if (typeof inline === 'object') {
+						if (Array.isArray(inline)) {
+							for (let handler of inline) {
+								let args = [];
 
-						if (fn.name) {
-							args.push(fn.name);
+								if (handler.name) {
+									args.push(handler.name);
+								}
+								if (handler.concurrency) {
+									args.push(handler.concurrency);
+								}
+
+								args.push(handler.process.bind(this));
+
+								this.getQueue(name).process(...args);
+							}
+						} else {
+							for (let handler in inline) {
+								this.getQueue(name).process(handler, inline[handler].bind(this));
+							}
 						}
-
-						if (fn.concurrency) {
-							args.push(fn.concurrency);
-						}
-
-						args.push(fn.process.bind(this));
-
-						this.getQueue(name).process(...args);
 					}
 				});
 			}
