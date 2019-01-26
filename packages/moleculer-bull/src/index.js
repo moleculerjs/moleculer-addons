@@ -56,7 +56,9 @@ module.exports = function createService(url, queueOpts) {
 
 		created() {
 			this.$queues = {};
+		},
 
+		started() {
 			if (this.schema.queues) {
 				_.forIn(this.schema.queues, (fn, name) => {
 					if(typeof fn === "function")

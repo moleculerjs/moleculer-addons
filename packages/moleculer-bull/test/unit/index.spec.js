@@ -29,7 +29,7 @@ describe("Test BullService constructor", () => {
 
 
 
-describe("Test BullService created handler", () => {
+describe("Test BullService started handler", () => {
 	const opts = { a: 5 };
 	const url = "redis://localhost";
 
@@ -60,6 +60,8 @@ describe("Test BullService created handler", () => {
 			"task.name.concurrency": namedconcurrency,
 		}
 	});
+
+	beforeAll(() => service._start());
 
 	it("should be created queues", () => {
 		expect(service).toBeDefined();

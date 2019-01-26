@@ -54,7 +54,12 @@ module.exports = function createService(queueOpts) {
 		 */
 		created() {
 			this.$queues = {};
+		},
 
+		/**
+		 * Service started lifecycle event handler
+		 */
+		started() {
 			if (this.schema.queues) {
 				_.forIn(this.schema.queues, (fn, name) => {
 					this.getQueue(name).process(fn.bind(this));
