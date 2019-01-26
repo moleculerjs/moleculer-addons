@@ -25,7 +25,7 @@ describe("Test BeeService constructor", () => {
 
 });
 
-describe("Test BeeService created handler", () => {
+describe("Test BeeService started handler", () => {
 	const opts = { a: 5 };
 
 	const broker = new ServiceBroker({ logger: false});
@@ -37,6 +37,8 @@ describe("Test BeeService created handler", () => {
 			"task.second": jest.fn(),
 		}
 	});
+
+	beforeAll(() => service._start());
 
 	it("should be created queues", () => {
 		expect(service).toBeDefined();
