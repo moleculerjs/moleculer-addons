@@ -1,35 +1,35 @@
 "use strict";
 
 jest.mock("nodemailer");
+jest.mock("email-templates");
+const path = require("path");
 const nodemailer = require("nodemailer");
 
 const { ServiceBroker } = require("moleculer");
 const MailService = require("../../src");
-const _ = require("lodash");
 
 describe("Test MailService", () => {
 
 	describe("Test created", () => {
 
 		it("should be created without transport", () => {
-			const broker = new ServiceBroker({ logger: false});
+			const broker = new ServiceBroker({ logger: false });
 			const service = broker.createService(MailService);
 			expect(service).toBeDefined();
 			expect(service.transporter).toBeUndefined();
 		});
 
 		it("should be created with transport", () => {
-			const fakeTransporter = {
-				use: jest.fn()
-			};
+			const fakeTransporter = {};
 			nodemailer.createTransport = jest.fn(() => fakeTransporter);
-			const broker = new ServiceBroker({ logger: false});
+
+			const broker = new ServiceBroker({ logger: false });
 			const service = broker.createService(MailService, {
 				settings: {
 					transport: {
-						a: 5
-					}
-				}
+						a: 5,
+					},
+				},
 			});
 
 			expect(service).toBeDefined();
@@ -37,25 +37,40 @@ describe("Test MailService", () => {
 
 			expect(nodemailer.createTransport).toHaveBeenCalledTimes(1);
 			expect(nodemailer.createTransport).toHaveBeenCalledWith(service.settings.transport);
+		});
 
-			expect(fakeTransporter.use).toHaveBeenCalledTimes(1);
-			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", jasmine.any(Function));
+		it("should be created with transport from templates config", () => {
+			const fakeTransporter = {};
+			nodemailer.createTransport = jest.fn(() => fakeTransporter);
+
+			const broker = new ServiceBroker({ logger: false });
+			const service = broker.createService(MailService, {
+				settings: {
+					template: {
+						transport: 5,
+					},
+				},
+			});
+
+			expect(service).toBeDefined();
+			expect(service.transporter).toBe(fakeTransporter);
+
+			expect(nodemailer.createTransport).toHaveBeenCalledTimes(1);
+			expect(nodemailer.createTransport).toHaveBeenCalledWith(service.settings.template.transport);
 		});
 
 
 		it("should be created and call createTransport", () => {
 			nodemailer.createTransport.mockClear();
 
-			const fakeTransporter = {
-				use: jest.fn()
-			};
+			const fakeTransporter = {};
 			const createTransport = jest.fn(() => fakeTransporter);
 
-			const broker = new ServiceBroker({ logger: false});
+			const broker = new ServiceBroker({ logger: false });
 			const service = broker.createService(MailService, {
 				methods: {
-					createTransport
-				}
+					createTransport,
+				},
 			});
 
 			expect(service).toBeDefined();
@@ -63,28 +78,22 @@ describe("Test MailService", () => {
 
 			expect(createTransport).toHaveBeenCalledTimes(1);
 			expect(createTransport).toHaveBeenCalledWith();
-
-			expect(fakeTransporter.use).toHaveBeenCalledTimes(1);
-			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", jasmine.any(Function));
 		});
 
 	});
 
 	describe("Test send", () => {
-		const spySendMail = jest.fn((msg, cb) => cb(null, msg));
+		const spySendMail = jest.fn((msg) => Promise.resolve(msg));
 
 		let broker, service;
 		beforeEach(() => {
-			broker = new ServiceBroker({ logger: false});
-			const svc = _.cloneDeep(MailService);
-
-			service = broker.createService(svc, {
-				settings: {
-					from: "moleculer@company.net"
-				}
-			});
+			broker = new ServiceBroker({ logger: false });
+			service = broker.createService(MailService);
+			service.emailTemplate = {
+				send: spySendMail,
+			};
 			service.transporter = {
-				sendMail: spySendMail
+				sendMail: jest.fn(),
 			};
 
 			return broker.start();
@@ -92,46 +101,31 @@ describe("Test MailService", () => {
 
 		afterEach(() => broker.stop());
 
-		it("should call nodemailer.sendMail", () => {
+		it("should call Email.send", () => {
 			const params = {
-				to: "john.doe@gmail.com"
-			};
-
-			return broker.call("mail.send", params).then(res => {
-				expect(res).toEqual({
-					from: "moleculer@company.net",
-					to: "john.doe@gmail.com"
-				});
-				expect(spySendMail).toHaveBeenCalledTimes(1);
-				expect(spySendMail).toHaveBeenCalledWith(res, jasmine.any(Function));
-			});
-
-		});
-
-		it("should call nodemailer.sendMail & set from", () => {
-			spySendMail.mockClear();
-			const params = {
-				from: "boss@company.net",
-				to: "john.doe@gmail.com"
+				message: {
+					to: "john.doe@gmail.com",
+				},
 			};
 
 			return broker.call("mail.send", params).then(res => {
 				expect(res).toEqual(params);
-				expect(res.from).toBe("boss@company.net");
 				expect(spySendMail).toHaveBeenCalledTimes(1);
-				expect(spySendMail).toHaveBeenCalledWith(params, jasmine.any(Function));
+				expect(spySendMail).toHaveBeenCalledWith(res);
 			});
 
 		});
 
 		it("should reject the request", () => {
 			spySendMail.mockClear();
-			service.transporter = {
-				sendMail: jest.fn((msg, cb) => cb(new Error("Invalid format!")))
+			service.emailTemplate = {
+				send: jest.fn(() => Promise.reject(new Error("Invalid format!"))),
 			};
 
 			const params = {
-				to: "john.doe@gmail.com"
+				message: {
+					to: "john.doe@gmail.com",
+				},
 			};
 
 			return expect(broker.call("mail.send", params)).rejects.toBeInstanceOf(Error);
@@ -142,7 +136,9 @@ describe("Test MailService", () => {
 			service.transporter = null;
 
 			const params = {
-				to: "john.doe@gmail.com"
+				message: {
+					to: "john.doe@gmail.com",
+				},
 			};
 
 			return expect(broker.call("mail.send", params)).rejects.toBeInstanceOf(Error);
@@ -150,6 +146,84 @@ describe("Test MailService", () => {
 
 	});
 
+	describe("Test sanitize", () => {
+		let broker, service;
+		beforeEach(() => {
+			broker = new ServiceBroker({ logger: false });
+			service = broker.createService(MailService);
+			service.transporter = {
+				sendMail: jest.fn(),
+			};
 
+			return broker.start();
+		});
+
+		afterEach(() => broker.stop());
+
+		it("should not change a correct message", () => {
+			const params = {
+				message: {
+					to: "john.doe@gmail.com",
+				},
+				template: "full",
+				locals: {
+					name: "Elon",
+				},
+			};
+
+			const res = service.sanitize(params);
+
+			expect(res).toEqual(params);
+		});
+
+		it("should move all nodemailer fields", () => {
+			const params = {
+				to: "john.doe@gmail.com",
+				cc: "john.doe@gmail.com",
+				template: "full",
+				locals: {
+					name: "Elon",
+				},
+			};
+
+			const res = service.sanitize(params);
+
+			expect(res).toEqual({
+				message: {
+					to: "john.doe@gmail.com",
+					cc: "john.doe@gmail.com",
+				},
+				template: "full",
+				locals: {
+					name: "Elon",
+				},
+			});
+		});
+
+		it("should use correct localized template", () => {
+			const params = {
+				to: "john.doe@gmail.com",
+				cc: "john.doe@gmail.com",
+				template: "full",
+				locals: {
+					locale: "fr",
+					name: "Elon",
+				},
+			};
+
+			const res = service.sanitize(params);
+
+			expect(res).toEqual({
+				message: {
+					to: "john.doe@gmail.com",
+					cc: "john.doe@gmail.com",
+				},
+				template: path.join("full", "fr"),
+				locals: {
+					name: "Elon",
+				},
+			});
+		});
+	});
 });
 

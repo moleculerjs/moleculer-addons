@@ -6,23 +6,18 @@
 
 "use strict";
 
-const fs 			= require("fs");
-const path 			= require("path");
-const _ 			= require("lodash");
+const _ = require("lodash");
+const path = require("path");
 
-const { MoleculerError, MoleculerRetryableError } 	= require("moleculer").Errors;
-const nodemailer 			= require("nodemailer");
-const htmlToText 			= require("nodemailer-html-to-text").htmlToText;
-const EmailTemplate 		= require("email-templates").EmailTemplate;
+const { MoleculerError, MoleculerRetryableError } = require("moleculer").Errors;
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
 
 module.exports = {
 
 	name: "mail",
 
 	settings: {
-		// Sender default e-mail address
-		from: null,
-
 		/* SMTP: https://nodemailer.com/smtp/
 		transport: {
 			host: "smtp.mailtrap.io",
@@ -43,15 +38,15 @@ module.exports = {
 			}
 		},
 		*/
+		// Shortcut for this.settings.template.transport
+		transport: null,
 
-		// Convert HTML body to text
-		htmlToText: true,
+		// Template configuration
+		// See https://github.com/niftylettuce/email-templates
+		template: null,
 
-		// Templates folder
-		templateFolder: null,
-
-		// Common data
-		data: {}
+		// Common locals (for templates)
+		locals: {},
 	},
 
 	/**
@@ -63,34 +58,10 @@ module.exports = {
 		 */
 		send: {
 			handler(ctx) {
-				const data = _.defaultsDeep(ctx.params.data || {}, this.settings.data);
-				if (ctx.params.template) {
-					const templateName = ctx.params.template;
-					// Use templates
-					const template = this.getTemplate(templateName);
-					if (template) {
-						// Render template
-						return template.render(data || {}, ctx.params.locale).then(rendered => {
-							const params = _.omit(ctx.params, ["template", "locale", "data"]);
-							params.html = rendered.html;
-							if (rendered.text)
-								params.text = rendered.text;
-							if (rendered.subject)
-								params.subject = rendered.subject;
-
-							// Send e-mail
-							return this.send(params);
-						});
-					}
-					return this.Promise.reject(new MoleculerError("Missing e-mail template: " + templateName));
-
-				} else {
-					// Send e-mail
-					const params = _.omit(ctx.params, ["template", "locale", "data"]);
-					return this.send(params);
-				}
-			}
-		}
+				const params = _.defaultsDeep(ctx.params, { locals: this.settings.locals });
+				return this.send(params);
+			},
+		},
 	},
 
 	/**
@@ -98,23 +69,27 @@ module.exports = {
 	 */
 	methods: {
 		/**
-		 * Get template renderer by name
-		 *
-		 * @param {any} templateName
-		 * @returns
+		 * Transform params to be compatible with email-templates
+		 * @param msg
 		 */
-		getTemplate(templateName) {
-			if (this.templates[templateName]) {
-				return this.templates[templateName];
+		sanitize(msg) {
+			const cleanMsg = _.defaultsDeep(msg, { message: {} });
+
+			// Move nodemailer fields inside message fields
+			["from", "to", "cc", "bcc", "subject", "text", "html", "attachments"]
+				.filter(key => !!msg[key])
+				.forEach(key => {
+					cleanMsg.message[key] = _.clone(msg[key]);
+					delete cleanMsg[key];
+				});
+
+			// Handle i18n as email-templates@2 instead of email-templates@3
+			if (msg.template && msg.locals && msg.locals.locale) {
+				cleanMsg.template = path.join(msg.template, msg.locals.locale); // Go inside locale template directory
+				delete cleanMsg.locals.locale; // Remove fields to prevent email-template doing it's own i18n
 			}
 
-			const templatePath = path.join(this.settings.templateFolder, templateName);
-			if (fs.existsSync(templatePath)) {
-				this.templates[templateName] = new EmailTemplate(templatePath);
-				this.Promise.promisifyAll(this.templates[templateName]);
-
-				return this.templates[templateName];
-			}
+			return cleanMsg;
 		},
 
 		/**
@@ -124,58 +99,47 @@ module.exports = {
 		 * @returns
 		 */
 		send(msg) {
-			return new this.Promise((resolve, reject) => {
-				this.logger.debug(`Sending email to ${msg.to} with subject '${msg.subject}'...`);
+			const cleanMsg = this.sanitize(msg);
 
-				if (!msg.from)
-					msg.from = this.settings.from;
+			this.logger.debug(`Sending email to ${cleanMsg.message.to} with subject '${cleanMsg.message.subject}'...`);
 
-				if (this.transporter) {
-					this.transporter.sendMail(msg, (err, info) => {
-						if (err) {
-							this.logger.warn("Unable to send email: ", err);
-							reject(new MoleculerRetryableError("Unable to send email! " + err.message));
-						} else {
-							this.logger.info("Email message sent.", info.response);
-							resolve(info);
-						}
-					});
-				}
-				else
-					return reject(new MoleculerError("Unable to send email! Invalid mailer transport: " + this.settings.transport));
+			if (!this.transporter) {
+				return this.Promise.reject(new MoleculerError("Unable to send email! Invalid mailer transport: " + this.settings.transport));
+			}
 
-			});
-		}
+			return this.emailTemplate.send(cleanMsg)
+				.catch((err) => {
+					this.logger.warn("Unable to send email: ", err);
+					return this.Promise.reject(new MoleculerRetryableError("Unable to send email! " + err.message));
+				})
+				.then((info) => {
+					this.logger.info("Email message sent.", info.response);
+					return info;
+				});
+		},
 	},
 
 	/**
 	 * Service created lifecycle event handler
 	 */
 	created() {
-		this.templates = {};
-		if (this.settings.templateFolder) {
-			if (!fs.existsSync(this.settings.templateFolder)) {
-				/* istanbul ignore next */
-				this.logger.warn("The templateFolder is not exists! Path:", this.settings.templateFolder);
-			}
-		}
-
+		// Transporter config lookup
+		// 1. createTransport function
+		// 2. this.settings.transport
+		// 3. this.settings.template.transport
 		if (_.isFunction(this.createTransport)) {
 			this.transporter = this.createTransport();
-
-		} else {
-			if (!this.settings.transport) {
-				this.logger.error("Missing transport configuration!");
-				return;
-			}
-
+		} else if (this.settings.transport) {
 			this.transporter = nodemailer.createTransport(this.settings.transport);
+		} else if (this.settings.template && this.settings.template.transport) {
+			this.transporter = nodemailer.createTransport(this.settings.template.transport);
+		} else {
+			this.logger.error("Missing transport configuration!");
+			return;
 		}
 
-		if (this.transporter) {
-			if (this.settings.htmlToText)
-				this.transporter.use("compile", htmlToText());
-		}
+		const config = _.defaults(this.settings.template, { transport: this.transporter });
+		this.emailTemplate = new Email(config);
 	},
 
 	/**
@@ -190,5 +154,5 @@ module.exports = {
 	 */
 	stopped() {
 
-	}
+	},
 };

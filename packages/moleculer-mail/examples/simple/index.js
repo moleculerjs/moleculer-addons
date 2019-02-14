@@ -19,7 +19,7 @@ broker.createService(MailerService, {
 				user: "367335eaa82697636",
 				pass: "e5a76af9b056d0"
 			}
-		}		
+		}
 	}
 });
 
@@ -27,15 +27,16 @@ broker.createService(MailerService, {
 broker.start().then(() => {
 
 	// Call action
-	broker.call("mail.send", { 
-		from: "adam@email.com",
-		to: "hello@moleculer.services", 
-		subject: "Hello Mailer", 
-		cc: "john.doe@gmail.com",
-		html: "This is a <b>moleculer-mail</b> demo!",
-		//text: "This is the text part"
+	broker.call("mail.send", {
+		message: {
+			from: "adam@email.com",
+			to: "hello@moleculer.services",
+			subject: "Hello Mailer",
+			cc: "john.doe@gmail.com",
+			html: "This is a <b>moleculer-mail</b> demo!",
+			//text: "This is the text part"
+		},
 	})
 	.then(console.log)
 	.catch(console.error);
-
 });

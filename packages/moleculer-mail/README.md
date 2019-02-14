@@ -33,7 +33,12 @@ const broker = new ServiceBroker();
 // Load service
 broker.createService(require("moleculer-mail"), {
     settings: {
-        from: "sender@moleculer.services",
+    	// Email template config (https://github.com/niftylettuce/email-templates/)
+    	template: {
+    		message: {
+    			from: "sender@moleculer.services",
+    		}
+    	},
         transport: {
             service: 'gmail',
             auth: {
@@ -49,6 +54,15 @@ broker.call("mail.send", {
     to: "john.doe@example.org", 
     subject: "Hello Friends!", 
     html: "This is the <b>content</b>!"
+}).then(console.log);
+
+// Or
+broker.call("mail.send", {
+    message: { 
+        to: "john.doe@example.org", 
+        subject: "Hello Friends!", 
+        html: "This is the <b>content</b>!"
+    }
 }).then(console.log);
 ```
 
@@ -75,6 +89,17 @@ broker.call("mail.send", {
     subject: "Hello Friends!", 
     text: "This is a text only message!"
 }).then(console.log);
+
+// Or
+broker.call("mail.send", {
+    message: { 
+        to: "john.doe@example.org", 
+        cc: "jane.doe@example.org",
+        bcc: "boss@example.org",
+        subject: "Hello Friends!", 
+        text: "This is a text only message!"
+    }
+}).then(console.log);
 ```
 
 
@@ -86,10 +111,15 @@ broker.createService(require("moleculer-mail"), {
         transport: {
             type: "sendmail"
         },
-        templateFolder: "./email-templates",
+    	// Email template config (https://github.com/niftylettuce/email-templates/)
+        template: {
+        	views: {
+        		root: "./email-templates"
+        	}
+        },
 
         // Global data for templates
-        data: {
+        locals: {
             siteName: "My app"
         }
     }
@@ -99,8 +129,22 @@ broker.createService(require("moleculer-mail"), {
 broker.call("mail.send", { 
     to: "john.doe@example.org", 
     template: "welcome",
-    locale: "de-DE",
     data: {
+        locale: "de-DE",
+        name: "John Doe",
+        username: "john_doe",
+        verifyToken: "123456"
+    }
+});
+
+// Or
+broker.call("mail.send", {
+	message: {
+        to: "john.doe@example.org", 
+	},
+    template: "welcome",
+    data: {
+        locale: "de-DE",
         name: "John Doe",
         username: "john_doe",
         verifyToken: "123456"
@@ -111,26 +155,44 @@ broker.call("mail.send", {
 ## Settings
 | Property | Type | Description |
 | -------- | -----| ----------- |
-| `from` | `String` | Sender's default email address. Use it if missing from `ctx.params` |
 | `transport` | `Object` | Transport settings. Send to `nodemailer.createTransporter`  |
-| `htmlToText` | `Boolean` | Enable [html-to-text](https://github.com/andris9/nodemailer-html-to-text) conversion |
-| `templateFolder` | `String` | Path to template folder |
-| `data` | `Object` | Global data for templates |
+| `template` | `Object` | [email-template](https://github.com/niftylettuce/email-templates/#options) config object |
+| `locals` | `Object` | Global data for templates |
 
 ### Transport options
 [Read more from transport options](https://nodemailer.com/smtp/)
 
 ### Localized templates
-The service support templates. It uses [email-templates](https://github.com/crocodilejs/node-email-templates) library. The templates is rendered by [consolidate.js](https://www.npmjs.com/package/consolidate), so you can use many template engines.
+The service support templates. It uses
+[email-templates](https://github.com/niftylettuce/email-templates/) library.
 
-Read more about [template files](https://github.com/crocodilejs/node-email-templates#quick-start).
+Because `email-templates@3+` does not handle localized the same way as before, `moleculer-mail`
+handle itself the localized system. It should work the same way as before.
 
-Read more about [localized templates](https://github.com/crocodilejs/node-email-templates#localized-template) or check the [examples](examples/template) folder.
+`moleculer-mail` append the locale name to the template folder. Example:
+
+```js
+broker.call("mail.send", {
+	message: {
+        to: "john.doe@example.org", 
+	},
+    template: "welcome",
+    data: {
+        locale: "de-DE",
+        name: "John Doe",
+        username: "john_doe",
+        verifyToken: "123456"
+    }
+});
+```
+
+Will load template from `<template-root>/welcome/de-DE/`.
+
 
 ## Actions
 | Name | Params | Result | Description |
 | ---- | ------ | ------ | ----------- |
-| `mail.send` | [Any field from here](https://nodemailer.com/message/) | [`Object`](https://nodemailer.com/usage/#sending-mail) | Send an email. |
+| `mail.send` | [Any field from here](https://github.com/niftylettuce/email-templates/#options) | [`Object`](https://nodemailer.com/usage/#sending-mail) | Send an email. |
 
 # Test
 ```
