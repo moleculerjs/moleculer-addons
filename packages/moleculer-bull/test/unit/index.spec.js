@@ -42,6 +42,17 @@ describe("Test BullService started handler", () => {
 		process: jest.fn(),
 	};
 
+	const multipleNamed = [
+		{
+			name: "name1",
+			process: jest.fn(),
+		},
+		{
+			name: "name2",
+			process: jest.fn(),
+		}
+	];
+
 	const namedconcurrency = {
 		name: "name",
 		concurrency: 100,
@@ -57,6 +68,7 @@ describe("Test BullService started handler", () => {
 			"task.second": jest.fn(),
 			"task.concurrency": concurrency,
 			"task.name": named,
+			"task.name.multiple": multipleNamed,
 			"task.name.concurrency": namedconcurrency,
 		}
 	});
@@ -65,26 +77,30 @@ describe("Test BullService started handler", () => {
 
 	it("should be created queues", () => {
 		expect(service).toBeDefined();
-		expect(Object.keys(service.$queues).length).toBe(5);
+		expect(Object.keys(service.$queues).length).toBe(6);
 
 		expect(service.$queues["task.first"]).toBeDefined();
 		expect(service.$queues["task.second"]).toBeDefined();
 		expect(service.$queues["task.concurrency"]).toBeDefined();
 		expect(service.$queues["task.name"]).toBeDefined();
+		expect(service.$queues["task.name.multiple"]).toBeDefined();
 		expect(service.$queues["task.name.concurrency"]).toBeDefined();
 
-		expect(Queue).toHaveBeenCalledTimes(5);
+		expect(Queue).toHaveBeenCalledTimes(6);
 		expect(Queue).toHaveBeenCalledWith("task.first", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.second", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.concurrency", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.name", url, opts);
+		expect(Queue).toHaveBeenCalledWith("task.name.multiple", url, opts);
 		expect(Queue).toHaveBeenCalledWith("task.name.concurrency", url, opts);
 
-		expect(processCB).toHaveBeenCalledTimes(5);
+		expect(processCB).toHaveBeenCalledTimes(7);
 		expect(processCB).toHaveBeenCalledWith(expect.anything());
 		expect(processCB).toHaveBeenCalledWith(expect.anything());
 		expect(processCB).toHaveBeenCalledWith(concurrency.concurrency, expect.anything());
 		expect(processCB).toHaveBeenCalledWith(named.name, expect.anything());
+		expect(processCB).toHaveBeenCalledWith(multipleNamed[0].name, expect.anything());
+		expect(processCB).toHaveBeenCalledWith(multipleNamed[1].name, expect.anything());
 		expect(processCB).toHaveBeenCalledWith(namedconcurrency.name, namedconcurrency.concurrency, expect.anything());
 	});
 
@@ -93,6 +109,7 @@ describe("Test BullService started handler", () => {
 		expect(service.getQueue("task.second")).toBeDefined();
 		expect(service.getQueue("task.concurrency")).toBeDefined();
 		expect(service.getQueue("task.name")).toBeDefined();
+		expect(service.getQueue("task.name.multiple")).toBeDefined();
 		expect(service.getQueue("task.name.concurrency")).toBeDefined();
 	});
 
