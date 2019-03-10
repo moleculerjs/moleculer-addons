@@ -59,26 +59,34 @@ module.exports = function createService(url, queueOpts) {
 		},
 
 		started() {
+			const setHandler = (handler, name)=>{
+				let args = [];
+
+				if (handler.name) {
+					args.push(handler.name);
+				}
+
+				if (handler.concurrency) {
+					args.push(handler.concurrency);
+				}
+
+				args.push(handler.process.bind(this))
+
+				this.getQueue(name).process(...args)
+			}
+
 			if (this.schema.queues) {
 				_.forIn(this.schema.queues, (fn, name) => {
 					if(typeof fn === "function")
 						this.getQueue(name).process(fn.bind(this));
-					else {
-						let args = [];
-
-						if (fn.name) {
-							args.push(fn.name);
+					else if(Array.isArray(fn)){
+						for(let handler of fn){
+							setHandler(handler, name)
 						}
-
-						if (fn.concurrency) {
-							args.push(fn.concurrency);
-						}
-
-						args.push(fn.process.bind(this));
-
-						this.getQueue(name).process(...args);
+					}else {
+						setHandler(fn, name)
 					}
-				});
+				})
 			}
 
 			return this.Promise.resolve();

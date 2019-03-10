@@ -62,6 +62,44 @@ broker.createService({
 });
 ```
 
+## Create multiple named queue worker service
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "task-worker",
+    mixins: [QueueService()],
+
+    queues: {
+        "mail.send": [
+          {
+              name: 'vip',
+              process(job) {
+                  this.logger.info("New important job received!", job.data);
+                  // Send email a vip way here.
+                  return this.Promise.resolve({ 'info': 'Process success.' });
+              }
+          },
+          {
+              name: 'normal',
+              process(job) {
+                  this.logger.info("New normal job received!", job.data);
+                  return this.Promise.resolve({ 'info': 'Process success.' });
+              }
+          }
+        ]
+    }
+});
+```
+
+This is same as:
+```js
+const emailQueue = new Bull('mail.send');
+// Worker
+emailQueue.process('vip', processImportant);
+emailQueue.process('normal', processNormal);
+```
+
 ## Create job in service
 ```js
 const QueueService = require("moleculer-bull");
