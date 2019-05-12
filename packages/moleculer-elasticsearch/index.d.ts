@@ -1,6 +1,4 @@
 declare module 'moleculer-elasticsearch' {
-  import { ServiceSchema } from 'moleculer';
-
   export const actions: {
     bulk: {
       handler: any;
@@ -148,7 +146,7 @@ export interface ConfigOptions {
   keepAlive?: boolean;
   maxSockets?: number;
   suggestCompression?: boolean;
-  connectionClass?: string | typeof HttpConnector;
+  connectionClass?: string;
   sniffedNodesProtocol?: string;
   ssl?: object;
   selector?: any;
