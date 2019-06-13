@@ -15,27 +15,25 @@ $ npm install moleculer-slack --save
 > Before use please set the `SLACK_TOKEN` and `SLACK_CHANNEL` environment variables.
 
 ```js
-let { ServiceBroker }     = require("moleculer");
-let SlackService             = require("../../index");
+let { ServiceBroker } = require('moleculer')
+let SlackService = require('../../index')
 
 // Create broker
-let broker = new ServiceBroker({ logger: console });
+let broker = new ServiceBroker({ logger: console })
 
 // Load my service
 broker.createService({
-    name: "slack",
+    name: 'slack',
     mixins: [SlackService]
-});
+})
 
 // Start server
 broker.start().then(() => {
-
     broker
-        .call("slack.send", { message: "Hello Slack!" })
-        .then(res => console.log("Slack message sent. Sid:", res.ts))
-        .catch(console.error);
-
-});
+        .call('slack.send', { message: 'Hello Slack!' })
+        .then(res => console.log('Slack message sent. Sid:', res.ts))
+        .catch(console.error)
+})
 ```
 
 # Settings
