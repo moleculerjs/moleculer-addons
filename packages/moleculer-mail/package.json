@@ -9,7 +9,9 @@
     "test": "jest --coverage",
     "lint": "eslint --ext=.js src test",
     "deps": "npm-check -u",
-    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "microservice",
@@ -53,6 +55,8 @@
     "email-templates": "2.7.1",
     "lodash": "4.17.11",
     "nodemailer": "4.6.7",
-    "nodemailer-html-to-text": "2.1.0"
-  }
+    "nodemailer-html-to-text": "2.1.0",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
