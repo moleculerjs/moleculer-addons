@@ -24,7 +24,7 @@
   "author": "MoleculerJS",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.13.0 || ^0.12.0"
+    "moleculer": "^0.14.0 || ^0.13.0 || ^0.12.0"
   },
   "devDependencies": {
     "benchmarkify": "2.1.0",
@@ -48,7 +48,7 @@
     "node": ">= 6.x.x"
   },
   "dependencies": {
-    "fakerator": "0.3.0",
-    "lodash": "4.17.11"
+    "fakerator": "^0.3.0",
+    "lodash": "^4.17.15"
   }
 }
