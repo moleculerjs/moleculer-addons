@@ -1,6 +1,6 @@
 /*
  * moleculer-twilio
- * Copyright (c) 2017 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
+ * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
@@ -11,9 +11,9 @@ const TwilioClient = require("twilio");
 
 /**
  * Send a message using the Twilio API.
- * 
+ *
  * https://www.twilio.com
- * 
+ *
  * @module Service
  */
 module.exports = {
@@ -38,7 +38,7 @@ module.exports = {
 
 		/**
 		 * Send an SMS
-		 * 
+		 *
 		 * @actions
 		 * @param {String} to - Target phone number
 		 * @param {String} message - Message text
@@ -64,7 +64,7 @@ module.exports = {
 
 		/**
 		 * Send an SMS
-		 * 
+		 *
 		 * @methods
 		 * @param {String} to - Target phone number
 		 * @param {String} [body=""] - Body of SMS
@@ -95,11 +95,11 @@ module.exports = {
 		/* istanbul ignore next */
 		if (this.settings.accountSid == null)
 			this.logger.warn("The `accountSid` is not configured. Please set the 'TWILIO_ACCOUNT_SID' environment variable!");
-		
+
 		/* istanbul ignore next */
 		if (this.settings.authToken == null)
 			this.logger.warn("The `authToken` is not configured. Please set the 'TWILIO_AUTH_TOKEN' environment variable!");
-		
+
 		/* istanbul ignore next */
 		if (this.settings.phoneNumber == null)
 			this.logger.warn("The `phoneNumber` is not configured. Please set the 'TWILIO_PHONE_NUMBER' environment variable!");

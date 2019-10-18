@@ -1,6 +1,6 @@
 /*
  * moleculer-fake
- * Copyright (c) 2017 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
+ * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
@@ -26,13 +26,13 @@ module.exports = {
 	 */
 	actions: {
 		boolean(ctx) { return this.generate(ctx, "random.boolean", [ctx.params.likelihoodPercent]); },
-		number(ctx) { 
+		number(ctx) {
 			let args = [];
 			if (ctx.params.max)
 				args.push(ctx.params.max);
 			if (ctx.params.min)
 				args.push(ctx.params.min);
-			return this.generate(ctx, "random.number", args); 
+			return this.generate(ctx, "random.number", args);
 		},
 		digit(ctx) 			{ return this.generate(ctx, "random.digit"); },
 		letter(ctx) 		{ return this.generate(ctx, "random.letter"); },
@@ -64,12 +64,12 @@ module.exports = {
 		postCode(ctx) 		{ return this.generate(ctx, "address.postCode"); },
 		geoLocation(ctx) 	{ return this.generate(ctx, "address.geoLocation"); },
 		altitude(ctx) 		{ return this.generate(ctx, "address.altitude"); },
-		
+
 		phoneNumber(ctx) 	{ return this.generate(ctx, "phone.number"); },
-		
+
 		companyName(ctx) 	{ return this.generate(ctx, "company.name"); },
 		companySuffix(ctx) 	{ return this.generate(ctx, "company.suffix"); },
-		
+
 		userName(ctx) 		{ return this.generate(ctx, "internet.userName", [ctx.params.firstName, ctx.params.lastName]); },
 		password(ctx) 		{ return this.generate(ctx, "internet.password"); },
 		domain(ctx) 		{ return this.generate(ctx, "internet.domain"); },
@@ -86,7 +86,7 @@ module.exports = {
 		word(ctx) 			{ return this.generate(ctx, "lorem.word"); },
 		sentence(ctx) 		{ return this.generate(ctx, "lorem.sentence"); },
 		paragraph(ctx) 		{ return this.generate(ctx, "lorem.paragraph"); },
-		
+
 		uuid(ctx) 			{ return this.generate(ctx, "misc.uuid"); },
 
 		user(ctx) 			{ return this.generate(ctx, "entity.user", [ctx.params.gender]); },
@@ -103,8 +103,8 @@ module.exports = {
 	methods: {
 		/**
 		 * Generate fake data
-		 * 
-		 * @param {any} ctx 
+		 *
+		 * @param {any} ctx
 		 * @returns {Promise}
 		 */
 		generate(ctx, type, args = []) {
@@ -133,7 +133,7 @@ module.exports = {
 			const fakerator = Fakerator(locale);
 			if (this.settings.seed)
 				fakerator.seed(this.settings.seed);
-			
+
 			this.fakerators[locale] = fakerator;
 
 			return fakerator;
