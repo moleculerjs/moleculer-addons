@@ -47,7 +47,7 @@
     ]
   },
   "engines": {
-    "node": ">= 6.x.x"
+    "node": ">= 8.x.x"
   },
   "dependencies": {
     "elasticsearch": "^16.4.0"

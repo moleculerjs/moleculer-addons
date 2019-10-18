@@ -46,7 +46,7 @@
     ]
   },
   "engines": {
-    "node": ">= 6.x.x"
+    "node": ">= 8.x.x"
   },
   "dependencies": {
     "bull": "^3.11.0",
