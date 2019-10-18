@@ -13,7 +13,7 @@ const _ 			= require("lodash");
 const { MoleculerError, MoleculerRetryableError } 	= require("moleculer").Errors;
 const nodemailer 			= require("nodemailer");
 const htmlToText 			= require("nodemailer-html-to-text").htmlToText;
-const EmailTemplate 		= require("email-templates").EmailTemplate;
+const EmailTemplate 		= require("email-templates");
 
 module.exports = {
 
@@ -47,8 +47,11 @@ module.exports = {
 		// Convert HTML body to text
 		htmlToText: true,
 
-		// Templates folder
+		// Template folder
 		templateFolder: null,
+
+		// Localization for templates
+		i18n: null,
 
 		// Common data
 		data: {}
@@ -67,10 +70,9 @@ module.exports = {
 				if (ctx.params.template) {
 					const templateName = ctx.params.template;
 					// Use templates
-					const template = this.getTemplate(templateName);
-					if (template) {
+					if (this.emailTemplate) {
 						// Render template
-						return template.render(data || {}, ctx.params.locale).then(rendered => {
+						return this.emailTemplate.renderAll(templateName, { locale: ctx.params.locale, ...data }).then(rendered => {
 							const params = _.omit(ctx.params, ["template", "locale", "data"]);
 							params.html = rendered.html;
 							if (rendered.text)
@@ -152,12 +154,20 @@ module.exports = {
 	 * Service created lifecycle event handler
 	 */
 	created() {
+		this.emailTemplate = null;
 		this.templates = {};
 		if (this.settings.templateFolder) {
 			if (!fs.existsSync(this.settings.templateFolder)) {
 				/* istanbul ignore next */
 				this.logger.warn("The templateFolder is not exists! Path:", this.settings.templateFolder);
 			}
+			this.emailTemplate = new EmailTemplate({
+				i18n: this.settings.i18n,
+
+				views: {
+					root: this.settings.templateFolder
+				}
+			});
 		}
 
 		if (_.isFunction(this.createTransport)) {

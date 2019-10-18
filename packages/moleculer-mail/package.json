@@ -47,12 +47,12 @@
     ]
   },
   "engines": {
-    "node": ">= 6.x.x"
+    "node": ">= 8.x.x"
   },
   "dependencies": {
-    "email-templates": "^2.7.1",
+    "email-templates": "^6.0.3",
     "lodash": "^4.17.15",
-    "nodemailer": "^4.6.7",
-    "nodemailer-html-to-text": "^2.1.0"
+    "nodemailer": "^6.3.1",
+    "nodemailer-html-to-text": "^3.1.0"
   }
 }

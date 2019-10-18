@@ -1,7 +1,6 @@
 doctype html
 html(lang="en")
 body
-	h1 Hi #{name}!
+	h1= t("hi", { name: name })
 	h2 Your username is #{username}
 	a(href="/verify/" + verifyToken) Click here to verify your registration.
-	
