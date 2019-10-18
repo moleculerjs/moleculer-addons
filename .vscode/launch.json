@@ -8,7 +8,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Launch dev",
-			"program": "${workspaceRoot}/proposal/moleculer-shared-object/examples/simple/index.js",
+			"program": "${workspaceRoot}/packages/moleculer-mail/examples/template/index.js",
 			"cwd": "${workspaceRoot}",
 		},
 		{
