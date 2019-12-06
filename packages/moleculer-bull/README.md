@@ -35,6 +35,29 @@ broker.createService({
 });
 ```
 
+## Create queue worker service specifying Redis host
+```js
+const QueueService = require("moleculer-bull");
+
+broker.createService({
+    name: "task-worker",
+    mixins: [QueueService("redis://0.0.0.0:32777")],
+
+    queues: {
+        "mail.send"(job) {
+            this.logger.info("New job received!", job.data);
+            job.progress(10);
+
+            return this.Promise.resolve({
+                done: true,
+                id: job.data.id,
+                worker: process.pid
+            });
+        }
+    }
+});
+```
+
 ## Create queue worker service with concurrency and named jobs
 ```js
 const QueueService = require("moleculer-bull");
