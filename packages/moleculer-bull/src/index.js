@@ -70,19 +70,13 @@ module.exports = function createService(url, queueOpts) {
 					}, 1000);
 
 					// Collect duration job time
-					queue.on("global:completed", async id => {
+					queue.on("completed", job => {
 						try {
-							const job = await this.$queues[name].getJob(id);
-							if (!job) {
-								this.logger.warn({job: id}, "unable to find job from id");
-								return;
-							}
 							if (!job.finishedOn) return;
 							const duration = job.finishedOn - job.processedOn;
-							console.log({duration});
 							this.broker.metrics.observe("bull.completed.duration", duration);
 						} catch (err) {
-							this.logger.error({err, job: id}, "unable to fetch completed job");
+							// silent
 						}
 					});
 				} catch(err) {
