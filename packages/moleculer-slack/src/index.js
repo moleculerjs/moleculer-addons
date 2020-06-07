@@ -45,9 +45,11 @@ module.exports = {
 		send: {
 			params: {
 				channel: { type: "string", optional: true },
+				ts: { type: "string", optional: true },
 				message: { type: "string" }
 			},
 			handler(ctx) {
+                if (ctx.params.ts) return this.sendMessage(ctx.params.message, ctx.params.channel, ctx.params.ts);
 				return this.sendMessage(ctx.params.message, ctx.params.channel);
 			}
 		}
@@ -66,11 +68,11 @@ module.exports = {
 		 * @param {String} [channel] - Channel
 		 * @returns {String}
 		 */
-		sendMessage(message, channel) {
+		sendMessage(message, channel, thread_ts) {
 			channel = channel || this.settings.slackChannel;
 			this.logger.debug(`Sending message to '${channel}' slack channel. Message: ${message}`);
 
-			return this.client.chat.postMessage({ channel: channel, text: message})
+			return this.client.chat.postMessage({ channel: channel, ts: thread_ts, text: message})
 				.then(res => {
 					this.logger.debug(`The Message sent to '${channel}' successfully! Ts: ${res.ts}`);
 					return res;
