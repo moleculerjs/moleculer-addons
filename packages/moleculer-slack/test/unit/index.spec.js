@@ -100,5 +100,20 @@ describe("Test SlackService", () => {
 		});
 	});
 
+	it("should call the sendMessage method successfully with channel and thread_ts", () => {
+		let message = {
+			sid: "12345"
+		};
+		service.sendMessage = jest.fn(() => Promise.resolve(message));
+
+		return broker.call("slack.send", { message: "Test Slack", channel: "some-topic" , ts: "some-thread"}).catch(protectReject).then(res => {
+			expect(res).toBe(message);
+			expect(service.sendMessage).toHaveBeenCalledTimes(1);
+			expect(service.sendMessage).toHaveBeenCalledWith("Test Slack", "some-topic", "some-thread");
+
+			return broker.stop();
+		});
+	});
+
 });
 
