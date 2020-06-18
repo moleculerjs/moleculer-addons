@@ -24,11 +24,11 @@ broker.createService(MailerService, {
 		templateFolder: path.join(__dirname, "templates"),
 		i18n: {
 			"en": {
-				"hi": "Hi #{name}!"
+				"hi": "Hi {{name}}!"
 			},
 
 			"hu-HU": {
-				"hi": "Szia, #{name}!"
+				"hi": "Szia, {{name}}!"
 			}
 		}
 	}
@@ -43,7 +43,7 @@ broker.start().then(() => {
 		to: "hello@moleculer.services",
 		subject: "Hello Mailer",
 		template: "welcome",
-		locale: "hu-HU", // Localized e-mail template
+		locale: "hu", // Localized e-mail template
 		data: {
 			name: "John Doe",
 			username: "john.doe",
