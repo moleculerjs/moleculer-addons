@@ -34,10 +34,10 @@ module.exports = function createService(url, queueOpts) {
 				if(opts)
 					return this.getQueue(name).add(jobName, payload, opts);
 				else
-					if (payload)
-						return this.getQueue(name).add(jobName, payload);
-					else
-						return this.getQueue(name).add(jobName);
+				if (payload)
+					return this.getQueue(name).add(jobName, payload);
+				else
+					return this.getQueue(name).add(jobName);
 			},
 
 			/**
@@ -48,7 +48,8 @@ module.exports = function createService(url, queueOpts) {
 			 */
 			getQueue(name) {
 				if (!this.$queues[name]) {
-					this.$queues[name] = Queue(name, url, queueOpts);
+					let queueOptions = this.schema.queues[name] ? this.schema.queues[name].options : null;
+					this.$queues[name] = Queue(name, url, queueOptions ? queueOptions : queueOpts);
 				}
 				return this.$queues[name];
 			}
@@ -59,7 +60,7 @@ module.exports = function createService(url, queueOpts) {
 		},
 
 		started() {
-			const setHandler = (handler, name)=>{
+			const setHandler = (handler, name) => {
 				let args = [];
 
 				if (handler.name) {
@@ -70,10 +71,10 @@ module.exports = function createService(url, queueOpts) {
 					args.push(handler.concurrency);
 				}
 
-				args.push(handler.process.bind(this))
+				args.push(handler.process.bind(this));
 
-				this.getQueue(name).process(...args)
-			}
+				this.getQueue(name).process(...args);
+			};
 
 			if (this.schema.queues) {
 				_.forIn(this.schema.queues, (fn, name) => {
@@ -81,12 +82,12 @@ module.exports = function createService(url, queueOpts) {
 						this.getQueue(name).process(fn.bind(this));
 					else if(Array.isArray(fn)){
 						for(let handler of fn){
-							setHandler(handler, name)
+							setHandler(handler, name);
 						}
 					}else {
-						setHandler(fn, name)
+						setHandler(fn, name);
 					}
-				})
+				});
 			}
 
 			return this.Promise.resolve();
