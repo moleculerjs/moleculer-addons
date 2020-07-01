@@ -48,7 +48,8 @@ module.exports = function createService(url, queueOpts) {
 			 */
 			getQueue(name) {
 				if (!this.$queues[name]) {
-					let queueOptions = this.schema.queues[name] ? this.schema.queues[name].options : null;
+					// If queue options are present 
+					let queueOptions = this.schema.queues[name].options;
 					this.$queues[name] = Queue(name, url, queueOptions ? queueOptions : queueOpts);
 				}
 				return this.$queues[name];
