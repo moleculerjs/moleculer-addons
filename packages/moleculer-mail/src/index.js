@@ -9,6 +9,7 @@
 const fs 			= require("fs");
 const path 			= require("path");
 const _ 			= require("lodash");
+const Promise 		= require("bluebird");
 
 const { MoleculerError, MoleculerRetryableError } 	= require("moleculer").Errors;
 const nodemailer 			= require("nodemailer");
@@ -111,7 +112,7 @@ module.exports = {
 			const templatePath = path.join(this.settings.templateFolder, templateName);
 			if (fs.existsSync(templatePath)) {
 				this.templates[templateName] = new EmailTemplate(templatePath);
-				this.Promise.promisifyAll(this.templates[templateName]);
+				Promise.promisifyAll(this.templates[templateName]);
 
 				return this.templates[templateName];
 			}
