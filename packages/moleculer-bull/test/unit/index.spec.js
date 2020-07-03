@@ -10,15 +10,14 @@ let addDelayedCB = jest.fn();
 
 let Queue = require("bull");
 
+Queue.mockImplementation(() => ({
+	process: processCB,
+	add: addCB,
+}));
+
 const { ServiceBroker } = require("moleculer");
 const BullService = require("../../src");
 
-beforeEach(() => {
-	Queue.mockImplementation(() => ({
-		process: processCB,
-		add: addCB,
-	}));
-});
 
 describe("Test BullService constructor", () => {
 	const broker = new ServiceBroker({ logger: false});
