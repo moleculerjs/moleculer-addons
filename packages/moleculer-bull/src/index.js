@@ -50,7 +50,11 @@ module.exports = function createService(url, queueOpts) {
 				if (!this.$queues[name]) {
 					// If queue options are present use them over the parent mixin options
 					// This allows a user to override the service wide queue options
-					let queueOptions = this.schema.queues[name].options;
+					let queueOptions = null;
+					const foundQueue = this.schema.queues && this.schema.queues[name];
+					if(foundQueue){
+						queueOptions = foundQueue.options;
+					}
 					this.$queues[name] = Queue(name, url, queueOptions ? queueOptions : queueOpts);
 				}
 				return this.$queues[name];

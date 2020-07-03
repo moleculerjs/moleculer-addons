@@ -3,18 +3,22 @@
 jest.mock("bull");
 
 let processCB = jest.fn();
-let addCB = jest.fn();
+let addCB = jest.fn().mockImplementation(() => {
+	return Promise.resolve({ id: "id" });
+});
 let addDelayedCB = jest.fn();
 
 let Queue = require("bull");
 
-Queue.mockImplementation(() => ({
-	process: processCB,
-	add: addCB
-}));
-
 const { ServiceBroker } = require("moleculer");
 const BullService = require("../../src");
+
+beforeEach(() => {
+	Queue.mockImplementation(() => ({
+		process: processCB,
+		add: addCB,
+	}));
+});
 
 describe("Test BullService constructor", () => {
 	const broker = new ServiceBroker({ logger: false});
@@ -26,8 +30,6 @@ describe("Test BullService constructor", () => {
 	});
 
 });
-
-
 
 describe("Test BullService started handler", () => {
 	const opts = { a: 5 };
@@ -200,7 +202,6 @@ describe("Test BullService job with delay", () => {
 });
 
 
-
 describe("Test BullService createJob return a promise", () => {
 	const payload = { a: 10 };
 	const broker = new ServiceBroker({ logger: false});
@@ -234,6 +235,38 @@ describe("Test BullService createJob return a promise", () => {
 
 				expect(addCB).toHaveBeenCalledTimes(1);
 				expect(addCB).toHaveBeenCalledWith(payload);
+
+				expect(job).toBeDefined();
+				expect(job.id).toBeDefined();
+			});
+	});
+
+});
+
+describe("Test BullService createJob return a promise", () => {
+	const payload = { a: 10 };
+	const broker = new ServiceBroker({ logger: false});
+	const service = broker.createService({
+		mixins: [BullService()],
+		queues: undefined
+	});
+
+	it("should be able to add a job", () => {
+		function promisedFunction (queue, payload) {
+			return new Promise((resolve, reject) => {
+				service.createJob(queue, payload)
+					.then(data => {
+						resolve(data);
+					}).catch(err => {
+						reject(err);
+					});
+			});
+		}
+
+		return promisedFunction("task.scheduled", payload)
+			.then(job => {
+				expect(Queue).toHaveBeenCalledTimes(8);
+				expect(Queue).toHaveBeenCalledWith("task.scheduled", undefined, undefined);
 
 				expect(job).toBeDefined();
 				expect(job.id).toBeDefined();
