@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "fakerator": "^0.3.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.16"
   }
 }
