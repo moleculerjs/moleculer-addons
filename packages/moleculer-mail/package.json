@@ -52,7 +52,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "email-templates": "^2.7.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "nodemailer": "^4.6.7",
     "nodemailer-html-to-text": "^2.1.0"
   }
