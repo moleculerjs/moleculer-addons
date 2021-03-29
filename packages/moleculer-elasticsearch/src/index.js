@@ -274,7 +274,7 @@ module.exports = {
 	started() {
 		this.client = new Elasticsearch.Client(this.settings.elasticsearch);
 
-		return this.client.ping({ requestTimeout: 5000 });
+		return this.client.ping({ requestTimeout: this.settings.elasticsearch.requestTimeout || 5000 });
 	},
 
 	/**
