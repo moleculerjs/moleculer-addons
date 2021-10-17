@@ -29,7 +29,7 @@
     "benchmarkify": "2.1.2",
     "coveralls": "^3.0.7",
     "eslint": "^6.5.1",
-    "handlebars": "^4.7.6",
+    "handlebars": "^4.7.7",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
     "lolex": "^5.1.0",
@@ -52,7 +52,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "email-templates": "^2.7.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "nodemailer": "^4.6.7",
     "nodemailer-html-to-text": "^2.1.0"
   }
