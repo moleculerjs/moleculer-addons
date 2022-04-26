@@ -37,7 +37,7 @@ broker.createService({
     mixins: [ESService],
     settings: {
         elasticsearch: {
-            host: "http://elastic:changeme@<docker-hostname>:9200"
+            node: "http://elastic:changeme@<docker-hostname>:9200",
         }
     }
 });
@@ -47,7 +47,6 @@ broker.start()
     // Create a document
     .then(() => broker.call("elasticsearch.create", { 
         index: "demo", 
-        type: "default", 
         id: "1", 
         body: { name: "John Doe", age: 36 }
     }))
@@ -66,7 +65,7 @@ broker.start()
     }).then(res => console.log("Hits:", res.hits.hits)))
     
     // Remove document
-    .then(() => broker.call("elasticsearch.delete", { index: "demo", type: "default", id: "1" }))
+    .then(() => broker.call("elasticsearch.delete", { index: "demo", id: "1" }))
 ```
 
 # Settings
@@ -75,8 +74,7 @@ broker.start()
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `elasticsearch` | `Object` | **required** | Elasticsearch constructor options. [More options](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html) |
-| `elasticsearch.host` | `String` | **required** | Host |
-| `elasticsearch.apiVersion` | `String` | **required** | API version |
+| `elasticsearch.node` | `String` | **required** | Host |
 
 <!-- AUTO-CONTENT-END:SETTINGS -->
 
@@ -104,7 +102,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String` | - | Default index for items which don’t provide one |
-| `type` | `String` | - | Default document type for items which don’t provide one |
 | `body` | `Array` | **required** | The request body, as either an array of objects or new-line delimited JSON objects |
 
 ### Results
@@ -123,7 +120,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String` | **required** | The name of the index |
-| `type` | `String` | **required** | The type of the document |
 | `id` | `String` | **required** | Document ID |
 | `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
 
@@ -143,7 +139,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String` | **required** | The name of the index |
-| `type` | `String` | **required** | The type of the document |
 | `id` | `String` | - | Document ID |
 
 ### Results
@@ -162,7 +157,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String` | **required** | The name of the index |
-| `type` | `String` | **required** | The type of the document |
 | `id` | `String` | **required** | Document ID |
 | `body` | `Object` | **required** | The request body, as either JSON or a JSON serializable object. |
 
@@ -182,7 +176,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String` | **required** | The name of the index |
-| `type` | `String` | **required** | The type of the document |
 | `id` | `String` | **required** | Document ID |
 
 ### Results
@@ -201,7 +194,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String`, `Array.<String>` | **required** | A comma-separated list of index names to search; use _all or empty string to perform the operation on all indices |
-| `type` | `String`, `Array.<String>` | **required** | A comma-separated list of document types to search; leave empty to perform the operation on all types |
 | `q` | `String` | - | Query in the [Lucene query string](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html) syntax. |
 | `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
 
@@ -221,7 +213,6 @@ More info: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/c
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `index` | `String`, `Array.<String>` | **required** | A comma-separated list of indices to restrict the results. |
-| `type` | `String`, `Array.<String>` | **required** | A comma-separated list of types to restrict the results. |
 | `q` | `String` | - | Query in the Lucene query string syntax. |
 | `body` | `Object` | - | The request body, as either JSON or a JSON serializable object. |
 

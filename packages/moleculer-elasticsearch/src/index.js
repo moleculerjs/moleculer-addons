@@ -6,7 +6,7 @@
 
 "use strict";
 
-const Elasticsearch = require("elasticsearch");
+const {Client} = require("@elastic/elasticsearch");
 
 /**
  * Elasticsearch service for Moleculer.
@@ -30,10 +30,7 @@ module.exports = {
 		/** @type {Object} Elasticsearch constructor options. [More options](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/configuration.html) */
 		elasticsearch: {
 			/** @type {String} Host */
-			host: process.env.ELASTICSEARCH_HOST || "http://localhost:9200",
-
-			/** @type {String} API version */
-			apiVersion: "5.4"
+			node: process.env.ELASTICSEARCH_HOST || "http://localhost:9200",
 		}
 	},
 
@@ -49,7 +46,6 @@ module.exports = {
 		 * @actions
 		 *
 		 * @param {String=} index - Default index for items which don’t provide one
-		 * @param {String=} type - Default document type for items which don’t provide one
 		 * @param {Array} body - The request body, as either an array of objects or new-line delimited JSON objects
 		 *
 		 * @returns {Object} Elasticsearch response object
@@ -57,7 +53,6 @@ module.exports = {
 		bulk: {
 			params: {
 				index: { type: "string", optional: true },
-				type: { type: "string", optional: true },
 				body: { type: "array" }
 			},
 			handler(ctx) {
@@ -73,7 +68,6 @@ module.exports = {
 		 * @actions
 		 *
 		 * @param {String} index - The name of the index
-		 * @param {String} type - The type of the document
 		 * @param {String} id - Document ID
 		 * @param {Object} body - The request body, as either JSON or a JSON serializable object.
 		 *
@@ -82,7 +76,6 @@ module.exports = {
 		create: {
 			params: {
 				index: { type: "string" },
-				type: { type: "string" },
 				id: { type: "string" },
 				body: { type: "object" }
 			},
@@ -107,7 +100,6 @@ module.exports = {
 		get: {
 			params: {
 				index: { type: "string" },
-				type: { type: "string" },
 				id: { type: "string" }
 			},
 			handler(ctx) {
@@ -123,7 +115,6 @@ module.exports = {
 		 * @actions
 		 *
 		 * @param {String} index - The name of the index
-		 * @param {String} type - The type of the document
 		 * @param {String} id - Document ID
 		 * @param {Object} body - The request body, as either JSON or a JSON serializable object.
 		 *
@@ -132,7 +123,6 @@ module.exports = {
 		update: {
 			params: {
 				index: { type: "string" },
-				type: { type: "string" },
 				id: { type: "string" },
 				body: { type: "object" }
 			},
@@ -150,7 +140,6 @@ module.exports = {
 		 * @actions
 		 *
 		 * @param {String} index - The name of the index
-		 * @param {String} type - The type of the document
 		 * @param {String} id - Document ID
 		 *
 		 * @returns {Object} Elasticsearch response object
@@ -158,7 +147,6 @@ module.exports = {
 		delete: {
 			params: {
 				index: { type: "string" },
-				type: { type: "string" },
 				id: { type: "string" }
 			},
 			handler(ctx) {
@@ -184,10 +172,6 @@ module.exports = {
 		search: {
 			params: {
 				/*index: [
-					{ type: "string", optional: true },
-					{ type: "array", items: "string", optional: true }
-				],
-				type: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
 				],*/
@@ -216,10 +200,6 @@ module.exports = {
 		count: {
 			params: {
 				/*index: [
-					{ type: "string", optional: true },
-					{ type: "array", items: "string", optional: true }
-				],
-				type: [
 					{ type: "string", optional: true },
 					{ type: "array", items: "string", optional: true }
 				],*/
@@ -272,9 +252,9 @@ module.exports = {
 	 * Service started lifecycle event handler
 	 */
 	started() {
-		this.client = new Elasticsearch.Client(this.settings.elasticsearch);
+		this.client = new Client(this.settings.elasticsearch);
 
-		return this.client.ping({ requestTimeout: this.settings.elasticsearch.requestTimeout || 5000 });
+		return this.client;
 	},
 
 	/**
