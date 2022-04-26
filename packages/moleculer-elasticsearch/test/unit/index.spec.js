@@ -3,8 +3,8 @@
 const { ServiceBroker } = require("moleculer");
 const ESService = require("../../src");
 
-jest.mock("elasticsearch");
-const Elasticsearch = require("elasticsearch");
+jest.mock("@elastic/elasticsearch");
+const Elasticsearch = require("@elastic/elasticsearch");
 
 Elasticsearch.Client = jest.fn(() => {
 	return {
@@ -45,7 +45,6 @@ describe("Test Elasticsearch service", () => {
 	it("should call client.bulk", () => {
 		let p = {
 			index: "test",
-			type: "def",
 			body: [
 				{ id: 1, name: "John" },
 				{ id: 2, name: "Jane" }
@@ -61,7 +60,6 @@ describe("Test Elasticsearch service", () => {
 	it("should call client.create", () => {
 		let p = {
 			index: "test",
-			type: "def",
 			id: "5",
 			body: { id: "5", name: "John" }
 		};
@@ -75,7 +73,6 @@ describe("Test Elasticsearch service", () => {
 	it("should call client.get", () => {
 		let p = {
 			index: "test",
-			type: "def",
 			id: "5"
 		};
 
@@ -88,7 +85,6 @@ describe("Test Elasticsearch service", () => {
 	it("should call client.update", () => {
 		let p = {
 			index: "test",
-			type: "def",
 			id: "5",
 			body: { id: "5", name: "John" }
 		};
@@ -102,7 +98,6 @@ describe("Test Elasticsearch service", () => {
 	it("should call client.delete", () => {
 		let p = {
 			index: "test",
-			type: "def",
 			id: "5",
 		};
 
@@ -165,7 +160,6 @@ describe("Test Elasticsearch service", () => {
 			api: "xyz",
 			params: {
 				index: "custom",
-				type: "default"
 			}
 		};
 
