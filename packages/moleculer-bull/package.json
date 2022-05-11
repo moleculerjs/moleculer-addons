@@ -31,7 +31,6 @@
     "eslint": "^8.11.0",
     "jest": "^28.1.0",
     "jest-cli": "^28.1.0",
-    "lolex": "^5.1.0",
     "moleculer": "^0.14.19",
     "moleculer-docgen": "^0.3.0",
     "nodemon": "^2.0.15"
