@@ -85,6 +85,11 @@ broker.createService({
 		 * More info: https://github.com/graphile/worker#logger
 		 */
 		initLogger() {
+			/**
+			 * @param {String} level Log level
+			 * @param {String} message Message to log
+			 * @param {Object} meta  Additional metadata
+			 */
 			return (level, message, meta) => {
 				this.loggerQueue[level](message);
 			};
