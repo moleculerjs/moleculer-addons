@@ -58,6 +58,27 @@ broker.createService({
 		),
 	],
 
+	settings: {
+		/**
+		 * @type {Record<String, Function>}
+		 * For a complete list of events see: https://github.com/graphile/worker#workerevents
+		 */
+		jobEventHandlers: {
+			/**
+			 * @param {{
+			 *  worker: import('graphile-worker').Worker,
+			 *  job: import('graphile-worker').Job
+			 * }}
+			 * @this {import('moleculer').Service}
+			 */
+			"job:success": function ({ worker, job }) {
+				this.logger.info(
+					`Worker ${worker.workerId} completed job ${job.id}`
+				);
+			},
+		},
+	},
+
 	queues: {
 		/**
 		 * @param {Object} payload Message payload

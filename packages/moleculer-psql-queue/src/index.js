@@ -30,23 +30,6 @@ module.exports = function createService(
 	return {
 		name: "psql-queue",
 
-		settings: {
-			jobEventHandlers: {
-				/**
-				 * @param {{
-				 *  worker: import('graphile-worker').Worker,
-				 *  job: import('graphile-worker').Job
-				 * }}
-				 * @this {import('moleculer').Service}
-				 */
-				success: function ({ worker, job }) {
-					this.logger.info(
-						`Worker ${worker.workerId} completed job ${job.id}`
-					);
-				},
-			},
-		},
-
 		methods: {
 			/**
 			 * Creates a new task
@@ -110,10 +93,14 @@ module.exports = function createService(
 					...queueOpts,
 				});
 
-				this.consumer.events.on(
-					"job:success",
-					this.settings.jobEventHandlers.success.bind(this)
-				);
+				// Register event handlers
+				if (Object.keys(this.settings.jobEventHandlers).length > 0) {
+					for (const [eventName, handler] of Object.entries(
+						this.settings.jobEventHandlers
+					)) {
+						this.consumer.events.on(eventName, handler.bind(this));
+					}
+				}
 
 				// If the worker exits (whether through fatal error or otherwise),
 				// this promise will resolve/reject:
