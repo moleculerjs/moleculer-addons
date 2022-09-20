@@ -7,7 +7,12 @@
 "use strict";
 
 const _ = require("lodash");
-const { run, quickAddJob, makeWorkerUtils } = require("graphile-worker");
+const {
+	run,
+	quickAddJob,
+	makeWorkerUtils,
+	Logger,
+} = require("graphile-worker");
 
 /**
  *
@@ -54,13 +59,25 @@ module.exports = function createService(
 					payload
 				);
 			},
+
+			/**
+			 * Replaces Default logger with Moleculer logger
+			 * More info: https://github.com/graphile/worker#logger
+			 */
+			initLogger() {
+				return (level, message, meta) => {
+					this.loggerQueue[level](message, meta);
+				};
+			},
 		},
 
 		/**
 		 * Service created lifecycle event handler
 		 * @this {import('moleculer').Service}
 		 */
-		created() {},
+		created() {
+			this.loggerQueue = this.broker.getLogger("psql-queue");
+		},
 
 		/**
 		 * Service started lifecycle event handler
@@ -91,6 +108,7 @@ module.exports = function createService(
 					taskList: taskList,
 					// Other opts
 					...queueOpts,
+					logger: new Logger(this.initLogger),
 				});
 
 				// Register event handlers

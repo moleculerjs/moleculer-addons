@@ -79,6 +79,18 @@ broker.createService({
 		},
 	},
 
+	methods: {
+		/**
+		 * Replaces Default logger with Moleculer logger
+		 * More info: https://github.com/graphile/worker#logger
+		 */
+		initLogger() {
+			return (level, message, meta) => {
+				this.loggerQueue[level](message);
+			};
+		},
+	},
+
 	queues: {
 		/**
 		 * @param {Object} payload Message payload
