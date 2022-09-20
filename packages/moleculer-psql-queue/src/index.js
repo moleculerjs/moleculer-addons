@@ -90,9 +90,11 @@ module.exports = function createService(
 		 */
 		async started() {
 			try {
+				// Start the producer to add jobs
 				this.producer = await makeWorkerUtils({
 					connectionString: url,
 					...producerOpts,
+					logger: new Logger(this.initLogger),
 				});
 
 				const taskList = {};
@@ -107,7 +109,7 @@ module.exports = function createService(
 					}
 				});
 
-				// Run a worker to execute jobs:
+				// Start the consumer to process jobs:
 				this.consumer = await run({
 					connectionString: url,
 					taskList: taskList,
@@ -117,7 +119,10 @@ module.exports = function createService(
 				});
 
 				// Register event handlers
-				if (Object.keys(this.settings.jobEventHandlers).length > 0) {
+				if (
+					this.settings.jobEventHandlers &&
+					Object.keys(this.settings.jobEventHandlers).length > 0
+				) {
 					for (const [eventName, handler] of Object.entries(
 						this.settings.jobEventHandlers
 					)) {
