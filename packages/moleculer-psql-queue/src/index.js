@@ -7,7 +7,7 @@
 "use strict";
 
 const _ = require("lodash");
-const { run, quickAddJob } = require("graphile-worker");
+const { run, quickAddJob, makeWorkerUtils } = require("graphile-worker");
 
 /**
  *
@@ -42,8 +42,11 @@ module.exports = function createService(url, queueOpts) {
 			 * Creates a new task
 			 * @param {String} name Task name
 			 * @param {Object} payload Payload to pass to the task
+			 * @param {import('graphile-worker').WorkerUtilsOptions} opts
 			 */
-			createJob(name, payload) {},
+			createJob(name, payload, opts) {
+				return this.producer.addJob(name, payload, opts);
+			},
 
 			/**
 			 *
@@ -71,23 +74,27 @@ module.exports = function createService(url, queueOpts) {
 		 * @this {import('moleculer').Service}
 		 */
 		async started() {
-			const taskList = {};
-
-			if (this.schema.queues) {
-				_.forIn(this.schema.queues, (fn, name) => {
-					if (typeof fn === "function")
-						taskList[name] = fn.bind(this);
-					else {
-						taskList[name] = fn.process.bind(this);
-					}
-				});
-			}
-
-			if (Object.keys(taskList).length === 0) return;
-
 			try {
+				const taskList = {};
+
+				if (this.schema.queues) {
+					_.forIn(this.schema.queues, (fn, name) => {
+						if (typeof fn === "function")
+							taskList[name] = fn.bind(this);
+						else {
+							taskList[name] = fn.process.bind(this);
+						}
+					});
+				}
+
+				this.producer = await makeWorkerUtils({
+					connectionString: url,
+				});
+
+				if (Object.keys(taskList).length === 0) return;
+
 				// Run a worker to execute jobs:
-				const runner = await run({
+				this.runner = await run({
 					connectionString: url,
 					concurrency: 5,
 					// Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
@@ -97,14 +104,14 @@ module.exports = function createService(url, queueOpts) {
 					taskList: taskList,
 				});
 
-				runner.events.on(
+				this.runner.events.on(
 					"job:success",
 					this.settings.jobEventHandlers.success.bind(this)
 				);
 
 				// If the worker exits (whether through fatal error or otherwise),
 				// this promise will resolve/reject:
-				await runner.promise;
+				await this.runner.promise;
 			} catch (error) {
 				this.logger.error(
 					"Failed to initialize PostgreSQL worker",

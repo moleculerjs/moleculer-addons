@@ -20,7 +20,7 @@ broker.createService({
 	 */
 	async started() {
 		try {
-			await this.createQuickJob("sample.task", {
+			await this.createJob("sample.task", {
 				id: 1,
 				name: "simple.task",
 			});
@@ -29,7 +29,7 @@ broker.createService({
 		}
 
 		try {
-			await this.createQuickJob("another.task", {
+			await this.createJob("another.task", {
 				id: 2,
 				name: "another.task",
 			});
