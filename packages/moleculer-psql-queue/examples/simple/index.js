@@ -20,6 +20,11 @@ broker.createService({
 	 */
 	async started() {
 		try {
+			/**
+			 * @param {String} name Task name
+			 * @param {Object} payload Payload to pass to the task
+			 * @param {import('graphile-worker').TaskSpec?} opts
+			 */
 			await this.createJob("sample.task", {
 				id: 1,
 				name: "simple.task",
@@ -29,6 +34,11 @@ broker.createService({
 		}
 
 		try {
+			/**
+			 * @param {String} name Task name
+			 * @param {Object} payload Payload to pass to the task
+			 * @param {import('graphile-worker').TaskSpec?} opts
+			 */
 			await this.createJob("another.task", {
 				id: 2,
 				name: "another.task",
