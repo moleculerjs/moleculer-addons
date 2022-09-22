@@ -22,7 +22,10 @@ const {
 } = require("graphile-worker");
 
 const addJobMock = jest.fn();
-makeWorkerUtils.mockImplementation(() => ({ addJob: addJobMock }));
+makeWorkerUtils.mockImplementation(() => ({
+	addJob: addJobMock,
+	release: jest.fn(),
+}));
 
 const promiseMock = jest.fn();
 const eventListenerMock = jest.fn();

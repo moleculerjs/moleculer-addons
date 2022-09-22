@@ -142,6 +142,10 @@ module.exports = function createService(
 			if (this.consumer) {
 				await this.consumer.stop();
 			}
+
+			if (this.producer) {
+				await this.producer.release();
+			}
 		},
 	};
 };
