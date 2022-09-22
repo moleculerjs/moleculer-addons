@@ -7,12 +7,7 @@
 "use strict";
 
 const _ = require("lodash");
-const {
-	run,
-	quickAddJob,
-	makeWorkerUtils,
-	Logger,
-} = require("graphile-worker");
+const { run, makeWorkerUtils, Logger } = require("graphile-worker");
 
 /**
  *
@@ -43,21 +38,8 @@ module.exports = function createService(
 			 * @param {import('graphile-worker').TaskSpec?} opts
 			 */
 			createJob(name, payload, opts) {
+				this.logger.debug(`Creating job "${name}"`, payload);
 				return this.producer.addJob(name, payload, opts);
-			},
-
-			/**
-			 *
-			 * @param {String} name Task name
-			 * @param {Object} payload Payload to pass to the task
-			 * @param {import('graphile-worker').TaskSpec?} opts
-			 */
-			createQuickJob(name, payload, opts) {
-				return quickAddJob(
-					{ connectionString: url, ...opts },
-					name,
-					payload
-				);
 			},
 
 			/**
@@ -71,7 +53,7 @@ module.exports = function createService(
 				 * @param {Object} meta  Additional metadata
 				 */
 				return (level, message, meta) => {
-					this.loggerQueue[level](message, meta);
+					this.loggerQueue[level](message, meta ? meta : "");
 				};
 			},
 		},
@@ -97,22 +79,22 @@ module.exports = function createService(
 					logger: new Logger(this.initLogger),
 				});
 
-				const taskList = {};
-
 				if (!this.schema.queues) return;
+
+				this.$queue = {};
 
 				_.forIn(this.schema.queues, (fn, name) => {
 					if (typeof fn === "function")
-						taskList[name] = fn.bind(this);
+						this.$queue[name] = fn.bind(this);
 					else {
-						taskList[name] = fn.process.bind(this);
+						this.$queue[name] = fn.process.bind(this);
 					}
 				});
 
 				// Start the consumer to process jobs:
 				this.consumer = await run({
 					connectionString: url,
-					taskList: taskList,
+					taskList: this.$queue,
 					// Other opts
 					...queueOpts,
 					logger: new Logger(this.initLogger),
@@ -130,14 +112,25 @@ module.exports = function createService(
 					}
 				}
 
-				// If the worker exits (whether through fatal error or otherwise),
+				// If the worker (`this.consumer`) exits (whether through fatal error or otherwise),
 				// this promise will resolve/reject:
-				await this.consumer.promise;
+				new Promise(async (resolve, reject) => {
+					try {
+						let res = await this.consumer.promise;
+						this.logger.info("Worker stopped", res ? res : "");
+						resolve(res);
+					} catch (error) {
+						this.logger.error("Worker exited", error);
+						reject(error);
+					}
+				});
 			} catch (error) {
 				this.logger.error(
 					"Failed to initialize PostgreSQL worker",
 					error
 				);
+
+				throw error;
 			}
 		},
 
@@ -145,6 +138,10 @@ module.exports = function createService(
 		 * Service stopped lifecycle event handler
 		 * @this {import('moleculer').Service}
 		 */
-		async stopped() {},
+		async stopped() {
+			if (this.consumer) {
+				await this.consumer.stop();
+			}
+		},
 	};
 };

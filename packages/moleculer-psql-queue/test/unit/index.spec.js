@@ -47,7 +47,6 @@ describe("Test PsqlQueueService constructor", () => {
 
 		expect(service.initLogger).toBeDefined();
 		expect(service.createJob).toBeDefined();
-		expect(service.createQuickJob).toBeDefined();
 	});
 });
 
