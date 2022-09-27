@@ -9,7 +9,8 @@ services:
     ports:
       - '5444:5432'
     volumes: 
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data # To persist data
+      - ./database:/docker-entrypoint-initdb.d # to run sql scripts on startup
     restart: unless-stopped
 
 volumes:

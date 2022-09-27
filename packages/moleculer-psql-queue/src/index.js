@@ -37,9 +37,13 @@ module.exports = function createService(
 			 * @param {Object} payload Payload to pass to the task
 			 * @param {import('graphile-worker').TaskSpec?} opts
 			 */
-			createJob(name, payload, opts) {
+			async createJob(name, payload, opts) {
 				this.logger.debug(`Creating job "${name}"`, payload);
-				return this.producer.addJob(name, payload, opts);
+				const job = await this.producer.addJob(name, payload, opts);
+
+				this.logger.debug(`Job "${name}" created`, job);
+
+				return job;
 			},
 
 			/**

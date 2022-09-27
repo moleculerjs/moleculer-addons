@@ -8,6 +8,18 @@ Job queue mixin for [graphile-worker](https://github.com/graphile/worker).
 $ npm install moleculer-pqsl-queue
 ```
 
+# Configuration
+
+1. Start your PostgreSQL db.
+
+2. Create an empty db `psql -U postgres -c 'CREATE DATABASE task_queue'`.
+
+    > Replace `task_queue` with your db name
+
+3. Use [graphile-worker](https://github.com/graphile/worker#running) CLI to init the schema for the jobs `npx graphile-worker -c \"postgres://postgres:postgres@localhost:5444/task_queue\" --schema-only`.
+
+    > Set your connection URL (more info: check [docs](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)) and replace `task_queue` with db name that you've defined in `step 2)`
+
 # Usage
 
 ## Create queue worker service
