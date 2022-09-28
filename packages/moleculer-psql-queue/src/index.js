@@ -39,7 +39,7 @@ module.exports = function createService(
 			 */
 			async createJob(name, payload, opts) {
 				this.logger.debug(`Creating job "${name}"`, payload);
-				const job = await this.producer.addJob(name, payload, opts);
+				const job = await this.$producer.addJob(name, payload, opts);
 
 				this.logger.debug(`Job "${name}" created`, job);
 
@@ -57,27 +57,20 @@ module.exports = function createService(
 				 * @param {Object} meta  Additional metadata
 				 */
 				return (level, message, meta) => {
-					this.loggerQueue[level](message, meta ? meta : "");
+					this.$loggerQueue[level](message, meta ? meta : "");
 				};
 			},
-		},
 
-		/**
-		 * Service created lifecycle event handler
-		 * @this {import('moleculer').Service}
-		 */
-		created() {
-			this.loggerQueue = this.broker.getLogger("psql-queue");
-		},
+			async tryConnect() {
+				if (this.$connectedToQueue) return;
 
-		/**
-		 * Service started lifecycle event handler
-		 * @this {import('moleculer').Service}
-		 */
-		async started() {
-			try {
+				this.logger.debug(
+					"Trying to connect with PostgreSQL server...",
+					url
+				);
+
 				// Start the producer to add jobs
-				this.producer = await makeWorkerUtils({
+				this.$producer = await makeWorkerUtils({
 					connectionString: url,
 					...producerOpts,
 					logger: new Logger(this.initLogger),
@@ -96,7 +89,7 @@ module.exports = function createService(
 				});
 
 				// Start the consumer to process jobs:
-				this.consumer = await run({
+				this.$consumer = await run({
 					connectionString: url,
 					taskList: this.$queue,
 					// Other opts
@@ -112,29 +105,67 @@ module.exports = function createService(
 					for (const [eventName, handler] of Object.entries(
 						this.settings.jobEventHandlers
 					)) {
-						this.consumer.events.on(eventName, handler.bind(this));
+						this.$consumer.events.on(eventName, handler.bind(this));
 					}
 				}
 
-				// If the worker (`this.consumer`) exits (whether through fatal error or otherwise),
-				// this promise will resolve/reject:
-				new Promise(async (resolve, reject) => {
-					try {
-						let res = await this.consumer.promise;
-						this.logger.info("Worker stopped", res ? res : "");
-						resolve(res);
-					} catch (error) {
-						this.logger.error("Worker exited", error);
-						reject(error);
-					}
-				});
-			} catch (error) {
-				this.logger.error(
-					"Failed to initialize PostgreSQL worker",
-					error
-				);
+				// All good. Connected to queue
+				this.$connectedToQueue = true;
 
-				throw error;
+				// If the worker exits (whether through fatal error or otherwise), this
+				// promise will resolve/reject:
+				// return this.$consumer.promise;
+			},
+
+			connect() {
+				return new Promise((resolve) => {
+					const doConnect = () => {
+						this.tryConnect()
+							.then(() => {
+								this.logger.info(
+									`Ready to process jobs from PostgreSQL server`
+								);
+								resolve();
+							})
+							.catch((err) => {
+								this.logger.error(
+									"PostgreSQL worker queue connection error",
+									err
+								);
+								setTimeout(() => {
+									this.logger.info(`Reconnecting...`);
+									doConnect();
+								}, 2000);
+							});
+					};
+
+					doConnect();
+				});
+			},
+		},
+
+		/**
+		 * Service created lifecycle event handler
+		 * @this {import('moleculer').Service}
+		 */
+		created() {
+			this.$loggerQueue = this.broker.getLogger("psql-queue");
+
+			this.$connectedToQueue = false;
+		},
+
+		/**
+		 * Service started lifecycle event handler
+		 * @this {import('moleculer').Service}
+		 */
+		async started() {
+			await this.connect();
+
+			if (this.$consumer && this.$consumer.promise) {
+				this.$consumer.promise.catch((error) => {
+					this.logger.error("PostgreSQL worker queue error", error);
+					this.connect();
+				});
 			}
 		},
 
@@ -143,12 +174,12 @@ module.exports = function createService(
 		 * @this {import('moleculer').Service}
 		 */
 		async stopped() {
-			if (this.consumer) {
-				await this.consumer.stop();
+			if (this.$consumer) {
+				await this.$consumer.stop();
 			}
 
-			if (this.producer) {
-				await this.producer.release();
+			if (this.$producer) {
+				await this.$producer.release();
 			}
 		},
 	};

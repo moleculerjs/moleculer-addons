@@ -14,12 +14,7 @@ jest.mock("graphile-worker", () => {
 const { ServiceBroker } = require("moleculer");
 const PsqlQueueService = require("../../src");
 
-const {
-	run,
-	quickAddJob,
-	makeWorkerUtils,
-	Logger,
-} = require("graphile-worker");
+const { run, makeWorkerUtils } = require("graphile-worker");
 
 const addJobMock = jest.fn();
 makeWorkerUtils.mockImplementation(() => ({
@@ -27,7 +22,10 @@ makeWorkerUtils.mockImplementation(() => ({
 	release: jest.fn(),
 }));
 
-const promiseMock = jest.fn();
+const promiseMock = {
+	then: jest.fn(),
+	catch: jest.fn(),
+};
 const eventListenerMock = jest.fn();
 
 run.mockImplementation(() => {
@@ -72,8 +70,8 @@ describe("Test PsqlQueueService started handler", () => {
 		afterAll(() => service._stop());
 
 		it("should be init producer and consumer to be defined", () => {
-			expect(service.producer).toBeDefined();
-			expect(service.consumer).toBeUndefined();
+			expect(service.$producer).toBeDefined();
+			expect(service.$consumer).toBeUndefined();
 		});
 	});
 
@@ -92,8 +90,8 @@ describe("Test PsqlQueueService started handler", () => {
 		beforeAll(() => service._start());
 
 		it("should be init producer and consumer to be defined", () => {
-			expect(service.producer).toBeDefined();
-			expect(service.consumer).toBeDefined();
+			expect(service.$producer).toBeDefined();
+			expect(service.$consumer).toBeDefined();
 			expect(initLoggerSpy).toHaveBeenCalled();
 		});
 	});
@@ -117,9 +115,9 @@ describe("Test PsqlQueueService started handler", () => {
 		beforeAll(() => service._start());
 
 		it("should be init producer and consumer to be defined", () => {
-			expect(service.producer).toBeDefined();
-			expect(service.consumer).toBeDefined();
-			expect(service.consumer.events.on).toHaveBeenLastCalledWith(
+			expect(service.$producer).toBeDefined();
+			expect(service.$consumer).toBeDefined();
+			expect(service.$consumer.events.on).toHaveBeenLastCalledWith(
 				"job:success",
 				expect.any(Function)
 			);

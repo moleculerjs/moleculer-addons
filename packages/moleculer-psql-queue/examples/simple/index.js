@@ -91,7 +91,7 @@ broker.createService({
 			 * @param {Object} meta  Additional metadata
 			 */
 			return (level, message, meta) => {
-				this.loggerQueue[level](message);
+				this.$loggerQueue[level](message);
 			};
 		},
 	},

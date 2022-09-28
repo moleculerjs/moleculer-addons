@@ -15,13 +15,7 @@ describe("Test PsqlQueueService handlers", () => {
 	const taskNameHandler = jest.fn();
 
 	const service = broker.createService({
-		mixins: [
-			PsqlQueueService(
-				"postgres://postgres:postgres@localhost:5444/task_queue",
-				queueOpts,
-				producerOpts
-			),
-		],
+		mixins: [PsqlQueueService(CONNECTION_URL, queueOpts, producerOpts)],
 
 		queues: {
 			"task.first": () => {},
@@ -44,7 +38,7 @@ describe("Test PsqlQueueService handlers", () => {
 		taskNameHandler.mockClear();
 	});
 
-	it('should call "task.name"', async () => {
+	it('should call "task.first"', async () => {
 		await service.createJob("task.first", { name: "task.first" });
 
 		// Add a delay to wait for the job to be processed
