@@ -99,7 +99,7 @@ broker.createService({
 	queues: {
 		/**
 		 * @param {Object} payload Message payload
-		 * @param {import('graphile-worker').JobHelpers} helpers Postgres helpers
+		 * @param {import('graphile-worker').JobHelpers} helpers graphile-worker helpers
 		 * More info about helpers: https://github.com/graphile/worker#creating-task-executors
 		 */
 		"sample.task"(payload, helpers) {
@@ -114,7 +114,7 @@ broker.createService({
 		"another.task": {
 			/**
 			 * @param {Object} payload Message payload
-			 * @param {import('graphile-worker').JobHelpers} helpers Postgres helpers
+			 * @param {import('graphile-worker').JobHelpers} helpers graphile-worker helpers
 			 * More info about helpers: https://github.com/graphile/worker#creating-task-executors
 			 */
 			process(payload, helpers) {

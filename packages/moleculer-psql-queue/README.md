@@ -16,9 +16,9 @@ $ npm install moleculer-pqsl-queue
 
     > Replace `task_queue` with your db name
 
-3. Use [graphile-worker](https://github.com/graphile/worker#running) CLI to init the schema for the jobs `npx graphile-worker -c \"postgres://postgres:postgres@localhost:5444/task_queue\" --schema-only`.
+3. Use [graphile-worker](https://github.com/graphile/worker#running) CLI to init the schema for the jobs `npx graphile-worker -c "postgres://postgres:postgres@localhost:5444/task_queue" --schema-only`.
 
-    > Set your connection URL (more info: check [docs](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)) and replace `task_queue` with db name that you've defined in `step 2)`
+    > Set your connection URL (more info: check [PSQL docs](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)) and replace `task_queue` with db name that you've defined in `step 2)`
 
 # Usage
 
@@ -33,15 +33,15 @@ broker.createService({
     mixins: [
         PsqlQueueService(
             "postgres://postgres:postgres@localhost:5444/task_queue"
-            // {}, // Optional worker options. More info: https://github.com/graphile/worker#runneroptions
-            // {}, // Optional producer options: More info: https://github.com/graphile/worker#workerutilsoptions
+            // {}, // Optional worker configs. More info: https://github.com/graphile/worker#runneroptions
+            // {}, // Optional producer configs: More info: https://github.com/graphile/worker#workerutilsoptions
         ),
     ],
 
     queues: {
         /**
          * @param {Object} payload Message payload
-         * @param {import('graphile-worker').JobHelpers} helpers Postgres helpers
+         * @param {import('graphile-worker').JobHelpers} helpers graphile-worker
          * More info about helpers: https://github.com/graphile/worker#creating-task-executors
          */
         "sample.task"(payload, helpers) {
