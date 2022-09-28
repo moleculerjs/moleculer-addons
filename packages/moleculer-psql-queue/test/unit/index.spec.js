@@ -48,10 +48,107 @@ describe("Test PsqlQueueService constructor", () => {
 
 		expect(service.initLogger).toBeDefined();
 		expect(service.createJob).toBeDefined();
+		expect(service.$connectedToQueue).toBeDefined();
 	});
 });
 
-describe("Test PsqlQueueService started handler", () => {
+describe("Test PsqlQueueService connection/reconnection logic", () => {
+	const broker = new ServiceBroker({ logger: false });
+	const service = broker.createService({
+		mixins: [PsqlQueueService(CONNECTION_URL)],
+
+		settings: {
+			$queueReconnectionDelay: 0,
+		},
+
+		queues: {
+			"task.first": jest.fn(),
+		},
+	});
+
+	beforeEach(() => {
+		// Disconnected by default
+		service.$connectedToQueue = false;
+
+		makeWorkerUtils.mockClear();
+		run.mockClear();
+	});
+
+	it("should successfully connect to the queue", async () => {
+		await service.connect();
+
+		expect(service.$consumer).toBeDefined();
+		expect(service.$producer).toBeDefined();
+
+		expect(makeWorkerUtils).toBeCalledTimes(1);
+		expect(run).toBeCalledTimes(1);
+	});
+
+	it("should fail to connect the 'producer' to the queue and retry with success", async () => {
+		makeWorkerUtils
+			.mockImplementationOnce(() => {
+				throw new Error("Failed to connect to the queue");
+			})
+			.mockImplementationOnce(() => ({
+				addJob: addJobMock,
+				release: jest.fn(),
+			}));
+
+		await service.connect();
+
+		await broker.Promise.delay(100);
+
+		expect(makeWorkerUtils).toBeCalledTimes(2);
+		expect(run).toBeCalledTimes(1);
+	});
+
+	it("should fail to connect the 'consumer' to the queue and retry with success", async () => {
+		run.mockImplementationOnce(() => {
+			throw new Error("Failed to connect to the queue");
+		}).mockImplementationOnce(() => {
+			return {
+				events: {
+					on: eventListenerMock,
+				},
+				promise: promiseMock,
+			};
+		});
+
+		await service.connect();
+
+		await broker.Promise.delay(100);
+
+		expect(makeWorkerUtils).toBeCalledTimes(2);
+		expect(run).toBeCalledTimes(2);
+	});
+
+	it("should successfully connect to the queue", async () => {
+		run.mockImplementationOnce(() => {
+			const p = new Promise((resolve, reject) => {
+				setTimeout(() => {
+					reject(new Error("Failed to connect to the queue"));
+				}, 100);
+			});
+
+			return {
+				events: {
+					on: eventListenerMock,
+				},
+				// Mimic a failed connection after 100ms
+				promise: p,
+			};
+		});
+
+		await service._start();
+
+		await broker.Promise.delay(300);
+
+		expect(makeWorkerUtils).toBeCalledTimes(2);
+		expect(run).toBeCalledTimes(2);
+	});
+});
+
+describe("Test PsqlQueueService producer/consumer initialization", () => {
 	const queueOpts = {};
 	const producerOpts = {};
 
@@ -69,7 +166,7 @@ describe("Test PsqlQueueService started handler", () => {
 		beforeAll(() => service._start());
 		afterAll(() => service._stop());
 
-		it("should be init producer and consumer to be defined", () => {
+		it("should init producer", () => {
 			expect(service.$producer).toBeDefined();
 			expect(service.$consumer).toBeUndefined();
 		});
@@ -89,7 +186,7 @@ describe("Test PsqlQueueService started handler", () => {
 
 		beforeAll(() => service._start());
 
-		it("should be init producer and consumer to be defined", () => {
+		it("should init producer and consumer", () => {
 			expect(service.$producer).toBeDefined();
 			expect(service.$consumer).toBeDefined();
 			expect(initLoggerSpy).toHaveBeenCalled();

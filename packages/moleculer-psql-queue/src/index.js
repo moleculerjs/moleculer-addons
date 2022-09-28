@@ -30,6 +30,13 @@ module.exports = function createService(
 	return {
 		name: "psql-queue",
 
+		settings: {
+			/**
+			 * @type {Number} Delay between reconnection attempts
+			 */
+			$queueReconnectionDelay: 2000,
+		},
+
 		methods: {
 			/**
 			 * Creates a new task
@@ -76,7 +83,12 @@ module.exports = function createService(
 					logger: new Logger(this.initLogger),
 				});
 
-				if (!this.schema.queues) return;
+				if (!this.schema.queues) {
+					// All good. Connected to queue
+					this.$connectedToQueue = true;
+
+					return;
+				}
 
 				this.$queue = {};
 
@@ -111,10 +123,6 @@ module.exports = function createService(
 
 				// All good. Connected to queue
 				this.$connectedToQueue = true;
-
-				// If the worker exits (whether through fatal error or otherwise), this
-				// promise will resolve/reject:
-				// return this.$consumer.promise;
 			},
 
 			connect() {
@@ -128,6 +136,8 @@ module.exports = function createService(
 								resolve();
 							})
 							.catch((err) => {
+								this.$connectedToQueue = false;
+
 								this.logger.error(
 									"PostgreSQL worker queue connection error",
 									err
@@ -135,7 +145,7 @@ module.exports = function createService(
 								setTimeout(() => {
 									this.logger.info(`Reconnecting...`);
 									doConnect();
-								}, 2000);
+								}, this.settings.$queueReconnectionDelay);
 							});
 					};
 
@@ -162,7 +172,10 @@ module.exports = function createService(
 			await this.connect();
 
 			if (this.$consumer && this.$consumer.promise) {
+				// If the worker exits (whether through fatal error or otherwise), this
+				// promise will resolve/reject:
 				this.$consumer.promise.catch((error) => {
+					this.$connectedToQueue = false;
 					this.logger.error("PostgreSQL worker queue error", error);
 					this.connect();
 				});

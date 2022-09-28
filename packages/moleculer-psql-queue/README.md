@@ -180,6 +180,37 @@ broker.createService({
 });
 ```
 
+## Advanced Usage
+
+The graphile-worker lib provides some advanced features like [administration functions](https://github.com/graphile/worker#administration-functions). These functions can be used to manage the queue and can be accessed via the `this.$producer` property of the service.
+
+```js
+const PsqlQueueService = require("moleculer-pqsl-queue");
+
+broker.createService({
+    name: "pub",
+
+    mixins: [
+        PsqlQueueService(
+            "postgres://postgres:postgres@localhost:5444/task_queue"
+        ),
+    ],
+
+    /**
+     * Service started lifecycle event handler
+     * @this {import('moleculer').Service}
+     */
+    async started() {
+        // Add the job via raw graphile-worker client
+        // For more info check the docs: https://github.com/graphile/worker#administration-functions
+        this.$producer.addJob("sample.task", {
+            id: 1,
+            name: "simple.task",
+        });
+    },
+});
+```
+
 # Test
 
 ```
