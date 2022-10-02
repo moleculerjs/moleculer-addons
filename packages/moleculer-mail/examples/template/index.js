@@ -1,11 +1,11 @@
 "use strict";
 
-let { ServiceBroker } 	= require("moleculer");
-let MailerService 		= require("../../index");
-let path 				= require("path");
+const { ServiceBroker } 	= require("moleculer");
+const MailerService 		= require("../../index");
+const path 					= require("path");
 
 // Create broker
-let broker = new ServiceBroker({
+const broker = new ServiceBroker({
 	logger: console,
 	logLevel: "debug"
 });
@@ -13,12 +13,13 @@ let broker = new ServiceBroker({
 // Load my service
 broker.createService(MailerService, {
 	settings: {
+		fallbackLanguage: "en",
 		transport: {
 			host: "smtp.mailtrap.io",
 			port: 2525,
 			auth: {
-				user: "367335eaa82697636",
-				pass: "e5a76af9b056d0"
+				user: process.env.MAILTRAP_USER,
+				pass: process.env.MAILTRAP_PASS
 			}
 		},
 		templateFolder: path.join(__dirname, "templates")
@@ -26,21 +27,21 @@ broker.createService(MailerService, {
 });
 
 // Start server
-broker.start().then(() => {
+broker.start().then(async () => {
 
 	// Send a default welcome email
-	broker.call("mail.send", { 
-		to: "hello@moleculer.services", 
-		subject: "Hello Mailer", 
+	const res = await broker.call("mail.send", {
+		to: "hello@moleculer.services",
+		subject: "Hello Mailer",
 		template: "welcome",
-		locale: "hu-HU", // Localized e-mail template
+		language: "hu", // Localized e-mail template
 		data: {
 			name: "John Doe",
 			username: "john.doe",
 			verifyToken: "123456"
 		}
-	})
-	.then(console.log)
-	.catch(console.error);
+	});
+	broker.logger.info("Res:", res);
 
-});
+}).catch(console.error);
+

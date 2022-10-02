@@ -1,10 +1,10 @@
 "use strict";
 
-let { ServiceBroker } 	= require("moleculer");
-let MailerService 		= require("../../index");
+const { ServiceBroker } 	= require("moleculer");
+const MailerService 		= require("../../index");
 
 // Create broker
-let broker = new ServiceBroker({
+const broker = new ServiceBroker({
 	logger: console,
 	logLevel: "debug"
 });
@@ -16,26 +16,26 @@ broker.createService(MailerService, {
 			host: "smtp.mailtrap.io",
 			port: 2525,
 			auth: {
-				user: "367335eaa82697636",
-				pass: "e5a76af9b056d0"
+				user: process.env.MAILTRAP_USER,
+				pass: process.env.MAILTRAP_PASS
 			}
-		}		
+		}
 	}
 });
 
 // Start server
-broker.start().then(() => {
+broker.start().then(async () => {
 
 	// Call action
-	broker.call("mail.send", { 
+	const res = await broker.call("mail.send", {
 		from: "adam@email.com",
-		to: "hello@moleculer.services", 
-		subject: "Hello Mailer", 
+		to: "hello@moleculer.services",
+		subject: "Hello Mailer",
 		cc: "john.doe@gmail.com",
 		html: "This is a <b>moleculer-mail</b> demo!",
 		//text: "This is the text part"
-	})
-	.then(console.log)
-	.catch(console.error);
+	});
 
-});
+	broker.logger.info("Res:", res);
+
+}).catch(console.error);

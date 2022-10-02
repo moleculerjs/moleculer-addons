@@ -1,3 +1,10 @@
+<a name="2.0.0"></a>
+# 2.0.0 (2022-10-02)
+
+## Changes
+- fully rewritten codebase without `email-templates` dependency.
+
+--------------------------------------------------
 <a name="1.2.0"></a>
 # 1.2.0 (2018-03-28)
 

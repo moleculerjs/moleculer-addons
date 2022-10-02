@@ -1,6 +1,6 @@
 /*
  * moleculer-mail
- * Copyright (c) 2019 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
+ * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
@@ -9,15 +9,14 @@
 const fs 			= require("fs");
 const path 			= require("path");
 const _ 			= require("lodash");
-const Promise 		= require("bluebird");
+const glob 			= require("glob").sync;
 
 const { MoleculerError, MoleculerRetryableError } 	= require("moleculer").Errors;
 const nodemailer 			= require("nodemailer");
 const htmlToText 			= require("nodemailer-html-to-text").htmlToText;
-const EmailTemplate 		= require("email-templates").EmailTemplate;
+const consolidate = require("consolidate");
 
 module.exports = {
-
 	name: "mail",
 
 	settings: {
@@ -51,6 +50,8 @@ module.exports = {
 		// Templates folder
 		templateFolder: null,
 
+		fallbackLanguage: "en",
+
 		// Common data
 		data: {}
 	},
@@ -63,33 +64,55 @@ module.exports = {
 		 * Send an email to recipients
 		 */
 		send: {
-			handler(ctx) {
-				const data = _.defaultsDeep(ctx.params.data || {}, this.settings.data);
+			params: {
+				template: "string|optional",
+				language: "string|optional",
+				to: "string",
+				data: "object|optional",
+				attachments: "array|optional",
+				text: "string|optional",
+				html: "string|optional",
+				subject: "string|optional",
+			},
+			async handler(ctx) {
+				const data = _.defaultsDeep({}, ctx.params.data, this.settings.data);
 				if (ctx.params.template) {
 					const templateName = ctx.params.template;
 					// Use templates
-					const template = this.getTemplate(templateName);
+					const template = this.getTemplate(templateName, ctx.params.language);
 					if (template) {
 						// Render template
-						return template.render(data || {}, ctx.params.locale).then(rendered => {
-							const params = _.omit(ctx.params, ["template", "locale", "data"]);
-							params.html = rendered.html;
-							if (rendered.text)
-								params.text = rendered.text;
-							if (rendered.subject)
-								params.subject = rendered.subject;
+						const rendered = await template(data);
+						const params = _.omit(ctx.params, ["template", "language", "data"]);
+						params.html = params.html || rendered.html;
+						if (rendered.text && !params.text) params.text = rendered.text;
+						if (rendered.subject && !params.subject) {
+							params.subject = rendered.subject;
+						}
 
-							// Send e-mail
-							return this.send(params);
-						});
+						// Send e-mail
+						return this.send(params);
 					}
 					return this.Promise.reject(new MoleculerError("Missing e-mail template: " + templateName));
 
 				} else {
 					// Send e-mail
-					const params = _.omit(ctx.params, ["template", "locale", "data"]);
+					const params = _.omit(ctx.params, ["template", "language", "data"]);
 					return this.send(params);
 				}
+			}
+		},
+
+		render: {
+			params: {
+				template: "string",
+				language: "string|optional",
+				data: "object"
+			},
+			async handler(ctx) {
+				const data = _.defaultsDeep(ctx.params.data || {}, this.settings.data);
+				const template = this.getTemplate(ctx.params.template, ctx.params.language);
+				return await template(data);
 			}
 		}
 	},
@@ -104,18 +127,46 @@ module.exports = {
 		 * @param {any} templateName
 		 * @returns
 		 */
-		getTemplate(templateName) {
-			if (this.templates[templateName]) {
-				return this.templates[templateName];
+		getTemplate(templateName, language) {
+			if (!language) language = this.settings.fallbackLanguage;
+
+			const key = templateName + "-" + language;
+			if (this.templates[key]) {
+				return this.templates[key];
 			}
 
-			const templatePath = path.join(this.settings.templateFolder, templateName);
-			if (fs.existsSync(templatePath)) {
-				this.templates[templateName] = new EmailTemplate(templatePath);
-				Promise.promisifyAll(this.templates[templateName]);
-
-				return this.templates[templateName];
+			const templatePath = path.join(this.settings.templateFolder, language, templateName);
+			if (!fs.existsSync(templatePath)) {
+				if (language != this.settings.fallbackLanguage) {
+					return this.getTemplate(templateName, this.settings.fallbackLanguage);
+				}
+				return null;
 			}
+
+			const files = glob("*.*", { cwd: templatePath });
+			if (files.length == 0) return;
+
+			this.templates[key] = async data => {
+				const res = {};
+
+				await Promise.all(
+					files.map(async file => {
+						const fullPath = path.join(templatePath, file);
+						const content = fs.readFileSync(fullPath, "utf8");
+						const ext = path.extname(fullPath);
+						const name = path.basename(fullPath, ext);
+						if (ext == ".pug") res[name] = await consolidate.pug.render(content, data);
+						if (ext == ".hbs")
+							res[name] = await consolidate.handlebars.render(content, data);
+						if (ext == ".njk")
+							res[name] = await consolidate.nunjucks.render(content, data);
+					})
+				);
+
+				return res;
+			};
+
+			return this.templates[key];
 		},
 
 		/**
@@ -128,23 +179,27 @@ module.exports = {
 			return new this.Promise((resolve, reject) => {
 				this.logger.debug(`Sending email to ${msg.to} with subject '${msg.subject}'...`);
 
-				if (!msg.from)
-					msg.from = this.settings.from;
+				if (!msg.from) msg.from = process.env.MAIL_FROM;
 
 				if (this.transporter) {
 					this.transporter.sendMail(msg, (err, info) => {
 						if (err) {
 							this.logger.warn("Unable to send email: ", err);
-							reject(new MoleculerRetryableError("Unable to send email! " + err.message));
+							reject(
+								new MoleculerRetryableError("Unable to send email! " + err.message)
+							);
 						} else {
 							this.logger.info("Email message sent.", info.response);
 							resolve(info);
 						}
 					});
-				}
-				else
-					return reject(new MoleculerError("Unable to send email! Invalid mailer transport: " + this.settings.transport));
-
+				} else
+					return reject(
+						new MoleculerError(
+							"Unable to send email! Invalid mailer transport: " +
+								this.settings.transport
+						)
+					);
 			});
 		}
 	},
@@ -173,9 +228,8 @@ module.exports = {
 			this.transporter = nodemailer.createTransport(this.settings.transport);
 		}
 
-		if (this.transporter) {
-			if (this.settings.htmlToText)
-				this.transporter.use("compile", htmlToText());
+		if (this.transporter && this.settings.htmlToText) {
+			this.transporter.use("compile", htmlToText());
 		}
 	},
 
