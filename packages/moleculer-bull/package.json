@@ -1,6 +1,6 @@
 {
   "name": "moleculer-bull",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Task queue service with Bull",
   "main": "index.js",
   "scripts": {

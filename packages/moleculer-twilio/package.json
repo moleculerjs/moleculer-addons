@@ -1,6 +1,6 @@
 {
   "name": "moleculer-twilio",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Send SMS Message with Twilio.",
   "main": "index.js",
   "scripts": {
