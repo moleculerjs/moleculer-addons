@@ -39,7 +39,7 @@ describe("Test MailService", () => {
 			expect(nodemailer.createTransport).toHaveBeenCalledWith(service.settings.transport);
 
 			expect(fakeTransporter.use).toHaveBeenCalledTimes(1);
-			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", jasmine.any(Function));
+			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", expect.any(Function));
 		});
 
 
@@ -65,7 +65,7 @@ describe("Test MailService", () => {
 			expect(createTransport).toHaveBeenCalledWith();
 
 			expect(fakeTransporter.use).toHaveBeenCalledTimes(1);
-			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", jasmine.any(Function));
+			expect(fakeTransporter.use).toHaveBeenCalledWith("compile", expect.any(Function));
 		});
 
 	});
@@ -103,7 +103,7 @@ describe("Test MailService", () => {
 					to: "john.doe@gmail.com"
 				});
 				expect(spySendMail).toHaveBeenCalledTimes(1);
-				expect(spySendMail).toHaveBeenCalledWith(res, jasmine.any(Function));
+				expect(spySendMail).toHaveBeenCalledWith(res, expect.any(Function));
 			});
 
 		});
@@ -119,7 +119,7 @@ describe("Test MailService", () => {
 				expect(res).toEqual(params);
 				expect(res.from).toBe("boss@company.net");
 				expect(spySendMail).toHaveBeenCalledTimes(1);
-				expect(spySendMail).toHaveBeenCalledWith(params, jasmine.any(Function));
+				expect(spySendMail).toHaveBeenCalledWith(params, expect.any(Function));
 			});
 
 		});
