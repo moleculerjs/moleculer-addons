@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "setup": "npm install && lerna bootstrap",
+    "setup-no-old-node": "npm install && lerna bootstrap",
     "clean": "lerna clean",
     "dev": "nodemon dev.js",
     "demo": "node dev.js",
