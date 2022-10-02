@@ -9,7 +9,7 @@
 			"request": "launch",
 			"name": "Launch dev",
 			"program": "${workspaceRoot}/packages/moleculer-mail/examples/template/index.js",
-			"cwd": "${workspaceRoot}",
+			"cwd": "${workspaceRoot}"
 		},
 		{
 			"type": "node",
@@ -22,7 +22,6 @@
 				"packages/moleculer-db/src/index.js"
 			],
 			"stopOnEntry": true
-
 		},
 		{
 			"type": "node",
@@ -38,9 +37,14 @@
 			"program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
 			"args": ["--runInBand"],
 			"cwd": "${workspaceRoot}",
-			"runtimeArgs": [
-                "--nolazy"
-            ]
+			"runtimeArgs": ["--nolazy"]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Current File",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${file}"
 		}
 	]
 }
