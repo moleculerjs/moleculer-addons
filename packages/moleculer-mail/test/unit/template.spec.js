@@ -2,7 +2,6 @@
 
 const { ServiceBroker } = require("moleculer");
 const MailService = require("../../src");
-const _ = require("lodash");
 
 describe("Test MailService template handling", () => {
 
@@ -20,7 +19,7 @@ describe("Test MailService template handling", () => {
 		expect(Object.keys(service.templates).length).toBe(0);
 		let tmp = service.getTemplate("welcome");
 		expect(tmp).toBeDefined();
-		expect(service.templates.welcome).toBe(tmp);
+		expect(service.templates["welcome-en"]).toBe(tmp);
 	});
 
 	it("should create templates", () => {
@@ -34,8 +33,8 @@ describe("Test MailService template handling", () => {
 			.then(() => {
 				// Mocking
 				service.send = jest.fn(() => Promise.resolve());
-				let tmp = service.getTemplate("welcome");
-				tmp.render = jest.fn(() => Promise.resolve({
+				service.getTemplate("welcome");
+				service.templates["welcome-en"] = jest.fn(() => Promise.resolve({
 					html: "<h1>Hello</h1>",
 					text: "Hello",
 					subject: "Hello Subject"
@@ -49,8 +48,8 @@ describe("Test MailService template handling", () => {
 						name: "John"
 					}
 				}).then(() => {
-					expect(tmp.render).toHaveBeenCalledTimes(1);
-					expect(tmp.render).toHaveBeenCalledWith({ name: "John" }, undefined);
+					expect(service.templates["welcome-en"]).toHaveBeenCalledTimes(1);
+					expect(service.templates["welcome-en"]).toHaveBeenCalledWith({ name: "John" });
 
 					expect(service.send).toHaveBeenCalledTimes(1);
 					expect(service.send).toHaveBeenCalledWith({"to": "john.doe@johndoe.com", "html": "<h1>Hello</h1>", "subject": "Hello Subject", "text": "Hello"});
@@ -89,20 +88,19 @@ describe("Test MailService template handling", () => {
 			});
 		});
 
-		it("should render the 'hu-HU' localized template", () => {
+		it("should render the 'hu' localized template", () => {
 			service.send.mockClear();
 
 			return broker.call("mail.send", {
 				template: "full",
-				locale: "hu-HU",
-				subject: "Fallback subject",
+				language: "hu",
 				to: "john.doe@johndoe.com",
 				data: {
 					name: "John"
 				}
 			}).then(() => {
 				expect(service.send).toHaveBeenCalledTimes(1);
-				expect(service.send).toHaveBeenCalledWith({"html": "<h1 style=\"color: red;\">Szia John!</h1>\n", "subject": "Üdvözlünk, John!\n", "text": "Szia John!\n", "to": "john.doe@johndoe.com"});
+				expect(service.send).toHaveBeenCalledWith({"html": "<h1>Szia John!</h1>\n", "subject": "Üdvözlünk, John!\n", "text": "Szia John!\n", "to": "john.doe@johndoe.com"});
 			});
 		});
 
@@ -112,7 +110,7 @@ describe("Test MailService template handling", () => {
 
 			return broker.call("mail.send", {
 				template: "full",
-				locale: "fr-FR",
+				language: "fr",
 				subject: "Full",
 				to: "john.doe@johndoe.com",
 				data: {
@@ -126,6 +124,7 @@ describe("Test MailService template handling", () => {
 
 		it("should reject if template is not exist", () => {
 			service.send.mockClear();
+			expect.assertions(2);
 
 			return broker.call("mail.send", {
 				template: "nothing",

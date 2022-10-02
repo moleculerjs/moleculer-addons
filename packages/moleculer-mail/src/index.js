@@ -179,7 +179,7 @@ module.exports = {
 			return new this.Promise((resolve, reject) => {
 				this.logger.debug(`Sending email to ${msg.to} with subject '${msg.subject}'...`);
 
-				if (!msg.from) msg.from = process.env.MAIL_FROM;
+				if (!msg.from) msg.from = this.settings.from;
 
 				if (this.transporter) {
 					this.transporter.sendMail(msg, (err, info) => {
