@@ -122,7 +122,7 @@ describe("Test FakeService", () => {
 			// Internet
 			{ action: "fake.userName", expect: "erik.hansen" },
 			{ action: "fake.userName", params: { firstName: "John", lastName: "Doe" }, expect: "john_doe" },
-			{ action: "fake.password", params: { length: 8 }, expect: jasmine.any(String) },
+			{ action: "fake.password", params: { length: 8 }, expect: expect.any(String) },
 			{ action: "fake.domain", expect: "rossbarrows.info" },
 			{ action: "fake.url", expect: "https://donaldaufderhar.info" },
 			{ action: "fake.email", expect: "erikhansen06@gmail.com" },
@@ -142,14 +142,14 @@ describe("Test FakeService", () => {
 			{ action: "fake.paragraph", expect: "Error voluptas accusantium rerum sit est. Magnam repudiandae laboriosam labore ipsum voluptatem dolorem. Eos eaque sit voluptatibus hic nulla perferendis nostrum error quidem. Quas iusto sapiente et ut magni tenetur molestias." },
 
 			// Misc
-			{ action: "fake.uuid", expect: jasmine.any(String) },
+			{ action: "fake.uuid", expect: expect.any(String) },
 
 			// Entity
-			{ action: "fake.user", expect: {"address": {"city": "Lake Wayneland", "country": "South Georgia & South Sandwich Islands", "countryCode": "GS", "geo": {"latitude": 41.6438, "longitude": 109.85270000000003}, "state": "Delaware", "street": "310 Rickey Creek Apt. 683", "zip": "44474-4318"}, "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/lebronjennan/128.jpg", "dob": jasmine.any(Date), "email": "erik.hansen@yahoo.com", "firstName": "Erik", "gravatar": "https://www.gravatar.com/avatar/820eecf59246afdd81170f4bebedb895", "ip": "221.60.34.243", "lastName": "Hansen", "password": jasmine.any(String), "phone": "(629) 321-0188 x0199", "status": false, "userName": "erik.hansen", "website": "https://luzkerluke.co"} },
-			{ action: "fake.user", params: { gender: "F" }, expect: {"address": {"city": "Schinnerville", "country": "Niue", "countryCode": "NU", "geo": {"latitude": 62.5325, "longitude": -53.179199999999994}, "state": "Maine", "street": "411 Hoppe Dale", "zip": "12616"}, "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/scottfeltham/128.jpg", "dob": jasmine.any(Date), "email": "dora.koelpin@gmail.com", "firstName": "Dora", "gravatar": "https://www.gravatar.com/avatar/a2cb08d975390b5abef0c7389d3f510e", "ip": "178.129.111.245", "lastName": "Koelpin", "password": jasmine.any(String), "phone": "066-293-2101 x8801", "status": true, "userName": "dora_koelpin", "website": "http://www.ross.info"} },
+			{ action: "fake.user", expect: {"address": {"city": "Lake Wayneland", "country": "South Georgia & South Sandwich Islands", "countryCode": "GS", "geo": {"latitude": 41.6438, "longitude": 109.85270000000003}, "state": "Delaware", "street": "310 Rickey Creek Apt. 683", "zip": "44474-4318"}, "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/lebronjennan/128.jpg", "dob": expect.any(Date), "email": "erik.hansen@yahoo.com", "firstName": "Erik", "gravatar": "https://www.gravatar.com/avatar/820eecf59246afdd81170f4bebedb895", "ip": "221.60.34.243", "lastName": "Hansen", "password": expect.any(String), "phone": "(629) 321-0188 x0199", "status": false, "userName": "erik.hansen", "website": "https://luzkerluke.co"} },
+			{ action: "fake.user", params: { gender: "F" }, expect: {"address": {"city": "Schinnerville", "country": "Niue", "countryCode": "NU", "geo": {"latitude": 62.5325, "longitude": -53.179199999999994}, "state": "Maine", "street": "411 Hoppe Dale", "zip": "12616"}, "avatar": "https://s3.amazonaws.com/uifaces/faces/twitter/scottfeltham/128.jpg", "dob": expect.any(Date), "email": "dora.koelpin@gmail.com", "firstName": "Dora", "gravatar": "https://www.gravatar.com/avatar/a2cb08d975390b5abef0c7389d3f510e", "ip": "178.129.111.245", "lastName": "Koelpin", "password": expect.any(String), "phone": "066-293-2101 x8801", "status": true, "userName": "dora_koelpin", "website": "http://www.ross.info"} },
 			{ action: "fake.address", expect: {"city": "Donaldfurt", "country": "Lesotho", "countryCode": "LS", "geo": {"latitude": 80.6447, "longitude": 124.2627}, "state": "Mississippi", "street": "629 Ernest Brook", "zip": "88019"} },
 			{ action: "fake.company", expect: {"address": {"city": "Fayfurt", "country": "Liechtenstein", "countryCode": "LI", "geo": {"latitude": -62.667500000000004, "longitude": -74.3886}, "state": "Louisiana", "street": "971 Eileen Crossroad", "zip": "69310"}, "email": "macgyver-barrows-llc.pfeffer93@yahoo.com", "ip": "221.60.34.243", "name": "MacGyver-Barrows LLC", "phone": "101-880-1998", "website": "https://luzkerluke.co"} },
-			{ action: "fake.post", expect: jasmine.any(Object) },
+			{ action: "fake.post", expect: expect.any(Object) },
 
 			{ action: "fake.populate", params: { template: "Hi, my name is #{names.name}. I was born in #{address.city}, #{address.country}. I am #{date.age} years old." }, expect: "Hi, my name is Ross Hansen. I was born in New Roderickstad, Denmark. I am 75 years old." },
 		];
