@@ -42,6 +42,18 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "Jest single",
+			"program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
+			"args": ["--runInBand", "${file}"],
+			"console": "internalConsole",
+			"cwd": "${workspaceRoot}",
+			"runtimeArgs": [
+                "--nolazy"
+            ]
+		},
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "Debug Current File",
 			"skipFiles": ["<node_internals>/**"],
 			"program": "${file}"
