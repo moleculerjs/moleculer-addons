@@ -148,7 +148,7 @@ describe("Test PsqlQueueService connection/reconnection logic", () => {
 	});
 });
 
-describe("Test PsqlQueueService producer/consumer initialization", () => {
+describe("Test PsqlQueueService producer/consumer default initialization", () => {
 	const queueOpts = {};
 	const producerOpts = {};
 
@@ -160,7 +160,9 @@ describe("Test PsqlQueueService producer/consumer initialization", () => {
 	const broker = new ServiceBroker({ logger: false });
 	describe("Test without queue", () => {
 		const service = broker.createService({
-			mixins: [PsqlQueueService(CONNECTION_URL, queueOpts, producerOpts)],
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, { queueOpts, producerOpts }),
+			],
 		});
 
 		beforeAll(() => service._start());
@@ -174,7 +176,9 @@ describe("Test PsqlQueueService producer/consumer initialization", () => {
 
 	describe("Test with queue", () => {
 		const service = broker.createService({
-			mixins: [PsqlQueueService(CONNECTION_URL, queueOpts, producerOpts)],
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, { queueOpts, producerOpts }),
+			],
 
 			queues: {
 				"task.first": jest.fn(),
@@ -195,7 +199,9 @@ describe("Test PsqlQueueService producer/consumer initialization", () => {
 
 	describe("Test with event listeners", () => {
 		const service = broker.createService({
-			mixins: [PsqlQueueService(CONNECTION_URL, queueOpts, producerOpts)],
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, { queueOpts, producerOpts }),
+			],
 
 			queues: {
 				"task.first": jest.fn(),
@@ -215,6 +221,123 @@ describe("Test PsqlQueueService producer/consumer initialization", () => {
 			expect(service.$producer).toBeDefined();
 			expect(service.$consumer).toBeDefined();
 			expect(service.$consumer.events.on).toHaveBeenLastCalledWith(
+				"job:success",
+				expect.any(Function)
+			);
+		});
+	});
+});
+
+describe("Test PsqlQueueService producer/consumer custom initialization", () => {
+	const CUSTOM_SCHEMA_PROPERTY = "customQueues";
+	const CUSTOM_CREATE_JOB_METHOD_NAME = "customCreateJob";
+	const CUSTOM_PRODUCER_PROPERTY_NAME = "$customProducer";
+	const CUSTOM_CONSUMER_PROPERTY_NAME = "$customConsumer";
+	const CUSTOM_INTERNAL_QUEUE_NAME = "$customQueue";
+	const CUSTOM_EVENT_HANDLERS_NAME = "customJobEventHandlers";
+
+	const queueOpts = {};
+	const producerOpts = {};
+
+	const named = {
+		name: "name",
+		process: jest.fn(),
+	};
+
+	const broker = new ServiceBroker({ logger: false });
+	describe("Test without queue", () => {
+		const service = broker.createService({
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, {
+					schemaProperty: CUSTOM_SCHEMA_PROPERTY,
+					createJobMethodName: CUSTOM_CREATE_JOB_METHOD_NAME,
+					producerPropertyName: CUSTOM_PRODUCER_PROPERTY_NAME,
+					consumerPropertyName: CUSTOM_CONSUMER_PROPERTY_NAME,
+					internalQueueName: CUSTOM_INTERNAL_QUEUE_NAME,
+					jobEventHandlersSettingsProperty:
+						CUSTOM_EVENT_HANDLERS_NAME,
+					queueOpts,
+					producerOpts,
+				}),
+			],
+		});
+
+		beforeAll(() => service._start());
+		afterAll(() => service._stop());
+
+		it("should init producer", () => {
+			expect(service.$customProducer).toBeDefined();
+			expect(service.$customConsumer).toBeUndefined();
+		});
+	});
+
+	describe("Test with queue", () => {
+		const service = broker.createService({
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, {
+					schemaProperty: CUSTOM_SCHEMA_PROPERTY,
+					createJobMethodName: CUSTOM_CREATE_JOB_METHOD_NAME,
+					producerPropertyName: CUSTOM_PRODUCER_PROPERTY_NAME,
+					consumerPropertyName: CUSTOM_CONSUMER_PROPERTY_NAME,
+					internalQueueName: CUSTOM_INTERNAL_QUEUE_NAME,
+					jobEventHandlersSettingsProperty:
+						CUSTOM_EVENT_HANDLERS_NAME,
+					queueOpts,
+					producerOpts,
+				}),
+			],
+
+			[CUSTOM_SCHEMA_PROPERTY]: {
+				"task.first": jest.fn(),
+				"task.name": named,
+			},
+		});
+
+		const initLoggerSpy = jest.spyOn(service, "initLogger");
+
+		beforeAll(() => service._start());
+
+		it("should init producer and consumer", () => {
+			expect(service.$customProducer).toBeDefined();
+			expect(service.$customConsumer).toBeDefined();
+			expect(initLoggerSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe("Test with event listeners", () => {
+		const service = broker.createService({
+			mixins: [
+				PsqlQueueService(CONNECTION_URL, {
+					schemaProperty: CUSTOM_SCHEMA_PROPERTY,
+					createJobMethodName: CUSTOM_CREATE_JOB_METHOD_NAME,
+					producerPropertyName: CUSTOM_PRODUCER_PROPERTY_NAME,
+					consumerPropertyName: CUSTOM_CONSUMER_PROPERTY_NAME,
+					internalQueueName: CUSTOM_INTERNAL_QUEUE_NAME,
+					jobEventHandlersSettingsProperty:
+						CUSTOM_EVENT_HANDLERS_NAME,
+					queueOpts,
+					producerOpts,
+				}),
+			],
+
+			[CUSTOM_SCHEMA_PROPERTY]: {
+				"task.first": jest.fn(),
+				"task.name": named,
+			},
+
+			settings: {
+				[CUSTOM_EVENT_HANDLERS_NAME]: {
+					"job:success": jest.fn(),
+				},
+			},
+		});
+
+		beforeAll(() => service._start());
+
+		it("should be init producer and consumer to be defined", () => {
+			expect(service.$customProducer).toBeDefined();
+			expect(service.$customConsumer).toBeDefined();
+			expect(service.$customConsumer.events.on).toHaveBeenLastCalledWith(
 				"job:success",
 				expect.any(Function)
 			);

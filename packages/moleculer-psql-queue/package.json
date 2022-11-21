@@ -1,6 +1,6 @@
 {
   "name": "moleculer-psql-queue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Task queue service with graphile-worker",
   "main": "index.js",
   "scripts": {

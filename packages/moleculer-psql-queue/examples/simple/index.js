@@ -10,7 +10,31 @@ broker.createService({
 
 	mixins: [
 		PsqlQueueService(
-			"postgres://postgres:postgres@localhost:5444/task_queue"
+			"postgres://postgres:postgres@localhost:5444/task_queue",
+			{
+				// Name of the property in service schema.
+				schemaProperty: "queues",
+				// Name of the method in Service to create jobs
+				createJobMethodName: "createJob",
+				// Name of the property in Service to produce jobs
+				producerPropertyName: "$producer",
+				// Name of the property in Service to consume jobs
+				consumerPropertyName: "$consumer",
+				// Name of the internal queue that's used to store the job handlers
+				internalQueueName: "$queue",
+				// Name of the property in Service settings to register job event handlers
+				jobEventHandlersSettingsProperty: "jobEventHandlers",
+
+				// Optional producer configs: More info: https://github.com/graphile/worker#workerutilsoptions
+				producerOpts: {},
+				// Optional worker configs. More info: https://github.com/graphile/worker#runneroptions
+				queueOpts: {
+					concurrency: 5,
+					// Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
+					noHandleSignals: false,
+					pollInterval: 1000,
+				},
+			}
 		),
 	],
 

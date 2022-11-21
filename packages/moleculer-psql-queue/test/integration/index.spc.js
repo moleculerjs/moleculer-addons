@@ -15,7 +15,7 @@ describe("Test PsqlQueueService handlers", () => {
 	const taskNameHandler = jest.fn();
 
 	const service = broker.createService({
-		mixins: [PsqlQueueService(CONNECTION_URL, queueOpts, producerOpts)],
+		mixins: [PsqlQueueService(CONNECTION_URL, { queueOpts, producerOpts })],
 
 		queues: {
 			"task.first": () => {},

@@ -6,26 +6,45 @@
 
 "use strict";
 
-const _ = require("lodash");
+const { forIn, defaultsDeep } = require("lodash");
 const { run, makeWorkerUtils, Logger } = require("graphile-worker");
 
 /**
+ * Creates a PsqlQueueService
  *
  * @param {String} url Connection String
- * @param {import('graphile-worker').RunnerOptions} queueOpts Queue options
- * @param {import('graphile-worker').WorkerUtilsOptions} producerOpts
+ * @param {WorkerOpts} opts Worker options
+ *
  * @returns {import('moleculer').ServiceSchema}
  */
-module.exports = function createService(
-	url,
-	queueOpts = {
-		concurrency: 5,
-		// Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
-		noHandleSignals: false,
-		pollInterval: 1000,
-	},
-	producerOpts = {}
-) {
+module.exports = function createService(url, opts = {}) {
+	/** @type {WorkerOpts} */
+	const {
+		producerOpts,
+		queueOpts,
+		schemaProperty,
+		createJobMethodName,
+		producerPropertyName,
+		consumerPropertyName,
+		internalQueueName,
+		jobEventHandlersSettingsProperty,
+	} = defaultsDeep(opts, {
+		producerOpts: {},
+		queueOpts: {
+			concurrency: 5,
+			// Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
+			noHandleSignals: false,
+			pollInterval: 1000,
+		},
+
+		schemaProperty: "queues",
+		createJobMethodName: "createJob",
+		producerPropertyName: "$producer",
+		consumerPropertyName: "$consumer",
+		internalQueueName: "$queue",
+		jobEventHandlersSettingsProperty: "jobEventHandlers",
+	});
+
 	/** @type {import('moleculer').ServiceSchema} */
 	return {
 		name: "psql-queue",
@@ -44,9 +63,13 @@ module.exports = function createService(
 			 * @param {Object} payload Payload to pass to the task
 			 * @param {import('graphile-worker').TaskSpec?} opts
 			 */
-			async createJob(name, payload, opts) {
+			async [createJobMethodName](name, payload, opts) {
 				this.logger.debug(`Creating job "${name}"`, payload);
-				const job = await this.$producer.addJob(name, payload, opts);
+				const job = await this[producerPropertyName].addJob(
+					name,
+					payload,
+					opts
+				);
 
 				this.logger.debug(`Job "${name}" created`, job);
 
@@ -77,33 +100,33 @@ module.exports = function createService(
 				);
 
 				// Start the producer to add jobs
-				this.$producer = await makeWorkerUtils({
+				this[producerPropertyName] = await makeWorkerUtils({
 					connectionString: url,
 					...producerOpts,
 					logger: new Logger(this.initLogger),
 				});
 
-				if (!this.schema.queues) {
+				if (!this.schema[schemaProperty]) {
 					// All good. Connected to queue
 					this.$connectedToQueue = true;
 
 					return;
 				}
 
-				this.$queue = {};
+				this[internalQueueName] = {};
 
-				_.forIn(this.schema.queues, (fn, name) => {
+				forIn(this.schema[schemaProperty], (fn, name) => {
 					if (typeof fn === "function")
-						this.$queue[name] = fn.bind(this);
+						this[internalQueueName][name] = fn.bind(this);
 					else {
-						this.$queue[name] = fn.process.bind(this);
+						this[internalQueueName][name] = fn.process.bind(this);
 					}
 				});
 
 				// Start the consumer to process jobs:
-				this.$consumer = await run({
+				this[consumerPropertyName] = await run({
 					connectionString: url,
-					taskList: this.$queue,
+					taskList: this[internalQueueName],
 					// Other opts
 					...queueOpts,
 					logger: new Logger(this.initLogger),
@@ -111,13 +134,17 @@ module.exports = function createService(
 
 				// Register event handlers
 				if (
-					this.settings.jobEventHandlers &&
-					Object.keys(this.settings.jobEventHandlers).length > 0
+					this.settings[jobEventHandlersSettingsProperty] &&
+					Object.keys(this.settings[jobEventHandlersSettingsProperty])
+						.length > 0
 				) {
 					for (const [eventName, handler] of Object.entries(
-						this.settings.jobEventHandlers
+						this.settings[jobEventHandlersSettingsProperty]
 					)) {
-						this.$consumer.events.on(eventName, handler.bind(this));
+						this[consumerPropertyName].events.on(
+							eventName,
+							handler.bind(this)
+						);
 					}
 				}
 
@@ -171,10 +198,13 @@ module.exports = function createService(
 		async started() {
 			await this.connect();
 
-			if (this.$consumer && this.$consumer.promise) {
+			if (
+				this[consumerPropertyName] &&
+				this[consumerPropertyName].promise
+			) {
 				// If the worker exits (whether through fatal error or otherwise), this
 				// promise will resolve/reject:
-				this.$consumer.promise.catch((error) => {
+				this[consumerPropertyName].promise.catch((error) => {
 					this.$connectedToQueue = false;
 					this.logger.error("PostgreSQL worker queue error", error);
 					this.connect();
@@ -187,13 +217,25 @@ module.exports = function createService(
 		 * @this {import('moleculer').Service}
 		 */
 		async stopped() {
-			if (this.$consumer) {
-				await this.$consumer.stop();
+			if (this[consumerPropertyName]) {
+				await this[consumerPropertyName].stop();
 			}
 
-			if (this.$producer) {
-				await this.$producer.release();
+			if (this[producerPropertyName]) {
+				await this[producerPropertyName].release();
 			}
 		},
 	};
 };
+
+/**
+ * @typedef WorkerOpts
+ * @property {String} schemaProperty Name of the property in service schema.
+ * @property {String} createJobMethodName Name of the method in Service to create jobs
+ * @property {String} producerPropertyName Name of the property in Service to produce jobs
+ * @property {String} consumerPropertyName Name of the property in Service to consume jobs
+ * @property {String} internalQueueName Name of the internal queue that's used to store the job handlers
+ * @property {String} jobEventHandlersSettingsProperty Name of the property in Service settings to register job event handlers
+ * @property {import('graphile-worker').RunnerOptions} queueOpts Queue options. More info: https://github.com/graphile/worker#runneroptions
+ * @property {import('graphile-worker').WorkerUtilsOptions} producerOpts Producer options. More info: https://github.com/graphile/worker#workerutilsoptions
+ */
