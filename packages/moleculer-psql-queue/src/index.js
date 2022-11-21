@@ -80,7 +80,7 @@ module.exports = function createService(url, opts = {}) {
 			 * Replaces Default logger with Moleculer logger
 			 * More info: https://github.com/graphile/worker#logger
 			 */
-			initLogger() {
+			initWorkerLogger() {
 				/**
 				 * @param {String} level Log level
 				 * @param {String} message Message to log
@@ -91,7 +91,7 @@ module.exports = function createService(url, opts = {}) {
 				};
 			},
 
-			async tryConnect() {
+			async tryConnectWorker() {
 				if (this.$connectedToQueue) return;
 
 				this.logger.debug(
@@ -103,7 +103,7 @@ module.exports = function createService(url, opts = {}) {
 				this[producerPropertyName] = await makeWorkerUtils({
 					connectionString: url,
 					...producerOpts,
-					logger: new Logger(this.initLogger),
+					logger: new Logger(this.initWorkerLogger),
 				});
 
 				if (!this.schema[schemaProperty]) {
@@ -129,7 +129,7 @@ module.exports = function createService(url, opts = {}) {
 					taskList: this[internalQueueName],
 					// Other opts
 					...queueOpts,
-					logger: new Logger(this.initLogger),
+					logger: new Logger(this.initWorkerLogger),
 				});
 
 				// Register event handlers
@@ -152,10 +152,10 @@ module.exports = function createService(url, opts = {}) {
 				this.$connectedToQueue = true;
 			},
 
-			connect() {
+			connectWorker() {
 				return new Promise((resolve) => {
 					const doConnect = () => {
-						this.tryConnect()
+						this.tryConnectWorker()
 							.then(() => {
 								this.logger.info(
 									`Ready to process jobs from PostgreSQL server`
@@ -196,7 +196,7 @@ module.exports = function createService(url, opts = {}) {
 		 * @this {import('moleculer').Service}
 		 */
 		async started() {
-			await this.connect();
+			await this.connectWorker();
 
 			if (
 				this[consumerPropertyName] &&
@@ -207,7 +207,7 @@ module.exports = function createService(url, opts = {}) {
 				this[consumerPropertyName].promise.catch((error) => {
 					this.$connectedToQueue = false;
 					this.logger.error("PostgreSQL worker queue error", error);
-					this.connect();
+					this.connectWorker();
 				});
 			}
 		},

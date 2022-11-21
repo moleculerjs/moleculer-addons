@@ -58,4 +58,10 @@
     });
     ```
 
+-   Rename internal methods to avoid with other libs (e.g. `moleculer-bull`).
+
+    -   `initLogger` -> `initWorkerLogger`
+    -   `tryConnect` -> `tryConnectWorker`
+    -   `connect` -> `connectWorker`
+
 -   Bump deps

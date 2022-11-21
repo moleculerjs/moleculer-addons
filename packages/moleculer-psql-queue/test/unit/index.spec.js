@@ -46,7 +46,7 @@ describe("Test PsqlQueueService constructor", () => {
 	it("should be created", () => {
 		expect(service).toBeDefined();
 
-		expect(service.initLogger).toBeDefined();
+		expect(service.initWorkerLogger).toBeDefined();
 		expect(service.createJob).toBeDefined();
 		expect(service.$connectedToQueue).toBeDefined();
 	});
@@ -75,7 +75,7 @@ describe("Test PsqlQueueService connection/reconnection logic", () => {
 	});
 
 	it("should successfully connect to the queue", async () => {
-		await service.connect();
+		await service.connectWorker();
 
 		expect(service.$consumer).toBeDefined();
 		expect(service.$producer).toBeDefined();
@@ -94,7 +94,7 @@ describe("Test PsqlQueueService connection/reconnection logic", () => {
 				release: jest.fn(),
 			}));
 
-		await service.connect();
+		await service.connectWorker();
 
 		await broker.Promise.delay(100);
 
@@ -114,7 +114,7 @@ describe("Test PsqlQueueService connection/reconnection logic", () => {
 			};
 		});
 
-		await service.connect();
+		await service.connectWorker();
 
 		await broker.Promise.delay(100);
 
@@ -186,7 +186,7 @@ describe("Test PsqlQueueService producer/consumer default initialization", () =>
 			},
 		});
 
-		const initLoggerSpy = jest.spyOn(service, "initLogger");
+		const initLoggerSpy = jest.spyOn(service, "initWorkerLogger");
 
 		beforeAll(() => service._start());
 
@@ -293,7 +293,7 @@ describe("Test PsqlQueueService producer/consumer custom initialization", () => 
 			},
 		});
 
-		const initLoggerSpy = jest.spyOn(service, "initLogger");
+		const initLoggerSpy = jest.spyOn(service, "initWorkerLogger");
 
 		beforeAll(() => service._start());
 
