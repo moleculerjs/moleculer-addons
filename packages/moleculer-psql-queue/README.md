@@ -5,7 +5,7 @@ Job queue mixin for [graphile-worker](https://github.com/graphile/worker).
 # Install
 
 ```
-$ npm install moleculer-pqsl-queue
+$ npm install moleculer-psql-queue
 ```
 
 # Configuration
@@ -25,16 +25,39 @@ $ npm install moleculer-pqsl-queue
 ## Create queue worker service
 
 ```js
-const PsqlQueueService = require("moleculer-pqsl-queue");
+const PsqlQueueService = require("moleculer-psql-queue");
 
 broker.createService({
     name: "task-worker",
 
     mixins: [
         PsqlQueueService(
-            "postgres://postgres:postgres@localhost:5444/task_queue"
-            // {}, // Optional worker configs. More info: https://github.com/graphile/worker#runneroptions
-            // {}, // Optional producer configs: More info: https://github.com/graphile/worker#workerutilsoptions
+            "postgres://postgres:postgres@localhost:5444/task_queue",
+            // Default opts
+            {
+                // Name of the property in service schema.
+                schemaProperty: "queues",
+                // Name of the method in Service to create jobs
+                createJobMethodName: "createJob",
+                // Name of the property in Service to produce jobs
+                producerPropertyName: "$producer",
+                // Name of the property in Service to consume jobs
+                consumerPropertyName: "$consumer",
+                // Name of the internal queue that's used to store the job handlers
+                internalQueueName: "$queue",
+                // Name of the property in Service settings to register job event handlers
+                jobEventHandlersSettingsProperty: "jobEventHandlers",
+
+                // Optional producer configs: More info: https://github.com/graphile/worker#workerutilsoptions
+                producerOpts: {},
+                // Optional worker configs. More info: https://github.com/graphile/worker#runneroptions
+                queueOpts: {
+                    concurrency: 5,
+                    // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
+                    noHandleSignals: false,
+                    pollInterval: 1000,
+                },
+            }
         ),
     ],
 
@@ -70,7 +93,7 @@ broker.createService({
 ## Customize worker logger
 
 ```js
-const PsqlQueueService = require("moleculer-pqsl-queue");
+const PsqlQueueService = require("moleculer-psql-queue");
 
 broker.createService({
     name: "task-worker",
@@ -107,7 +130,7 @@ broker.createService({
 ## Listen to queue events
 
 ```js
-const PsqlQueueService = require("moleculer-pqsl-queue");
+const PsqlQueueService = require("moleculer-psql-queue");
 
 broker.createService({
     name: "task-worker",
@@ -147,7 +170,7 @@ broker.createService({
 ## Create Task
 
 ```js
-const PsqlQueueService = require("moleculer-pqsl-queue");
+const PsqlQueueService = require("moleculer-psql-queue");
 
 broker.createService({
     name: "pub",
@@ -185,7 +208,7 @@ broker.createService({
 The graphile-worker lib provides some advanced features like [administration functions](https://github.com/graphile/worker#administration-functions). These functions can be used to manage the queue and can be accessed via the `this.$producer` property of the service.
 
 ```js
-const PsqlQueueService = require("moleculer-pqsl-queue");
+const PsqlQueueService = require("moleculer-psql-queue");
 
 broker.createService({
     name: "pub",
