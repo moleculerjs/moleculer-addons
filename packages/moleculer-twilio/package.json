@@ -49,6 +49,6 @@
     "node": ">= 8.x.x"
   },
   "dependencies": {
-    "twilio": "^3.69.0"
+    "twilio": "^4.0.0"
   }
 }
