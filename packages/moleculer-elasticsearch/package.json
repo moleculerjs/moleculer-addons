@@ -50,6 +50,6 @@
     "node": ">= 8.x.x"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^8.1.0"
+    "@elastic/elasticsearch": "^8.14.0"
   }
 }
