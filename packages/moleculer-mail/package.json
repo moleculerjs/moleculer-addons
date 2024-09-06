@@ -54,6 +54,6 @@
     "nodemailer": "^6.8.0",
     "nodemailer-html-to-text": "^3.2.0",
     "nunjucks": "^3.2.3",
-    "pug": "^3.0.2"
+    "pug": "^3.0.3"
   }
 }
