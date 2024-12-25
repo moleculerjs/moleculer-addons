@@ -46,7 +46,7 @@
     "node": ">= 12.x.x"
   },
   "dependencies": {
-    "bull": "^4.7.0",
+    "bull": "^4.16.5",
     "lodash": "^4.17.21"
   }
 }
