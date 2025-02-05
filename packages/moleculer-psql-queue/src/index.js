@@ -1,6 +1,6 @@
 /*
  * moleculer-psql-queue
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
+ * Copyright (c) 2025 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
@@ -158,7 +158,7 @@ module.exports = function createService(url, opts = {}) {
 						this.tryConnectWorker()
 							.then(() => {
 								this.logger.info(
-									`Ready to process jobs from PostgreSQL server`
+									"Ready to process jobs from PostgreSQL server"
 								);
 								resolve();
 							})
@@ -170,7 +170,7 @@ module.exports = function createService(url, opts = {}) {
 									err
 								);
 								setTimeout(() => {
-									this.logger.info(`Reconnecting...`);
+									this.logger.info("Reconnecting...");
 									doConnect();
 								}, this.settings.$queueReconnectionDelay);
 							});
