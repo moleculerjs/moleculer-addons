@@ -1,6 +1,6 @@
 /*
  * moleculer-psql-queue
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
+ * Copyright (c) 2025 MoleculerJS (https://github.com/moleculerjs/moleculer-addons)
  * MIT Licensed
  */
 
@@ -158,7 +158,7 @@ module.exports = function createService(url, opts = {}) {
 						this.tryConnectWorker()
 							.then(() => {
 								this.logger.info(
-									`Ready to process jobs from PostgreSQL server`
+									"Ready to process jobs from PostgreSQL server"
 								);
 								resolve();
 							})
@@ -170,7 +170,7 @@ module.exports = function createService(url, opts = {}) {
 									err
 								);
 								setTimeout(() => {
-									this.logger.info(`Reconnecting...`);
+									this.logger.info("Reconnecting...");
 									doConnect();
 								}, this.settings.$queueReconnectionDelay);
 							});
@@ -189,6 +189,14 @@ module.exports = function createService(url, opts = {}) {
 			this.$loggerQueue = this.broker.getLogger("psql-queue");
 
 			this.$connectedToQueue = false;
+
+			this.$terminationSignalTriggered = false;
+
+			const _closeFn = () => {
+				this.$terminationSignalTriggered = true;
+			};
+			process.on("SIGINT", _closeFn);
+			process.on("SIGTERM", _closeFn);
 		},
 
 		/**
@@ -217,11 +225,18 @@ module.exports = function createService(url, opts = {}) {
 		 * @this {import('moleculer').Service}
 		 */
 		async stopped() {
-			if (this[consumerPropertyName]) {
+			if (
+				!this.$terminationSignalTriggered &&
+				this[consumerPropertyName] &&
+				this[consumerPropertyName].stop
+			) {
 				await this[consumerPropertyName].stop();
 			}
 
-			if (this[producerPropertyName]) {
+			if (
+				this[producerPropertyName] &&
+				this[producerPropertyName].release
+			) {
 				await this[producerPropertyName].release();
 			}
 		},

@@ -1,3 +1,10 @@
+<a name="0.3.0"></a>
+
+# [0.3.0]
+
+-   Bump deps
+-   Improve SIGINT and SIGTERM handling during shutdown
+
 <a name="0.2.0"></a>
 
 # [0.2.0]
