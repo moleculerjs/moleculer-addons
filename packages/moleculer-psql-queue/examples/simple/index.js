@@ -148,4 +148,12 @@ broker.createService({
 	},
 });
 
-broker.start();
+broker
+	.start()
+	.then(() => {
+		broker.repl();
+	})
+	.catch((error) => {
+		broker.logger.error(error);
+		process.exit(1);
+	});

@@ -1,18 +1,18 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  pqsl:
-    image: postgres:14.1-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - '5444:5432'
-    volumes: 
-      - db:/var/lib/postgresql/data # To persist data
-      - ./database:/docker-entrypoint-initdb.d # to run sql scripts on startup
-    restart: unless-stopped
+    pqsl:
+        image: postgres:17.2-alpine
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        ports:
+            - "5444:5432"
+        volumes:
+            - db:/var/lib/postgresql/data # To persist data
+            - ./database:/docker-entrypoint-initdb.d # to run sql scripts on startup
+        restart: unless-stopped
 
 volumes:
-  db:
-    driver: local
+    db:
+        driver: local
